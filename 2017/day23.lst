@@ -1,0 +1,740 @@
+     1                                  section .data
+     2                                  
+     3 00000000 01000000                a:      dd      1
+     4 00000004 00000000                b:      dd      0
+     5 00000008 00000000                c:      dd      0
+     6 0000000C 00000000                d:      dd      0
+     7 00000010 00000000                e:      dd      0
+     8 00000014 00000000                f:      dd      0
+     9 00000018 00000000                g:      dd      0
+    10 0000001C 00000000                h:      dd      0
+    11                                  
+    12                                  %macro mkstring 2
+    13                                      %1: db %2,10
+    14                                      .len equ $ - %1
+    15                                  %endmacro
+    16                                  
+    17                                  mkstring the_end, "The end"
+    17 00000020 54686520656E640A    <1>  %1: db %2,10
+    17                              <1>  .len equ $ - %1
+    18                                  mkstring bump_d, "Bumped d"
+    18 00000028 42756D70656420640A  <1>  %1: db %2,10
+    18                              <1>  .len equ $ - %1
+    19                                  mkstring bump_h, "Bumped h"
+    19 00000031 42756D70656420680A  <1>  %1: db %2,10
+    19                              <1>  .len equ $ - %1
+    20                                  mkstring one_rnd, "One round"
+    20 0000003A 4F6E6520726F756E64- <1>  %1: db %2,10
+    20 00000043 0A                  <1>
+    20                              <1>  .len equ $ - %1
+    21                                  
+    22                                  ;the_end: db "The end",10
+    23                                  ;.len equ $ - the_end
+    24                                  ;
+    25                                  ;bump_d: db "Bumped d",10
+    26                                  ;.len equ $ - bump_d
+    27                                  ;
+    28                                  ;bump_h: db "Bumped h",10
+    29                                  ;.len equ $ - bump_h
+    30                                  ;
+    31                                  ;one_rnd: db "One round",10
+    32                                  ;.len equ $ - one_rnd
+    33                                  
+    34                                  %macro fetch 1
+    35                                      %ifnum %1
+    36                                          mov     eax, %1
+    37                                      %elifidn %1,d
+    38                                          mov     eax, edx
+    39                                      %elifidn %1,g
+    40                                          mov     eax, ecx
+    41                                      %else
+    42                                          mov     eax, [%1]
+    43                                      %endif
+    44                                  %endmacro
+    45                                  
+    46                                  %macro store 2
+    47                                      %ifidn %2,d
+    48                                          %1     edx, eax
+    49                                      %elifidn %2,g
+    50                                          %1     ecx, eax
+    51                                      %else
+    52                                          %1     [%2], eax
+    53                                      %endif
+    54                                  %endmacro
+    55                                  
+    56                                  
+    57                                  %macro xset 2
+    58                                      fetch       %2
+    59                                      store       mov, %1
+    60                                  %endmacro
+    61                                  
+    62                                  %macro xmul 2
+    63                                      fetch %2
+    64                                      imul     eax, [%1]
+    65                                      store    mov, %1
+    66                                  %endmacro
+    67                                  
+    68                                  %macro xsub 2
+    69                                      fetch %2
+    70                                      store sub, %1
+    71                                  %endmacro
+    72                                  
+    73                                  %macro xjnz 2
+    74                                      %ifnum %1
+    75                                          jmp     %2
+    76                                      %else
+    77                                          fetch   %1
+    78                                          test    eax, eax
+    79                                          jnz     %2
+    80                                      %endif
+    81                                  %endmacro
+    82                                  
+    83                                  %macro puts 1
+    84                                      push dword %1.len
+    85                                      push dword %1
+    86                                      push 1
+    87                                      mov eax, 4
+    88                                      sub esp, 4
+    89                                      int 0x80
+    90                                      add esp, 16
+    91                                  %endmacro
+    92                                  
+    93                                  section .text
+    94                                  global start
+    95                                  start:
+    96                                  
+    97                                  .l0:  xset b, 65
+    97                              <1> .l0: 
+    97                              <1>  fetch %2
+    97                              <2>  %ifnum %1
+    97 00000000 B841000000          <2>  mov eax, %1
+    97                              <2>  %elifidn %1,d
+    97                              <2>  mov eax, edx
+    97                              <2>  %elifidn %1,g
+    97                              <2>  mov eax, ecx
+    97                              <2>  %else
+    97                              <2>  mov eax, [%1]
+    97                              <2>  %endif
+    97                              <1>  store mov, %1
+    97                              <2>  %ifidn %2,d
+    97                              <2>  %1 edx, eax
+    97                              <2>  %elifidn %2,g
+    97                              <2>  %1 ecx, eax
+    97                              <2>  %else
+    97 00000005 A3[04000000]        <2>  %1 [%2], eax
+    97                              <2>  %endif
+    98                                  .l1:  xset c, b
+    98                              <1> .l1: 
+    98                              <1>  fetch %2
+    98                              <2>  %ifnum %1
+    98                              <2>  mov eax, %1
+    98                              <2>  %elifidn %1,d
+    98                              <2>  mov eax, edx
+    98                              <2>  %elifidn %1,g
+    98                              <2>  mov eax, ecx
+    98                              <2>  %else
+    98 0000000A A1[04000000]        <2>  mov eax, [%1]
+    98                              <2>  %endif
+    98                              <1>  store mov, %1
+    98                              <2>  %ifidn %2,d
+    98                              <2>  %1 edx, eax
+    98                              <2>  %elifidn %2,g
+    98                              <2>  %1 ecx, eax
+    98                              <2>  %else
+    98 0000000F A3[08000000]        <2>  %1 [%2], eax
+    98                              <2>  %endif
+    99                                  .l2:  xjnz a, .l4 ; 2
+    99                              <1> .l2: 
+    99                              <1>  %ifnum %1
+    99                              <1>  jmp %2
+    99                              <1>  %else
+    99                              <1>  fetch %1
+    99                              <2>  %ifnum %1
+    99                              <2>  mov eax, %1
+    99                              <2>  %elifidn %1,d
+    99                              <2>  mov eax, edx
+    99                              <2>  %elifidn %1,g
+    99                              <2>  mov eax, ecx
+    99                              <2>  %else
+    99 00000014 A1[00000000]        <2>  mov eax, [%1]
+    99                              <2>  %endif
+    99 00000019 85C0                <1>  test eax, eax
+    99 0000001B 7502                <1>  jnz %2
+    99                              <1>  %endif
+   100                                  .l3:  xjnz 1, .l8 ; 5
+   100                              <1> .l3: 
+   100                              <1>  %ifnum %1
+   100 0000001D EB31                <1>  jmp %2
+   100                              <1>  %else
+   100                              <1>  fetch %1
+   100                              <1>  test eax, eax
+   100                              <1>  jnz %2
+   100                              <1>  %endif
+   101                                  .l4:  xmul b, 100
+   101                              <1> .l4: 
+   101                              <1>  fetch %2
+   101                              <2>  %ifnum %1
+   101 0000001F B864000000          <2>  mov eax, %1
+   101                              <2>  %elifidn %1,d
+   101                              <2>  mov eax, edx
+   101                              <2>  %elifidn %1,g
+   101                              <2>  mov eax, ecx
+   101                              <2>  %else
+   101                              <2>  mov eax, [%1]
+   101                              <2>  %endif
+   101 00000024 0FAF05[04000000]    <1>  imul eax, [%1]
+   101                              <1>  store mov, %1
+   101                              <2>  %ifidn %2,d
+   101                              <2>  %1 edx, eax
+   101                              <2>  %elifidn %2,g
+   101                              <2>  %1 ecx, eax
+   101                              <2>  %else
+   101 0000002B A3[04000000]        <2>  %1 [%2], eax
+   101                              <2>  %endif
+   102                                  .l5:  xsub b, -100000
+   102                              <1> .l5: 
+   102                              <1>  fetch %2
+   102                              <2>  %ifnum %1
+   102 00000030 B86079FEFF          <2>  mov eax, %1
+   102                              <2>  %elifidn %1,d
+   102                              <2>  mov eax, edx
+   102                              <2>  %elifidn %1,g
+   102                              <2>  mov eax, ecx
+   102                              <2>  %else
+   102                              <2>  mov eax, [%1]
+   102                              <2>  %endif
+   102                              <1>  store sub, %1
+   102                              <2>  %ifidn %2,d
+   102                              <2>  %1 edx, eax
+   102                              <2>  %elifidn %2,g
+   102                              <2>  %1 ecx, eax
+   102                              <2>  %else
+   102 00000035 2905[04000000]      <2>  %1 [%2], eax
+   102                              <2>  %endif
+   103                                  .l6:  xset c, b
+   103                              <1> .l6: 
+   103                              <1>  fetch %2
+   103                              <2>  %ifnum %1
+   103                              <2>  mov eax, %1
+   103                              <2>  %elifidn %1,d
+   103                              <2>  mov eax, edx
+   103                              <2>  %elifidn %1,g
+   103                              <2>  mov eax, ecx
+   103                              <2>  %else
+   103 0000003B A1[04000000]        <2>  mov eax, [%1]
+   103                              <2>  %endif
+   103                              <1>  store mov, %1
+   103                              <2>  %ifidn %2,d
+   103                              <2>  %1 edx, eax
+   103                              <2>  %elifidn %2,g
+   103                              <2>  %1 ecx, eax
+   103                              <2>  %else
+   103 00000040 A3[08000000]        <2>  %1 [%2], eax
+   103                              <2>  %endif
+   104                                  .l7:  xsub c, -17000
+   104                              <1> .l7: 
+   104                              <1>  fetch %2
+   104                              <2>  %ifnum %1
+   104 00000045 B898BDFFFF          <2>  mov eax, %1
+   104                              <2>  %elifidn %1,d
+   104                              <2>  mov eax, edx
+   104                              <2>  %elifidn %1,g
+   104                              <2>  mov eax, ecx
+   104                              <2>  %else
+   104                              <2>  mov eax, [%1]
+   104                              <2>  %endif
+   104                              <1>  store sub, %1
+   104                              <2>  %ifidn %2,d
+   104                              <2>  %1 edx, eax
+   104                              <2>  %elifidn %2,g
+   104                              <2>  %1 ecx, eax
+   104                              <2>  %else
+   104 0000004A 2905[08000000]      <2>  %1 [%2], eax
+   104                              <2>  %endif
+   105                                  .l8:  xset f, 1
+   105                              <1> .l8: 
+   105                              <1>  fetch %2
+   105                              <2>  %ifnum %1
+   105 00000050 B801000000          <2>  mov eax, %1
+   105                              <2>  %elifidn %1,d
+   105                              <2>  mov eax, edx
+   105                              <2>  %elifidn %1,g
+   105                              <2>  mov eax, ecx
+   105                              <2>  %else
+   105                              <2>  mov eax, [%1]
+   105                              <2>  %endif
+   105                              <1>  store mov, %1
+   105                              <2>  %ifidn %2,d
+   105                              <2>  %1 edx, eax
+   105                              <2>  %elifidn %2,g
+   105                              <2>  %1 ecx, eax
+   105                              <2>  %else
+   105 00000055 A3[14000000]        <2>  %1 [%2], eax
+   105                              <2>  %endif
+   106                                  .l9:  xset d, 2
+   106                              <1> .l9: 
+   106                              <1>  fetch %2
+   106                              <2>  %ifnum %1
+   106 0000005A B802000000          <2>  mov eax, %1
+   106                              <2>  %elifidn %1,d
+   106                              <2>  mov eax, edx
+   106                              <2>  %elifidn %1,g
+   106                              <2>  mov eax, ecx
+   106                              <2>  %else
+   106                              <2>  mov eax, [%1]
+   106                              <2>  %endif
+   106                              <1>  store mov, %1
+   106                              <2>  %ifidn %2,d
+   106 0000005F 89C2                <2>  %1 edx, eax
+   106                              <2>  %elifidn %2,g
+   106                              <2>  %1 ecx, eax
+   106                              <2>  %else
+   106                              <2>  %1 [%2], eax
+   106                              <2>  %endif
+   107                                  .l10: xset e, 2
+   107                              <1> .l10: 
+   107                              <1>  fetch %2
+   107                              <2>  %ifnum %1
+   107 00000061 B802000000          <2>  mov eax, %1
+   107                              <2>  %elifidn %1,d
+   107                              <2>  mov eax, edx
+   107                              <2>  %elifidn %1,g
+   107                              <2>  mov eax, ecx
+   107                              <2>  %else
+   107                              <2>  mov eax, [%1]
+   107                              <2>  %endif
+   107                              <1>  store mov, %1
+   107                              <2>  %ifidn %2,d
+   107                              <2>  %1 edx, eax
+   107                              <2>  %elifidn %2,g
+   107                              <2>  %1 ecx, eax
+   107                              <2>  %else
+   107 00000066 A3[10000000]        <2>  %1 [%2], eax
+   107                              <2>  %endif
+   108                                  .l11: xset g, d
+   108                              <1> .l11: 
+   108                              <1>  fetch %2
+   108                              <2>  %ifnum %1
+   108                              <2>  mov eax, %1
+   108                              <2>  %elifidn %1,d
+   108 0000006B 89D0                <2>  mov eax, edx
+   108                              <2>  %elifidn %1,g
+   108                              <2>  mov eax, ecx
+   108                              <2>  %else
+   108                              <2>  mov eax, [%1]
+   108                              <2>  %endif
+   108                              <1>  store mov, %1
+   108                              <2>  %ifidn %2,d
+   108                              <2>  %1 edx, eax
+   108                              <2>  %elifidn %2,g
+   108 0000006D 89C1                <2>  %1 ecx, eax
+   108                              <2>  %else
+   108                              <2>  %1 [%2], eax
+   108                              <2>  %endif
+   109                                  .l12: xmul g, e
+   109                              <1> .l12: 
+   109                              <1>  fetch %2
+   109                              <2>  %ifnum %1
+   109                              <2>  mov eax, %1
+   109                              <2>  %elifidn %1,d
+   109                              <2>  mov eax, edx
+   109                              <2>  %elifidn %1,g
+   109                              <2>  mov eax, ecx
+   109                              <2>  %else
+   109 0000006F A1[10000000]        <2>  mov eax, [%1]
+   109                              <2>  %endif
+   109 00000074 0FAF05[18000000]    <1>  imul eax, [%1]
+   109                              <1>  store mov, %1
+   109                              <2>  %ifidn %2,d
+   109                              <2>  %1 edx, eax
+   109                              <2>  %elifidn %2,g
+   109 0000007B 89C1                <2>  %1 ecx, eax
+   109                              <2>  %else
+   109                              <2>  %1 [%2], eax
+   109                              <2>  %endif
+   110                                  .l13: xsub g, b
+   110                              <1> .l13: 
+   110                              <1>  fetch %2
+   110                              <2>  %ifnum %1
+   110                              <2>  mov eax, %1
+   110                              <2>  %elifidn %1,d
+   110                              <2>  mov eax, edx
+   110                              <2>  %elifidn %1,g
+   110                              <2>  mov eax, ecx
+   110                              <2>  %else
+   110 0000007D A1[04000000]        <2>  mov eax, [%1]
+   110                              <2>  %endif
+   110                              <1>  store sub, %1
+   110                              <2>  %ifidn %2,d
+   110                              <2>  %1 edx, eax
+   110                              <2>  %elifidn %2,g
+   110 00000082 29C1                <2>  %1 ecx, eax
+   110                              <2>  %else
+   110                              <2>  %1 [%2], eax
+   110                              <2>  %endif
+   111                                  .l14: xjnz g, .l16 ; 2
+   111                              <1> .l14: 
+   111                              <1>  %ifnum %1
+   111                              <1>  jmp %2
+   111                              <1>  %else
+   111                              <1>  fetch %1
+   111                              <2>  %ifnum %1
+   111                              <2>  mov eax, %1
+   111                              <2>  %elifidn %1,d
+   111                              <2>  mov eax, edx
+   111                              <2>  %elifidn %1,g
+   111 00000084 89C8                <2>  mov eax, ecx
+   111                              <2>  %else
+   111                              <2>  mov eax, [%1]
+   111                              <2>  %endif
+   111 00000086 85C0                <1>  test eax, eax
+   111 00000088 750A                <1>  jnz %2
+   111                              <1>  %endif
+   112                                  .l15: xset f, 0
+   112                              <1> .l15: 
+   112                              <1>  fetch %2
+   112                              <2>  %ifnum %1
+   112 0000008A B800000000          <2>  mov eax, %1
+   112                              <2>  %elifidn %1,d
+   112                              <2>  mov eax, edx
+   112                              <2>  %elifidn %1,g
+   112                              <2>  mov eax, ecx
+   112                              <2>  %else
+   112                              <2>  mov eax, [%1]
+   112                              <2>  %endif
+   112                              <1>  store mov, %1
+   112                              <2>  %ifidn %2,d
+   112                              <2>  %1 edx, eax
+   112                              <2>  %elifidn %2,g
+   112                              <2>  %1 ecx, eax
+   112                              <2>  %else
+   112 0000008F A3[14000000]        <2>  %1 [%2], eax
+   112                              <2>  %endif
+   113                                  .l16: xsub e, -1
+   113                              <1> .l16: 
+   113                              <1>  fetch %2
+   113                              <2>  %ifnum %1
+   113 00000094 B8FFFFFFFF          <2>  mov eax, %1
+   113                              <2>  %elifidn %1,d
+   113                              <2>  mov eax, edx
+   113                              <2>  %elifidn %1,g
+   113                              <2>  mov eax, ecx
+   113                              <2>  %else
+   113                              <2>  mov eax, [%1]
+   113                              <2>  %endif
+   113                              <1>  store sub, %1
+   113                              <2>  %ifidn %2,d
+   113                              <2>  %1 edx, eax
+   113                              <2>  %elifidn %2,g
+   113                              <2>  %1 ecx, eax
+   113                              <2>  %else
+   113 00000099 2905[10000000]      <2>  %1 [%2], eax
+   113                              <2>  %endif
+   114                                  .l17: xset g, e
+   114                              <1> .l17: 
+   114                              <1>  fetch %2
+   114                              <2>  %ifnum %1
+   114                              <2>  mov eax, %1
+   114                              <2>  %elifidn %1,d
+   114                              <2>  mov eax, edx
+   114                              <2>  %elifidn %1,g
+   114                              <2>  mov eax, ecx
+   114                              <2>  %else
+   114 0000009F A1[10000000]        <2>  mov eax, [%1]
+   114                              <2>  %endif
+   114                              <1>  store mov, %1
+   114                              <2>  %ifidn %2,d
+   114                              <2>  %1 edx, eax
+   114                              <2>  %elifidn %2,g
+   114 000000A4 89C1                <2>  %1 ecx, eax
+   114                              <2>  %else
+   114                              <2>  %1 [%2], eax
+   114                              <2>  %endif
+   115                                  .l18: xsub g, b
+   115                              <1> .l18: 
+   115                              <1>  fetch %2
+   115                              <2>  %ifnum %1
+   115                              <2>  mov eax, %1
+   115                              <2>  %elifidn %1,d
+   115                              <2>  mov eax, edx
+   115                              <2>  %elifidn %1,g
+   115                              <2>  mov eax, ecx
+   115                              <2>  %else
+   115 000000A6 A1[04000000]        <2>  mov eax, [%1]
+   115                              <2>  %endif
+   115                              <1>  store sub, %1
+   115                              <2>  %ifidn %2,d
+   115                              <2>  %1 edx, eax
+   115                              <2>  %elifidn %2,g
+   115 000000AB 29C1                <2>  %1 ecx, eax
+   115                              <2>  %else
+   115                              <2>  %1 [%2], eax
+   115                              <2>  %endif
+   116                                  .l19: xjnz g, .l11 ; -8
+   116                              <1> .l19: 
+   116                              <1>  %ifnum %1
+   116                              <1>  jmp %2
+   116                              <1>  %else
+   116                              <1>  fetch %1
+   116                              <2>  %ifnum %1
+   116                              <2>  mov eax, %1
+   116                              <2>  %elifidn %1,d
+   116                              <2>  mov eax, edx
+   116                              <2>  %elifidn %1,g
+   116 000000AD 89C8                <2>  mov eax, ecx
+   116                              <2>  %else
+   116                              <2>  mov eax, [%1]
+   116                              <2>  %endif
+   116 000000AF 85C0                <1>  test eax, eax
+   116 000000B1 75B8                <1>  jnz %2
+   116                              <1>  %endif
+   117                                  .l20: xsub d, -1
+   117                              <1> .l20: 
+   117                              <1>  fetch %2
+   117                              <2>  %ifnum %1
+   117 000000B3 B8FFFFFFFF          <2>  mov eax, %1
+   117                              <2>  %elifidn %1,d
+   117                              <2>  mov eax, edx
+   117                              <2>  %elifidn %1,g
+   117                              <2>  mov eax, ecx
+   117                              <2>  %else
+   117                              <2>  mov eax, [%1]
+   117                              <2>  %endif
+   117                              <1>  store sub, %1
+   117                              <2>  %ifidn %2,d
+   117 000000B8 29C2                <2>  %1 edx, eax
+   117                              <2>  %elifidn %2,g
+   117                              <2>  %1 ecx, eax
+   117                              <2>  %else
+   117                              <2>  %1 [%2], eax
+   117                              <2>  %endif
+   118                                  .l21: xset g, d
+   118                              <1> .l21: 
+   118                              <1>  fetch %2
+   118                              <2>  %ifnum %1
+   118                              <2>  mov eax, %1
+   118                              <2>  %elifidn %1,d
+   118 000000BA 89D0                <2>  mov eax, edx
+   118                              <2>  %elifidn %1,g
+   118                              <2>  mov eax, ecx
+   118                              <2>  %else
+   118                              <2>  mov eax, [%1]
+   118                              <2>  %endif
+   118                              <1>  store mov, %1
+   118                              <2>  %ifidn %2,d
+   118                              <2>  %1 edx, eax
+   118                              <2>  %elifidn %2,g
+   118 000000BC 89C1                <2>  %1 ecx, eax
+   118                              <2>  %else
+   118                              <2>  %1 [%2], eax
+   118                              <2>  %endif
+   119                                  .l22: xsub g, b
+   119                              <1> .l22: 
+   119                              <1>  fetch %2
+   119                              <2>  %ifnum %1
+   119                              <2>  mov eax, %1
+   119                              <2>  %elifidn %1,d
+   119                              <2>  mov eax, edx
+   119                              <2>  %elifidn %1,g
+   119                              <2>  mov eax, ecx
+   119                              <2>  %else
+   119 000000BE A1[04000000]        <2>  mov eax, [%1]
+   119                              <2>  %endif
+   119                              <1>  store sub, %1
+   119                              <2>  %ifidn %2,d
+   119                              <2>  %1 edx, eax
+   119                              <2>  %elifidn %2,g
+   119 000000C3 29C1                <2>  %1 ecx, eax
+   119                              <2>  %else
+   119                              <2>  %1 [%2], eax
+   119                              <2>  %endif
+   120                                  .l23: xjnz g, .l10 ; -13
+   120                              <1> .l23: 
+   120                              <1>  %ifnum %1
+   120                              <1>  jmp %2
+   120                              <1>  %else
+   120                              <1>  fetch %1
+   120                              <2>  %ifnum %1
+   120                              <2>  mov eax, %1
+   120                              <2>  %elifidn %1,d
+   120                              <2>  mov eax, edx
+   120                              <2>  %elifidn %1,g
+   120 000000C5 89C8                <2>  mov eax, ecx
+   120                              <2>  %else
+   120                              <2>  mov eax, [%1]
+   120                              <2>  %endif
+   120 000000C7 85C0                <1>  test eax, eax
+   120 000000C9 7596                <1>  jnz %2
+   120                              <1>  %endif
+   121                                      puts one_rnd
+   121 000000CB 6A0A                <1>  push dword %1.len
+   121 000000CD 68[3A000000]        <1>  push dword %1
+   121 000000D2 6A01                <1>  push 1
+   121 000000D4 B804000000          <1>  mov eax, 4
+   121 000000D9 83EC04              <1>  sub esp, 4
+   121 000000DC CD80                <1>  int 0x80
+   121 000000DE 83C410              <1>  add esp, 16
+   122 000000E1 EB50                        jmp .l32
+   123                                  .l24: xjnz f, .l26 ; 2
+   123                              <1> .l24: 
+   123                              <1>  %ifnum %1
+   123                              <1>  jmp %2
+   123                              <1>  %else
+   123                              <1>  fetch %1
+   123                              <2>  %ifnum %1
+   123                              <2>  mov eax, %1
+   123                              <2>  %elifidn %1,d
+   123                              <2>  mov eax, edx
+   123                              <2>  %elifidn %1,g
+   123                              <2>  mov eax, ecx
+   123                              <2>  %else
+   123 000000E3 A1[14000000]        <2>  mov eax, [%1]
+   123                              <2>  %endif
+   123 000000E8 85C0                <1>  test eax, eax
+   123 000000EA 7521                <1>  jnz %2
+   123                              <1>  %endif
+   124                                  .l25: xsub h, -1
+   124                              <1> .l25: 
+   124                              <1>  fetch %2
+   124                              <2>  %ifnum %1
+   124 000000EC B8FFFFFFFF          <2>  mov eax, %1
+   124                              <2>  %elifidn %1,d
+   124                              <2>  mov eax, edx
+   124                              <2>  %elifidn %1,g
+   124                              <2>  mov eax, ecx
+   124                              <2>  %else
+   124                              <2>  mov eax, [%1]
+   124                              <2>  %endif
+   124                              <1>  store sub, %1
+   124                              <2>  %ifidn %2,d
+   124                              <2>  %1 edx, eax
+   124                              <2>  %elifidn %2,g
+   124                              <2>  %1 ecx, eax
+   124                              <2>  %else
+   124 000000F1 2905[1C000000]      <2>  %1 [%2], eax
+   124                              <2>  %endif
+   125                                      puts bump_h
+   125 000000F7 6A09                <1>  push dword %1.len
+   125 000000F9 68[31000000]        <1>  push dword %1
+   125 000000FE 6A01                <1>  push 1
+   125 00000100 B804000000          <1>  mov eax, 4
+   125 00000105 83EC04              <1>  sub esp, 4
+   125 00000108 CD80                <1>  int 0x80
+   125 0000010A 83C410              <1>  add esp, 16
+   126                                  .l26: xset g, b
+   126                              <1> .l26: 
+   126                              <1>  fetch %2
+   126                              <2>  %ifnum %1
+   126                              <2>  mov eax, %1
+   126                              <2>  %elifidn %1,d
+   126                              <2>  mov eax, edx
+   126                              <2>  %elifidn %1,g
+   126                              <2>  mov eax, ecx
+   126                              <2>  %else
+   126 0000010D A1[04000000]        <2>  mov eax, [%1]
+   126                              <2>  %endif
+   126                              <1>  store mov, %1
+   126                              <2>  %ifidn %2,d
+   126                              <2>  %1 edx, eax
+   126                              <2>  %elifidn %2,g
+   126 00000112 89C1                <2>  %1 ecx, eax
+   126                              <2>  %else
+   126                              <2>  %1 [%2], eax
+   126                              <2>  %endif
+   127                                  .l27: xsub g, c
+   127                              <1> .l27: 
+   127                              <1>  fetch %2
+   127                              <2>  %ifnum %1
+   127                              <2>  mov eax, %1
+   127                              <2>  %elifidn %1,d
+   127                              <2>  mov eax, edx
+   127                              <2>  %elifidn %1,g
+   127                              <2>  mov eax, ecx
+   127                              <2>  %else
+   127 00000114 A1[08000000]        <2>  mov eax, [%1]
+   127                              <2>  %endif
+   127                              <1>  store sub, %1
+   127                              <2>  %ifidn %2,d
+   127                              <2>  %1 edx, eax
+   127                              <2>  %elifidn %2,g
+   127 00000119 29C1                <2>  %1 ecx, eax
+   127                              <2>  %else
+   127                              <2>  %1 [%2], eax
+   127                              <2>  %endif
+   128                                  .l28: xjnz g, .l30 ; 2
+   128                              <1> .l28: 
+   128                              <1>  %ifnum %1
+   128                              <1>  jmp %2
+   128                              <1>  %else
+   128                              <1>  fetch %1
+   128                              <2>  %ifnum %1
+   128                              <2>  mov eax, %1
+   128                              <2>  %elifidn %1,d
+   128                              <2>  mov eax, edx
+   128                              <2>  %elifidn %1,g
+   128 0000011B 89C8                <2>  mov eax, ecx
+   128                              <2>  %else
+   128                              <2>  mov eax, [%1]
+   128                              <2>  %endif
+   128 0000011D 85C0                <1>  test eax, eax
+   128 0000011F 7502                <1>  jnz %2
+   128                              <1>  %endif
+   129                                  .l29: xjnz 1, .l32 ; 3
+   129                              <1> .l29: 
+   129                              <1>  %ifnum %1
+   129 00000121 EB10                <1>  jmp %2
+   129                              <1>  %else
+   129                              <1>  fetch %1
+   129                              <1>  test eax, eax
+   129                              <1>  jnz %2
+   129                              <1>  %endif
+   130                                  .l30: xsub b, -17
+   130                              <1> .l30: 
+   130                              <1>  fetch %2
+   130                              <2>  %ifnum %1
+   130 00000123 B8EFFFFFFF          <2>  mov eax, %1
+   130                              <2>  %elifidn %1,d
+   130                              <2>  mov eax, edx
+   130                              <2>  %elifidn %1,g
+   130                              <2>  mov eax, ecx
+   130                              <2>  %else
+   130                              <2>  mov eax, [%1]
+   130                              <2>  %endif
+   130                              <1>  store sub, %1
+   130                              <2>  %ifidn %2,d
+   130                              <2>  %1 edx, eax
+   130                              <2>  %elifidn %2,g
+   130                              <2>  %1 ecx, eax
+   130                              <2>  %else
+   130 00000128 2905[04000000]      <2>  %1 [%2], eax
+   130                              <2>  %endif
+   131                                  .l31: xjnz 1, .l8 ; -23
+   131                              <1> .l31: 
+   131                              <1>  %ifnum %1
+   131 0000012E E91DFFFFFF          <1>  jmp %2
+   131                              <1>  %else
+   131                              <1>  fetch %1
+   131                              <1>  test eax, eax
+   131                              <1>  jnz %2
+   131                              <1>  %endif
+   132                                  
+   133                                  .l32:
+   134                                      ;; printf
+   135                                  
+   136                                      puts the_end
+   136 00000133 6A08                <1>  push dword %1.len
+   136 00000135 68[20000000]        <1>  push dword %1
+   136 0000013A 6A01                <1>  push 1
+   136 0000013C B804000000          <1>  mov eax, 4
+   136 00000141 83EC04              <1>  sub esp, 4
+   136 00000144 CD80                <1>  int 0x80
+   136 00000146 83C410              <1>  add esp, 16
+   137                                  
+   138                                      ;; Exit
+   139                                  
+   140 00000149 6A00                        push dword 0
+   141 0000014B B801000000                  mov eax, 1
+   142 00000150 83EC0C                      sub esp, 12
+   143 00000153 CD80                        int 0x80
+   144                                  
+   145                                  
