@@ -1,3 +1,6 @@
+import time
+before = time.time()
+
 live = 7672
 
 # Grid is 300x300, based at 1
@@ -33,11 +36,21 @@ print len(grid), len(grid[0])
 def convolute( grid, sq ):
     maxx = len(grid) - sq
     row = []
+#    rowbase = None
     for y in range(0,maxx):
         base = 0
         for cvy in range(sq):
             for cvx in range(sq):
                 base += grid[y+cvy][cvx]
+#        if rowbase is None:
+#            for cvy in range(sq):
+#                for cvx in range(sq):
+#                    base += grid[y+cvy][cvx]
+#        else:
+#            base = rowbase
+#            for cvx in range(sq):
+#                base = base - grid[y-1][cvx] + grid[y+sq-1][cvx]
+#        rowbase = base
         row.append(base)
         for x in range(1,maxx):
             for cvy in range(sq):
@@ -59,4 +72,4 @@ for square in range(25):
     maxes.append( c )
 
 print max(maxes), maxes.index(max(maxes))
-
+print time.time() - before
