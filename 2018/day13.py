@@ -43,10 +43,8 @@ def right(x,y):
 
 moves = ( left, straight, right )
 
-cartcounter = itertools.count()
 class Cart( object ):
     def __init__(self,cart,x,y):
-        self.cart = cartcounter.next()
         self.delta = dirs[cart]
         self.x = x
         self.y = y
@@ -66,7 +64,7 @@ class Cart( object ):
             self.delta = (self.delta[1],self.delta[0])
 
     def __repr__(self):
-        return "Cart at %d,%d moving %d,%d" % (self.x, self.y, self.delta[0], self.delta[1])
+        return "(Cart at %d,%d moving %d,%d)" % (self.x, self.y, self.delta[0], self.delta[1])
 
 def parse( grid ):
     corners = {}
