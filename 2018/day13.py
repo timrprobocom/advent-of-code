@@ -46,14 +46,13 @@ moves = ( left, straight, right )
 class Cart( object ):
     def __init__(self,cart,x,y):
         self.delta = dirs[cart]
-        self.x = x
-        self.y = y
+        self.coord = [x,y]
         self.intersection = 0
     def forward(self):
-        self.x += self.delta[0]
-        self.y += self.delta[1]
-    def coord(self):
-        return (self.x, self.y)
+        self.coord[0] += self.delta[0]
+        self.coord[1] += self.delta[1]
+#    def coord(self):
+#        return (self.x, self.y)
     def turn(self,corner):
         if corner == '+':
             self.delta = moves[self.intersection](*self.delta)
@@ -64,7 +63,7 @@ class Cart( object ):
             self.delta = (self.delta[1],self.delta[0])
 
     def __repr__(self):
-        return "(Cart at %d,%d moving %d,%d)" % (self.x, self.y, self.delta[0], self.delta[1])
+        return "(Cart at %d,%d moving %d,%d)" % (self.coord[0], self.coord[1], self.delta[0], self.delta[1])
 
 def parse( grid ):
     corners = {}
@@ -81,11 +80,11 @@ def advance1( corners, carts ):
     for cart in carts:
         cart.forward()
         for other in carts:
-            if cart != other and cart.coord() == other.coord():
-                print "Collision at ", cart.coord()
+            if cart != other and cart.coord == other.coord:
+                print "Collision at ", cart.coord
                 return False
-        if cart.coord() in corners:
-            cart.turn( corners[cart.coord()] )
+        if tuple(cart.coord) in corners:
+            cart.turn( corners[tuple(cart.coord)] )
     return True
 
 def advance2( corners, carts ):
@@ -93,12 +92,12 @@ def advance2( corners, carts ):
     for cart in carts:
         cart.forward()
         for other in carts:
-            if cart != other and cart.coord() == other.coord():
-                print "Collision at ", cart.coord()
+            if cart != other and cart.coord == other.coord:
+                print "Collision at ", cart.coord
                 remove.append( cart )
                 remove.append( other )
-        if cart.coord() in corners:
-            cart.turn( corners[cart.coord()] )
+        if tuple(cart.coord) in corners:
+            cart.turn( corners[tuple(cart.coord)] )
     for cart in remove:
         carts.remove( cart )
     return True
