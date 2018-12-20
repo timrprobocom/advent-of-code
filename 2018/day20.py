@@ -9,13 +9,13 @@ rex = sys.stdin.read()
 #rex = "^ENWWW(NEEE|SSE(EE|N))$"
 #rex = "^ENNWSWW(NEWS|)SSSEEN(WNSE|)EE(SWEN|)NNN$"
 
+# First, produce the DAG.
+
 def buildNodeEval(inp):
     to_python = inp.replace("^", "['").replace("$","']").replace("(","',[['") \
         .replace(")","']],'").replace("|","'],['").replace("[","(").replace("]",")")
     print( to_python )
     return eval(to_python)
-
-# How to do that parsing?
 
 def reader(sx):
     for c in sx:
@@ -38,8 +38,11 @@ def parse(rdr):
                 strx = ''
             parts.append( parse(rdr ) )
             break
-        elif c == ')' or c == '$':
+        elif c == ')':
             parts.append( strx )
+            break
+        elif  c == '$':
+            parts.append( 0 )
             break
         else:
             strx += c
@@ -48,14 +51,38 @@ def parse(rdr):
     else:
         return tuple(parts)
      
-
-dirx = { 'N': 0, 'E':1, 'S':0, 'W':-1 }
-diry = { 'N': -1, 'E':0, 'S':1, 'W':0 }
-
 #graph = buildNodeEval( rex )
 graph = parse( reader(rex) )
 print( graph )
 #sys.exit(0)
+
+# Now, depth first search to find lengths.
+# First path is 11,036 long
+
+# Remember each decision point with the fixed count up to that point?
+# obj, count, idx?
+rememberhere = []
+
+def depthsum( node, count ):
+    for n in node:
+        if isinstance(n,str):
+            count += len(n)
+        elif isinstance(n,int):
+            print count
+            print "END"
+            break
+        else:
+            rememberhere.append( [n, count, 0] )
+    return count
+
+
+print len(graph)
+print depthsum(graph, 0)
+sys.exit(0)
+
+
+dirx = { 'N': 0, 'E':1, 'S':0, 'W':-1 }
+diry = { 'N': -1, 'E':0, 'S':1, 'W':0 }
 
 adj = defaultdict(set)
 def connect(a,b):
