@@ -1,0 +1,37 @@
+#ip 3
+addi 3 16 3  # jmp to initialization
+seti 1 6 1
+seti 1 4 5
+mulr 1 5 4   # r4 = r1 * r5
+eqrr 4 2 4   # r4 = r4 == r2
+addr 4 3 3   # pc = pc + r4
+addi 3 1 3   # pc = pc + 1   (skip)
+addr 1 0 0   # r0 = r1 + r0   sum of r1s where r2 == r4
+addi 5 1 5   # r5 ++
+gtrr 5 2 4   # r4 = r5 > r2
+addr 3 4 3   # pc = pc + r4  (skip)
+seti 2 6 3   # loop to 3 until r5 > r2
+addi 1 1 1   # r1 ++
+gtrr 1 2 4   # if r1 > r2
+addr 4 3 3   # Skip next
+seti 1 1 3   # jmp to 4
+mulr 3 3 3   # pc *= pc --  EXIT
+addi 2 2 2   # r2 += 2  This is initialization
+mulr 2 2 2   # r2 <- 4
+mulr 3 2 2   # r2 <- 76
+muli 2 11 2  # r2 <- 836
+addi 4 8 4   # r4 = 8
+mulr 4 3 4   # r4 <- 176
+addi 4 12 4  # r4 <- 188
+addr 2 4 2   # r2 <- 1024
+addr 3 0 3   # SKIP NEXT for PART 2
+seti 0 2 3   # jmp to 1
+setr 3 9 4   # r4 = 27
+mulr 4 3 4   # r4 = 756
+addr 3 4 4   # r4 = 785
+mulr 3 4 4   # r4 = 23550
+muli 4 14 4  # r4 = 329700
+mulr 4 3 4   # r4 = 10550400
+seti 41 0 2  # r2 = 10551424
+seti 0 4 0   # r0 = 0
+seti 0 3 3   # jmp to 1

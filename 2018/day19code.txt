@@ -1,0 +1,18 @@
+
+
+# The program adds up all the prime factors of the number
+# created during initialization, 10,551,424.
+#  That's 24,033,240.
+
+Loop 3 4 5 6 8 9 11 bumps r5 by 1 until it exceeds r2
+then             10 12 13 14 15  bumps r1 until r1 > r2
+
+
+10 -> 18     1 + 2 + 5 + 10 
+20 -> 42     1 + 2 + 4 + 5 + 10 + 20
+30 -> 72     1 + 2 + 3 + 5 + 6 + 10 + 15 + 30
+40 -> 90
+42 -> 96     # 1 + 2 + 3 + 7 + 14 +
+50 -> 93     # 1 + 2 + 5 + 10 + 25 + 50
+100 -> 217
+
