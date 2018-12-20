@@ -54,30 +54,59 @@ def parse(rdr):
 #graph = buildNodeEval( rex )
 graph = parse( reader(rex) )
 print( graph )
-#sys.exit(0)
 
 # Now, depth first search to find lengths.
 # First path is 11,036 long
 
 # Remember each decision point with the fixed count up to that point?
 # obj, count, idx?
-rememberhere = []
 
-def depthsum( node, count ):
-    for n in node:
-        if isinstance(n,str):
-            count += len(n)
-        elif isinstance(n,int):
-            print count
-            print "END"
-            break
+# I need to have a function to pick up in the middle.  That is,
+# given a nodelist, an index, an iteration number and a count,
+# run from there out.
+
+backtrack = []
+lengths = []
+
+class Node(object):
+    def __init__(self, nodelist, idx, count ):
+        self.nodes = nodelist
+        self.index = idx
+        self.count = count
+        self.last = 0
+    def advance(self):
+        self.index += 1
+        return self.index < len(self.nodes)
+    def __repr__(self):
+        return str((self.nodes,self.index,self.count,self.last))
+
+def depthfirst( nodelist, idx, count ):
+#    print( nodelist, idx, count )
+#    if not nodelist:
+#        lengths.append(count)
+#        return count
+    while idx < len(nodelist):
+        if isinstance(nodelist[idx],str):
+            count += len(nodelist[idx])
+        elif not nodelist[idx]:
+            return count
         else:
-            rememberhere.append( [n, count, 0] )
+            backtrack.append( Node( nodelist, idx, count ) )
+            count = depthfirst( nodelist[idx], 0, count )
+        idx += 1
     return count
 
+print( len(graph) )
+print( depthfirst( graph, 0, 0 ) )
+print (backtrack)
 
-print len(graph)
-print depthsum(graph, 0)
+while backtrack:
+    print( len(backtrack), end='\r')
+    decpt = backtrack.pop()
+    if decpt.advance():
+        depthfirst( decpt.nodes, decpt.index, decpt.count )
+
+print( lengths )
 sys.exit(0)
 
 

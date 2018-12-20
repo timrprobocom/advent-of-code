@@ -107,16 +107,17 @@ def do_battle():
     all_done = False
     while any(u.which=='E' for u in units) and any(u.which=='G' for u in units):
         rounds += 1
-#    printgrid(grid)
+        print "Round", rounds
+        printgrid(grid)
         units.sort()
-#        for u in units:
-#            print u
+        for u in units:
+            print u
         remove = []
         for unit in units[:]:
             all_done = False
             if unit.hp <= 0:
                 continue
-            #print "Checking unit", unit
+            print "Checking unit", unit
             etype = other[unit.which]
 
             enemy = find_attack( unit.x, unit.y, etype )
@@ -127,7 +128,7 @@ def do_battle():
                 if not tgt:
                     continue
 
-                #print "Found target", tgt
+                print "Found target", tgt
                 top = tgt[0]
 
                 # Take a step towards tgt[0],tgt[1]
