@@ -1,172 +1,80 @@
-
-#
-#
-#
-from collections import defaultdict
 import sys
+from collections import defaultdict
 
-rex = sys.stdin.read()
-#rex = "^ENWWW(NEEE|SSE(EE|N))$"
-#rex = "^ENNWSWW(NEWS|)SSSEEN(WNSE|)EE(SWEN|)NNN$"
+# So this is making a graph out of the map, not the regex!
+# He is using complex numbers to store the coordinates.
+# My map is only 100x100.
 
-# First, produce the DAG.
+def printgraph(maze):
+    n = int(min(c.imag for c in maze))
+    s = int(max(c.real for c in maze))
+    w = int(min(c.imag for c in maze))
+    e = int(max(c.real for c in maze))
+    wid = e-w+1
+    hgt = s-n+1
 
-def buildNodeEval(inp):
-    to_python = inp.replace("^", "['").replace("$","']").replace("(","',[['") \
-        .replace(")","']],'").replace("|","'],['").replace("[","(").replace("]",")")
-    print( to_python )
-    return eval(to_python)
+    for y in range(n,s+1):
+        for x in range(w,e+1):
+            print( maze[x+y*1j], end=' | ')
+        print()
 
-def reader(sx):
-    for c in sx:
-        yield c
+def createMaze( paths ):
+    maze = defaultdict(set)
+    pos = {0}  # the current positions that we're building on
+    stack = []  # a stack keeping track of (starts, ends) for groups
+    starts, ends = {0}, {0}   # current possible starting and ending positions
 
-def parse(rdr):
-    parts = []
-    strx = ''
-    for c in rdr:
-        if c == '^':
-            pass
+    points = []
+    for c in paths:
+        if c == '|':
+            # an alternate: update possible ending points, and restart the group
+            ends.update(pos)
+            pos = starts
+        elif c in 'NESW':
+            # move in a given direction: add all edges and update our current positions
+            direction = {'N': 1, 'E': 1j, 'S': -1, 'W': -1j}[c]
+#            print( tuple((p,p+direction) for p in pos) )
+            for p in pos:
+                maze[p].add( p+direction )
+                maze[p+direction].add( p )
+            pos = {p + direction for p in pos}
         elif c == '(':
-            if strx:
-                parts.append(strx)
-                strx = ''
-            parts.append( parse(rdr ) )
-        elif c == '|':
-            if strx:
-                parts.append(strx)
-                strx = ''
-            parts.append( parse(rdr ) )
-            break
+            # start of group: add current positions as start of a new group
+            stack.append((starts, ends))
+            starts, ends = pos, set()
         elif c == ')':
-            parts.append( strx )
-            break
-        elif  c == '$':
-            parts.append( 0 )
-            break
-        else:
-            strx += c
-    if len(parts) == 1 and isinstance(parts[0],str):
-        return parts[0]
-    else:
-        return tuple(parts)
-     
-#graph = buildNodeEval( rex )
-graph = parse( reader(rex) )
-print( graph )
+            # end of group: finish current group, add current positions as possible ends
+            starts, ends = stack.pop()
+            ends.update(pos)
+    return maze
 
-# Now, depth first search to find lengths.
-# First path is 11,036 long
+# Build the graph of all possible door movements.
 
-# Remember each decision point with the fixed count up to that point?
-# obj, count, idx?
-
-# I need to have a function to pick up in the middle.  That is,
-# given a nodelist, an index, an iteration number and a count,
-# run from there out.
-
-backtrack = []
-lengths = []
-
-class Node(object):
-    def __init__(self, nodelist, idx, count ):
-        self.nodes = nodelist
-        self.index = idx
-        self.count = count
-        self.last = 0
-    def advance(self):
-        self.index += 1
-        return self.index < len(self.nodes)
-    def __repr__(self):
-        return str((self.nodes,self.index,self.count,self.last))
-
-def depthfirst( nodelist, idx, count ):
-#    print( nodelist, idx, count )
-#    if not nodelist:
-#        lengths.append(count)
-#        return count
-    while idx < len(nodelist):
-        if isinstance(nodelist[idx],str):
-            count += len(nodelist[idx])
-        elif not nodelist[idx]:
-            return count
-        else:
-            backtrack.append( Node( nodelist, idx, count ) )
-            count = depthfirst( nodelist[idx], 0, count )
-        idx += 1
-    return count
+graph = createMaze( sys.stdin.read() )
 
 print( len(graph) )
-print( depthfirst( graph, 0, 0 ) )
-print (backtrack)
 
-while backtrack:
-    print( len(backtrack), end='\r')
-    decpt = backtrack.pop()
-    if decpt.advance():
-        depthfirst( decpt.nodes, decpt.index, decpt.count )
+# Determine the path lengths.
+
+lengths = defaultdict(int)
+
+visits = [0]
+lengths[0] = 0
+steps = 0
+while visits:
+    steps += 1
+    nextstep = []
+    for v in visits:
+        print(v, graph[v])
+        for p in graph[v]:
+            if p not in lengths:
+                lengths[p] = steps
+                nextstep.append( p )
+    visits = nextstep
 
 print( lengths )
-sys.exit(0)
 
+# find the shortest path lengths from the starting room to all other rooms
 
-dirx = { 'N': 0, 'E':1, 'S':0, 'W':-1 }
-diry = { 'N': -1, 'E':0, 'S':1, 'W':0 }
-
-adj = defaultdict(set)
-def connect(a,b):
-    global adj
-    adj[a].add(b)
-    adj[b].add(a)
-
-# Make the adjacency map.
-
-memo = {}
-def traverse( pt, pieces ):
-    key = (pt, pieces)
-    if key in memo:
-        return memo[key]
-    
-    positions = set([pt])
-
-    for part in pieces:
-        print( part )
-        if isinstance(part, str):
-            for c in part:
-                newpositions = set()
-                for pos in positions:
-                    newpos = pos[0] + dirx[c], pos[1] + diry[c]
-#                    print( pos, newpos )
-                    connect( pos, newpos )
-                    newpositions.add( newpos )
-                positions = newpositions
-        else:
-            positions = set( k 
-                for pos in positions 
-                for choice in part
-                for k in traverse( pos, choice )
-            )
-
-    memo[key] = positions
-    return positions
-              
-traverse( (0,0), graph )
-print( memo )
-print( adj )
-
-# Points we haven't looked at yet.
-todo = [(0,0)]
-distances = {}
-dist = 0
-while todo:
-    newtodo = []
-    for i in todo:
-        if i in distances:
-            continue
-        distances[i] = dist
-        newtodo.extend(adj[i])
-    todo = newtodo
-    dist += 1
-
-print( distances )
-print( max(distances.values()) )
+print('part1:', max(lengths.values()))
+print('part2:', sum(1 for length in lengths.values() if length >= 1000))

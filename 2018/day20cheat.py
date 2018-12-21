@@ -3,7 +3,8 @@ import networkx
 
 maze = networkx.Graph()
 
-#paths = open('day20.txt').read()[1:-1]
+# So this is making a graph out of the map, not the regex!
+
 paths = sys.stdin.read()[1:-1]
 
 pos = {0}  # the current positions that we're building on
