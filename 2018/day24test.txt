@@ -1,0 +1,8 @@
+# count, attack, immune, weak, damage, damage type, initiative
+Immune System:
+17,5390,,radiation:bludgeoning,4507,fire,2
+989,1274,fire,bludgeoning:slashing,25,slashing,3
+
+Infection:
+801,4706,,radiation,116,bludgeoning,1
+4485,2961,radiation,fire:code,12,slashing,4

@@ -1,0 +1,22 @@
+Immune System:
+339,6787,,bludgeoning,192,slashing,7
+3134,1909,slashing:cold,radiation,5,bludgeoning,16
+3866,10217,,bludgeoning,25,bludgeoning,13
+6032,3101,,cold,4,fire,4
+2975,3123,fire:slashing,,10,bludgeoning,19
+1139,7509,,slashing,49,fire,20
+6472,8589,bludgeoning,radiation,12,bludgeoning,18
+1242,3025,,cold,23,cold,17
+280,3301,fire,radiation,90,slashing,14
+5463,1741,,,2,cold,2
+Infection:
+5068,11409,bludgeoning,,4,bludgeoning,1
+138,24309,slashing,bludgeoning,351,slashing,9
+323,36803,,slashing,227,slashing,11
+5264,34281,,fire,12,slashing,10
+5327,21299,cold,radiation,6,fire,3
+8661,28468,,slashing,5,fire,8
+1283,25737,,radiation:cold,30,bludgeoning,5
+8070,63467,radiation:fire,,11,fire,6
+768,15629,cold:fire:slashing,,38,cold,12
+2080,19161,,,18,bludgeoning,15
