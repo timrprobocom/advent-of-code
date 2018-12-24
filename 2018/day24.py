@@ -5,6 +5,7 @@
 
 import sys
 from pprint import pprint
+VERBOSE = "-v" in sys.argv
 
 class Unit(object):
     count = [0,0]
@@ -13,14 +14,20 @@ class Unit(object):
         self.side = side
         self.id = Unit.count[side]
         self.count = count
+        self.origCount = count
         self.hp = hp
         self.immune = immune
         self.weak = weak
         self.damage = damage
+        self.origDamage = damage
         self.dtype = dtype
         self.initiative = initiative
     def eff_power(self):
         return self.count * self.damage
+    def reset(self, boost=0):
+        self.count = self.origCount
+        self.damage = self.origDamage + boost
+        return self
     def damageto( self, defend ):
         if self.dtype in defend.immune:
             return 0
@@ -30,8 +37,7 @@ class Unit(object):
         return damage
     def __repr__(self):
 #        return '%d units each with %d hit points (immune to %s; weak to %s) with an attack that does %d %s at initiative %d' % (self.count, self.hp, ','.join(self.immune), ','.join(self.weak), self.damage, self.dtype, self.initiative)
-#        return '%d x %d hp (immune:%s; weak:%s) %d %s initiative %d' % (self.count, self.hp, ','.join(self.immune), ','.join(self.weak), self.damage, self.dtype, self.initiative)
-        return '%s %d: %d, %d hp %d %s init %d' % (("Immune","Infect")[self.side],self.id,self.count, self.hp, self.damage, self.dtype, self.initiative)
+        return '%s %d: (n=%d hp=%d dam=%d init=%d)' % (("Immune","Infect")[self.side],self.id,self.count, self.hp, self.damage, self.initiative)
 
 def parse(ln,which):
     #989,1274,fire,bludgeoning:slashing,25,slashing,3
@@ -50,7 +56,7 @@ def parse(ln,which):
 
 # Create the lists.
 
-units = []
+master = []
 for ln in sys.stdin:
     if len(ln) < 2 or ln[0] == '#':
         continue
@@ -59,17 +65,19 @@ for ln in sys.stdin:
     elif ln.startswith('Infect'):
         which = 1
     else:
-        units.append( parse(ln, which) )
+        master.append( parse(ln, which) )
 
-pprint(units)
+pprint(master)
 
 def round( units ):
-    print "\nAnother round\n"
+    if VERBOSE:
+        print "\nAnother round\n"
 
     # Units choose who to attack in order of effective power and then by initiative.
 
     units.sort( key=lambda x: (x.eff_power(),x.initiative), reverse=1 )
-    pprint(units)
+    if VERBOSE:
+        pprint(units)
 
     # Choose a defender.  For each unit, we choose the defender with the maximum damage
     # assessment, or if tied maximum effective power, or if tied maximum initiative.
@@ -81,23 +89,27 @@ def round( units ):
         set(u for u in units if u.side==0)
     )
     for att in units:
-        choices = list((dfd,att.damageto(dfd)) for dfd in units_left[att.side] )
+        choices = [(dfd,att.damageto(dfd)) for dfd in units_left[att.side]]
         choices.sort( key=lambda c: (c[1],c[0].eff_power(),c[0].initiative) )
-#        pprint(choices)
+        if VERBOSE:
+            pprint(choices)
         if not choices: 
             continue
         dfd, damage = choices[-1]
         if damage:
-            print att, "Chose", dfd, damage
+            if VERBOSE:
+                print att, "Chose", dfd, damage
             units_left[att.side].remove( dfd )
             attacks.append( (att, dfd, damage) )
         else:
-            print att, "Chose no one"
+            if VERBOSE:
+                print att, "Chose no one"
 
     # The units attack in order by initiative.
 
     attacks.sort( key=lambda e: e[0].initiative, reverse=1 )
-#    pprint(attacks)
+    if VERBOSE:
+        pprint(attacks)
 
     tot_damage = 0
     for attack in attacks:
@@ -106,27 +118,58 @@ def round( units ):
             continue
         units_lost = att.damageto(dfd) // dfd.hp
         tot_damage += units_lost
-        print att, "attacks"
-        print "---", dfd, "lost", units_lost
+        if VERBOSE:
+            print att, "attacks"
+            print "---", dfd, "lost", units_lost
         dfd.count -= units_lost
         if dfd.count <= 0:
-            print "--- Eliminated"
+            if VERBOSE:
+                print "--- Eliminated"
             units.remove( dfd )
     return tot_damage
 
 def count(units,side):
-    return len(tuple(k for k in units if k.side==side))
+    return any(k for k in units if k.side==side)
 
-def tryboost( units, boost ):
-    for u in units:
-        if u.side == 0:
-            u.damage += boost
+def tryboost( baseline, boosts ):
+    units = [u.reset(boosts[u.side]) for u in baseline]
     while count(units,0) and count(units,1):
         if not round(units):
             break
-    pprint(units)
-    print "====", boost, sum( k.count for k in units)
+    if VERBOSE:
+        pprint(units)
+    return sum( k.count for k in units)
 
-import copy
-for i in range(55,75):
-    tryboost( copy.deepcopy(units), i )
+# Part 1.
+
+print "===== Part 1:", tryboost( master, (0,0) )
+
+# Part 2.
+
+# First, find the inflection point.
+
+low, last = 0, 999999
+for i in range(0,100,10):
+    result = tryboost( master, (i,0) )
+    if VERBOSE:
+        print i, result
+    if result > last:
+        low = i-10
+        break
+    last = result
+
+# Next, narrow it down.
+
+if VERBOSE:
+    print "Refining"
+last = 999999
+for i in range(low-10,low+10):
+    result = tryboost( master, (i,0) )
+    if VERBOSE:
+        print i, result
+    if result > last:
+        low = i - 1
+        break
+    last = result
+
+print "===== Part 2: (%d) %d" % (low, last)
