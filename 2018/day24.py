@@ -3,9 +3,21 @@
 #
 # 34846 too low
 
+from __future__ import print_function
+import re
 import sys
-from pprint import pprint
-VERBOSE = "-v" in sys.argv
+
+def empty( *args ):
+    pass
+
+if "-v" in sys.argv:
+    dbgprint = print
+    from pprint import pprint
+else:
+    dbgprint = empty
+    pprint = empty
+
+pat = r"(\d+) units each with (\d+) hit points (\([a-z;, ]+\) )?with an attack that does (\d+) ([a-z]+) damage at initiative (\d+)$"
 
 class Unit(object):
     count = [0,0]
@@ -39,45 +51,56 @@ class Unit(object):
 #        return '%d units each with %d hit points (immune to %s; weak to %s) with an attack that does %d %s at initiative %d' % (self.count, self.hp, ','.join(self.immune), ','.join(self.weak), self.damage, self.dtype, self.initiative)
         return '%s %d: (n=%d hp=%d dam=%d init=%d)' % (("Immune","Infect")[self.side],self.id,self.count, self.hp, self.damage, self.initiative)
 
+
 def parse(ln,which):
-    #989,1274,fire,bludgeoning:slashing,25,slashing,3
-    parts = ln.strip().split(',')
+    gps = re.match(pat,ln)
+    immune = []
+    weak = []
+    if gps.group(3):
+        s = gps.group(3)[1:-2]
+        for section in s.split(';'):
+            parts = section.split()
+            isimm = parts.pop(0) == 'immune'
+            assert parts.pop(0)=='to'
+            if isimm:
+                immune = [k.strip(',') for k in parts]
+            else:
+                weak = [k.strip(',') for k in parts]
+
     return Unit(
         which,
-        int(parts[0]),
-        int(parts[1]),
-        parts[2].split(':'),
-        parts[3].split(':'),
-        int(parts[4]),
-        parts[5],
-        int(parts[6])
+        int(gps.group(1)),
+        int(gps.group(2)),
+        immune,
+        weak,
+        int(gps.group(4)),
+        gps.group(5),
+        int(gps.group(6))
     )
-
 
 # Create the lists.
 
 master = []
 for ln in sys.stdin:
+    ln = ln.strip()
     if len(ln) < 2 or ln[0] == '#':
-        continue
-    if ln.startswith('Immune'):
+        pass
+    elif ln.startswith("Immune"):
         which = 0
-    elif ln.startswith('Infect'):
+    elif ln.startswith("Infect"):
         which = 1
     else:
-        master.append( parse(ln, which) )
+        master.append( parse(ln,which) )
 
 pprint(master)
 
 def round( units ):
-    if VERBOSE:
-        print "\nAnother round\n"
+    dbgprint( "\nAnother round\n" )
 
     # Units choose who to attack in order of effective power and then by initiative.
 
     units.sort( key=lambda x: (x.eff_power(),x.initiative), reverse=1 )
-    if VERBOSE:
-        pprint(units)
+    pprint(units)
 
     # Choose a defender.  For each unit, we choose the defender with the maximum damage
     # assessment, or if tied maximum effective power, or if tied maximum initiative.
@@ -91,25 +114,21 @@ def round( units ):
     for att in units:
         choices = [(dfd,att.damageto(dfd)) for dfd in units_left[att.side]]
         choices.sort( key=lambda c: (c[1],c[0].eff_power(),c[0].initiative) )
-        if VERBOSE:
-            pprint(choices)
+        pprint(choices)
         if not choices: 
             continue
         dfd, damage = choices[-1]
         if damage:
-            if VERBOSE:
-                print att, "Chose", dfd, damage
+            dbgprint( att, "Chose", dfd, damage )
             units_left[att.side].remove( dfd )
             attacks.append( (att, dfd, damage) )
         else:
-            if VERBOSE:
-                print att, "Chose no one"
+            dbgprint( att, "Chose no one" )
 
     # The units attack in order by initiative.
 
     attacks.sort( key=lambda e: e[0].initiative, reverse=1 )
-    if VERBOSE:
-        pprint(attacks)
+    pprint(attacks)
 
     tot_damage = 0
     for attack in attacks:
@@ -118,13 +137,11 @@ def round( units ):
             continue
         units_lost = att.damageto(dfd) // dfd.hp
         tot_damage += units_lost
-        if VERBOSE:
-            print att, "attacks"
-            print "---", dfd, "lost", units_lost
+        dbgprint( att, "attacks" )
+        dbgprint( "---", dfd, "lost", units_lost )
         dfd.count -= units_lost
         if dfd.count <= 0:
-            if VERBOSE:
-                print "--- Eliminated"
+            dbgprint( "--- Eliminated" )
             units.remove( dfd )
     return tot_damage
 
@@ -136,13 +153,12 @@ def tryboost( baseline, boosts ):
     while count(units,0) and count(units,1):
         if not round(units):
             break
-    if VERBOSE:
-        pprint(units)
+    pprint(units)
     return sum( k.count for k in units)
 
 # Part 1.
 
-print "===== Part 1:", tryboost( master, (0,0) )
+print( "===== Part 1:", tryboost( master, (0,0) ) )
 
 # Part 2.
 
@@ -151,8 +167,7 @@ print "===== Part 1:", tryboost( master, (0,0) )
 low, last = 0, 999999
 for i in range(0,100,10):
     result = tryboost( master, (i,0) )
-    if VERBOSE:
-        print i, result
+    dbgprint( i, result )
     if result > last:
         low = i-10
         break
@@ -160,16 +175,14 @@ for i in range(0,100,10):
 
 # Next, narrow it down.
 
-if VERBOSE:
-    print "Refining"
+dbgprint( "Refining" )
 last = 999999
 for i in range(low-10,low+10):
     result = tryboost( master, (i,0) )
-    if VERBOSE:
-        print i, result
+    dbgprint( i, result )
     if result > last:
         low = i - 1
         break
     last = result
 
-print "===== Part 2: (%d) %d" % (low, last)
+print( "===== Part 2: (%d) %d" % (low, last) )
