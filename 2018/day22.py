@@ -1,5 +1,15 @@
+from __future__ import print_function
+import sys
 
-from pprint import pprint
+def empty(*args,**kwargs):
+    pass
+
+if '-v' in sys.argv:
+    from pprint import pprint
+    dbgprint = print
+else:
+    pprint = empty
+    dbgprint = empty
 
 depth = 3339
 target = (10,715)
@@ -40,9 +50,9 @@ for row in types:
     line = []
     for x in row:
         line.append( encode[x] )
-    print ''.join(line)
+    print( ''.join(line) )
 
-print "Part 1:", sum( sum( x for x in row[:tgtx+1] ) for row in types[:tgty+1] )
+print( "Part 1:", sum( sum( x for x in row[:tgtx+1] ) for row in types[:tgty+1] ) )
 
 # OK.
 # Gear, torch, or nothing.
@@ -71,7 +81,7 @@ cost[0][0] = [0,0,0]
 
 def printcost(cost):
     for row in cost:
-        print ' '.join('%3d' % min(x) for x in row)
+        dbgprint( ' '.join('%3d' % min(x) for x in row) )
 
 printcost(cost)
 
@@ -79,24 +89,24 @@ def checkpaths():
     probes = [(0,0,TORCH)]
     mincost = 999999
     while probes:
-        print "New round"
+        dbgprint( "New round" )
         newprobes = []
         for x,y,tool in probes:
             dcost = cost[y][x][tool]
-#            print "Checking", x, y, "tool", tool, "cost", dcost
+            dbgprint( "Checking", x, y, "tool", tool, "cost", dcost )
             if dcost > mincost:
                 continue
             for dx,dy in directions:
                 nx = x+dx
                 ny = y+dy
-#                print "    ", nx, ny,
+                dbgprint( "    ", nx, ny, end=' ' )
                 if nx < 0 or ny < 0: 
-#                    print "out of bounds"
+                    dbgprint( "out of bounds" )
                     continue
                 if nx >= len(cost[0]) or ny >= len(cost):
-#                    print "out of bounds"
+                    dbgprint( "out of bounds" )
                     continue
-#                print types[ny][nx], "oldcost", dcost,
+                dbgprint( types[ny][nx], "oldcost", dcost, end=' ' )
 
                 # What would be the cost of moving here?
 
@@ -105,7 +115,7 @@ def checkpaths():
                     newcost = dcost+1
                     newtool = tool
                 else:
-#                    print "switch",
+                    dbgprint( "switch", end=' ' )
                     newcost = dcost+8
                     newtool = 3 - types[y][x] - types[ny][nx]
 
@@ -116,28 +126,23 @@ def checkpaths():
                 # Is this better than our last visit?
 
                 if cost[ny][nx][newtool] <= newcost:
-#                    print "no good"
+                    dbgprint( "no good" )
                     continue
 
-#                print "now", newcost, "using", newtool
+                dbgprint( "now", newcost, "using", newtool )
                 cost[ny][nx][newtool] = newcost
 
                 if (nx,ny) == target:
                     if newcost < mincost:
                         mincost = newcost
-                        print "New min", mincost
+                        print( "New min", mincost )
                 else:
                     newprobes.append((nx,ny,newtool))
 
-#        printcost(cost)
+        printcost(cost)
         probes = newprobes
     return cost[tgty][tgtx]
 
 result = checkpaths()
 
-#for row in cost:
-#    for x in range(len(row)):
-#        if row[x] > 1000000:
-#            row[x] = 0
-#
-print "Part 2:", result
+print( "Part 2:", result )
