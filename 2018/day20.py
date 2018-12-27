@@ -8,14 +8,14 @@ from collections import defaultdict
 
 def printgraph(maze):
     n = int(min(c.imag for c in maze))
-    s = int(max(c.real for c in maze))
-    w = int(min(c.imag for c in maze))
+    s = int(max(c.imag for c in maze))
+    w = int(min(c.real for c in maze))
     e = int(max(c.real for c in maze))
     wid = e-w+1
     hgt = s-n+1
 
     basewall = ['#','#'] * wid + ['#']
-    baseroom = ['#','.'] * wid + ['#']
+    baseroom = ['#',' '] * wid + ['#']
     for y in range(hgt):
         wall = basewall[:]
         room = baseroom[:]
@@ -27,6 +27,8 @@ def printgraph(maze):
                 wall[x+x+1] = "-"
             if ww in maze[me]:
                 room[x+x] = "|"
+            if me == 0:
+                room[x+x+1] = 'X'
         print( ''.join(wall) ) 
         print( ''.join(room) )
             
