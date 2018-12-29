@@ -14,64 +14,74 @@
 //
 // That's really clever.
 
-typedef uint64_t Coord;
-
-Coord make_coord( int x, int y )
-{
-    return ((uint64_t)(uint32_t)x) << 32 | (uint32_t)y;
-}
-
-int getx( Coord & c )
-{
-    return (int)(c >> 32);
-}
-
-int gety( Coord & c )
-{
-    return (int)(c&0xffff);
-}
-
-Coord add( Coord a, Coord b )
-{
-    return make_coord( getx(a)+getx(b), gety(a)+gety(b) );
-}
-
-class Cell
+struct Coord 
 {
     int x;
     int y;
-public:
-    int steps;
-public:
-    Cell( int _x, int _y, int _steps=0 )
+    Coord( int _x=0, int _y=0 )
         : x(_x)
         , y(_y)
-        , steps(_steps)
+    {}
+
+    Coord operator+ (const Coord & o) const
     {
+        return Coord( x+o.x, y+o.y );
     }
 
-    Cell * add( int dx, int dy )
+    bool operator< (const Coord & o) const
     {
-        return new Cell( x+dx, y+dy, steps+1 );
-    }
-
-    Coord coord()
-    {
-        return make_coord(x,y);
+        return std::tie(y,x) < std::tie(o.y,o.x);
     }
 };
 
-typedef std::map<Coord, Cell*> Maze;
-typedef std::set<Cell*> CellSet;
 
-Maze createMaze( std::vector<char> & paths )
+class Maze 
+    : public std::vector<int>
 {
-    Cell * base = new Cell(0,0);
-    Maze maze;
-    maze[base->coord()] = base;
+    int m_dx;
+    int m_dy;
+    int m_stride;
+public:
+    Maze( int width, int height )
+        : std::vector<int>( (width+width+1)*(height+height+1), -1 )
+        , m_dx( width )
+        , m_dy( height )
+        , m_stride( width+width+1 )
+    {
+    }
+
+    int get(int x, int y )
+    {
+        return (*this)[(y+m_dy)*m_stride + x + m_dx];
+    }
+
+    int get(Coord c)
+    {
+        return get(c.x, c.y);
+    }
+
+    void set(int x, int y, int value )
+    {
+        (*this)[(y+m_dy)*m_stride + x + m_dx] = value;
+    }
+
+    void set(Coord c, int value )
+    {
+        set( c.x, c.y, value );
+    }
+};
+
+
+typedef std::set<Coord> CellSet;
+
+void createMaze( Maze & maze, std::vector<char> & paths )
+{
+    Coord base( 0, 0 );
+    maze.set( base, 0 );
 
     // the current positions that we're building on.
     CellSet pos;
+    pos.insert( base );
     // a stack keeping track of (starts, ends) for groups.
     std::stack<CellSet> stack;
     // current possible starting and ending positions.
@@ -82,15 +92,14 @@ Maze createMaze( std::vector<char> & paths )
     static std::map<char, Coord> directions;
     if( directions.empty() )
     {
-        directions['N'] = make_coord(0,-1);
-        directions['E'] = make_coord(1, 0);
-        directions['S'] = make_coord(0, 1);
-        directions['W'] = make_coord(-1,0);
+        directions['N'] = Coord(0,-1);
+        directions['E'] = Coord(1, 0);
+        directions['S'] = Coord(0, 1);
+        directions['W'] = Coord(-1,0);
     }
 
     for( auto c : paths )
     {
-        std::cout << c;
         switch( c )
         {
             case '|':
@@ -109,16 +118,12 @@ Maze createMaze( std::vector<char> & paths )
                 CellSet newpos;
                 for( auto cell : pos )
                 {
-                    Coord maybe = add( cell->coord(), dir );
-                    if( maze.find( maybe ) == maze.end() )
+                    int steps = maze.get( cell );
+                    Coord maybe = cell + dir;
+                    if( maze.get( maybe ) < 0 )
                     {
-                        newpos.insert( maze[maybe] );
-                    }
-                    else
-                    {
-                        Cell * n = cell->add( getx(dir), gety(dir) );
-                        newpos.insert( n );
-                        maze[maybe] = n;
+                        maze.set( maybe, steps+1 );
+                        newpos.insert( maybe );
                     }
                 }
                 pos = newpos;
@@ -135,16 +140,14 @@ Maze createMaze( std::vector<char> & paths )
             case ')':
                 // End of group.  Add the current positions as possible endpoints,
                 // and pop the last positions off the stack.
-                starts = stack.top();
-                stack.pop();
                 ends = stack.top();
+                stack.pop();
+                starts = stack.top();
                 stack.pop();
                 ends.insert( pos.begin(), pos.end() );
                 break;
         }
     }
-    std::cout << "Maze has " << maze.size() << "\n";
-    return maze;
 }
 
 
@@ -157,13 +160,9 @@ int main()
     std::cin.read( inp.data(), inp.size() );
     inp.resize( std::cin.gcount() );
 
-    Maze graph = createMaze( inp );
+    Maze graph(100,100);
+    createMaze( graph, inp );
 
-    std::vector<int> lengths;
-    for( auto v : graph )
-    {
-        lengths.push_back( v.second->steps );
-    }
-    std::cout <<  "Part 1: " << *std::max_element(lengths.begin(), lengths.end() ) << "\n";
-//    print( "Part 2:", sum(1 for pt in graph.values() if pt.steps >= 1000) )
+    std::cout <<  "Part 1: " << *std::max_element(graph.begin(), graph.end() ) << "\n";
+    std::cout << "Part 2: " << std::count_if( graph.begin(), graph.end(), [](int i){return i >= 1000;}) << "\n";
 }
