@@ -14,26 +14,16 @@
 //
 // That's really clever.
 
-struct Coord 
+typedef std::tuple<int,int> Coord;
+
+Coord operator+(const Coord & a, const Coord & b )
 {
-    int x;
-    int y;
-    Coord( int _x=0, int _y=0 )
-        : x(_x)
-        , y(_y)
-    {}
+    return Coord(std::get<0>(a)+std::get<0>(b),std::get<1>(a)+std::get<1>(b));
+}
 
-    Coord operator+ (const Coord & o) const
-    {
-        return Coord( x+o.x, y+o.y );
-    }
 
-    bool operator< (const Coord & o) const
-    {
-        return std::tie(y,x) < std::tie(o.y,o.x);
-    }
-};
-
+// The sizes here are essentially a diameter from the center.  Specifying
+// 100,100 makes a matrix from [-100,100] in both directions.
 
 class Maze 
     : public std::vector<int>
@@ -50,24 +40,24 @@ public:
     {
     }
 
-    int get(int x, int y )
+    int get( int x, int y )
     {
         return (*this)[(y+m_dy)*m_stride + x + m_dx];
     }
 
-    int get(Coord c)
+    int get( Coord c)
     {
-        return get(c.x, c.y);
+        return get(std::get<0>(c),std::get<1>(c));
     }
 
-    void set(int x, int y, int value )
+    void set( int x, int y, int value )
     {
         (*this)[(y+m_dy)*m_stride + x + m_dx] = value;
     }
 
-    void set(Coord c, int value )
+    void set( Coord c, int value )
     {
-        set( c.x, c.y, value );
+        set(std::get<0>(c),std::get<1>(c),value);
     }
 };
 
@@ -113,7 +103,7 @@ void createMaze( Maze & maze )
             case 'W':
             {
                 // Move in a given direction, by updating all of possible positions
-                // we might have started at.  Add these edges to the graph.
+                // we might have started at.  Remember step counts in the maze.
                 Coord dir = directions[c];
                 CellSet newpos;
                 for( auto cell : pos )
