@@ -74,7 +74,7 @@ public:
 
 typedef std::set<Coord> CellSet;
 
-void createMaze( Maze & maze, std::vector<char> & paths )
+void createMaze( Maze & maze )
 {
     Coord base( 0, 0 );
     maze.set( base, 0 );
@@ -98,7 +98,7 @@ void createMaze( Maze & maze, std::vector<char> & paths )
         directions['W'] = Coord(-1,0);
     }
 
-    for( auto c : paths )
+    for( char c = getchar(); c >= 0; c = getchar() )
     {
         switch( c )
         {
@@ -155,14 +155,9 @@ int main()
 {
     // Build the graph of all possible movements.
 
-
-    std::vector<char> inp(10000);
-    std::cin.read( inp.data(), inp.size() );
-    inp.resize( std::cin.gcount() );
-
     Maze graph(100,100);
-    createMaze( graph, inp );
+    createMaze( graph );
 
-    std::cout <<  "Part 1: " << *std::max_element(graph.begin(), graph.end() ) << "\n";
+    std::cout << "Part 1: " << *std::max_element(graph.begin(), graph.end() ) << "\n";
     std::cout << "Part 2: " << std::count_if( graph.begin(), graph.end(), [](int i){return i >= 1000;}) << "\n";
 }
