@@ -9,22 +9,12 @@ import sys
 #
 # That's really clever.
 
-class Cell(object):
-    def __init__(self,x,y,steps=0):
-        self.x = x
-        self.y = y
-        self.steps = steps
-    def add(self,x,y):
-        return Cell(self.x+x,self.y+y,self.steps+1)
-    def coord(self):
-        return (self.x,self.y)
-
 def createMaze( paths ):
-    base = Cell(0,0)
-    maze = {(0,0):base}
+    base = (0,0)
+    maze = {(0,0):0}
     pos = {base}  # the current positions that we're building on
     stack = []  # a stack keeping track of (starts, ends) for groups
-    starts, ends = {base}, {base}   # current possible starting and ending positions
+    starts, ends = {base}, set()   # current possible starting and ending positions
 
     for c in paths:
         if c == '|':
@@ -35,20 +25,21 @@ def createMaze( paths ):
             # Move in a given direction, by updating all of possible positions
             # we might have started at.  Add these edges to the graph.
             direction = {'N': (0,-1), 'E': (1,0), 'S': (0,1), 'W': (-1,0)}[c]
-            pos = {p.add(*direction) for p in pos}
-            for pt in pos:
-                if pt.coord() not in maze:
-                    maze[pt.coord()] = pt
+            newpos = {(p[0]+direction[0],p[1]+direction[1]) for p in pos}
+            for opt,npt in zip(pos,newpos):
+                if npt not in maze:
+                    maze[npt] = maze[opt] + 1
+            pos = newpos
         elif c == '(':
             # Start of group.  Push the current starting set so we can use
             # it later, and start a new group.
-            stack.append((starts, ends))
+            stack.append(starts)
             starts, ends = pos, set()
         elif c == ')':
             # End of group.  Add the current positions as possible endpoints,
             # and pop the last positions off the stack.
-            starts, ends = stack.pop()
-            ends.update(pos)
+            pos.update(ends)
+            starts = stack.pop()
     return maze
 
 # Build the graph of all possible movements.
@@ -56,5 +47,5 @@ def createMaze( paths ):
 graph = createMaze( sys.stdin.read() )
 #printgraph(graph)
 
-print( "Part 1:", max(pt.steps for pt in graph.values()) )
-print( "Part 2:", sum(1 for pt in graph.values() if pt.steps >= 1000) )
+print( "Part 1:", max(pt for pt in graph.values()) )
+print( "Part 2:", sum(1 for pt in graph.values() if pt >= 1000) )
