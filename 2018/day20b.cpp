@@ -5,6 +5,7 @@
 #include <set>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 // So, here's the magic.  Rather than build all of the possible strings
 // up to this point, pos simply holds the list of coordinates we might be
