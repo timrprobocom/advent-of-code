@@ -11,7 +11,7 @@ import sys
 
 def createMaze( paths ):
     base = (0,0)
-    maze = {(0,0):0}
+    maze = {base:0}
     pos = {base}  # the current positions that we're building on
     stack = []  # a stack keeping track of (starts, ends) for groups
     starts, ends = {base}, set()   # current possible starting and ending positions
@@ -37,7 +37,7 @@ def createMaze( paths ):
             starts, ends = pos, set()
         elif c == ')':
             # End of group.  Add the current positions as possible endpoints,
-            # and pop the last positions off the stack.
+            # and pop the last start positions off the stack.
             pos.update(ends)
             starts = stack.pop()
     return maze
