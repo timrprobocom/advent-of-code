@@ -96,6 +96,8 @@ ends = set()
 
 def run_to_end( r0=0 ):
     global reg
+    answer1 = 0
+    answer2 = 0
     reg = [r0,0,0,0,0,0]
     cycle = itertools.count()
     while reg[pc] < len(program):
@@ -109,19 +111,31 @@ def run_to_end( r0=0 ):
         if opc:
             reg[r3] = opc(r1,r2)
         if reg[pc] == 28:
+            if not answer1:
+                answer1 = reg[3]
             print c, reg
             if reg[3] in ends:
                 print "*** REPEAT"
                 break
+            answer2 = reg[3]
             ends.add( reg[3] )
         reg[pc] += 1
 #        print c, reg
-    return reg
+    return answer1, answer2
+
+# Note that the execution of the program does not actually depend on the
+# value of R0.  When we get to instruction 28, the program ends if r3 == r0.
+# So, we run the code with r0=0 (optimized by adding the div instruction),
+# and print the results at instruction 28.  The value of r3 first time is 
+# our first part answer.  The last UNIQUE value of r3 is our second part answer.
 
 
 #i = 10147168
 i = 0
 print "*************", i , "***************"
-print run_to_end( i )
+answer1, answer2 = run_to_end( i )
+
+print "Part 1:", answer1
+print "Part 2:", answer2
 
 
