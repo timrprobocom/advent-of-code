@@ -124,7 +124,6 @@ void createMaze( Maze & maze )
                 // Start of group.  Push the current starting set so we can use
                 // it later, and start a new group.
                 stack.push( starts );
-//                stack.push( ends );
                 starts = pos;
                 ends.clear();
                 break;
@@ -132,11 +131,8 @@ void createMaze( Maze & maze )
                 // End of group.  Add the current positions as possible endpoints,
                 // and pop the last positions off the stack.
                 pos.insert( ends.begin(), ends.end() );
-//                ends = stack.top();
-//                stack.pop();
                 starts = stack.top();
                 stack.pop();
-//                ends.insert( pos.begin(), pos.end() );
                 break;
         }
     }
