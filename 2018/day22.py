@@ -11,48 +11,59 @@ else:
     pprint = empty
     dbgprint = empty
 
+# Tim's data
 depth = 3339
 target = (10,715)
 
-#depth = 510
-#target = (10,10)
+# Test data
+depth = 510
+target = (10,10)
+
+# Bog's data
+depth = 6969
+target = (9,796)
 
 KY = 48271
 KX = 16807
 KMOD = 20183
-PAD = 20
+PAD = 30
 
 tgtx,tgty = target
 
 # Build arrays.
 
-erosion = []
-types = []
-row = list((x * KX + depth) % KMOD for x in range(tgtx+PAD) )
-erosion.append( row )
-types.append( list(x % 3 for x in row ) )
-for y in range(1,tgty+PAD):
-    row = [(y * KY + depth) % KMOD]
-    line = []
-    for x in range(1,tgtx+PAD):
-        val = (row[x-1] * erosion[y-1][x] + depth) % KMOD
-        row.append( val )
-        line.append( val % 3 )
-    erosion.append( row )
-    types.append( list(x % 3 for x in row) )
-erosion[tgty][tgtx] = erosion[0][0]
-types[tgty][tgtx] = types[0][0]
+class Cave(object):
+    def __init__(self):
+        self.erosion = {(0,0): depth, (tgtx,tgty): depth}
+    def gete(self,x,y):
+        if (x,y) in self.erosion:
+            return self.erosion[x,y]
+        if x == 0:
+            e = (y * KY + depth) % KMOD
+        elif y == 0:
+            e = (x * KX + depth) % KMOD
+        else:
+            e = (self.gete(x-1,y) * self.gete(x,y-1) + depth) % KMOD
+        self.erosion[x,y] = e
+        return e
+    def get(self,x,y):
+        return self.gete(x,y) % 3
+
 
 encode = ".=|"
 encode = "012"
 
-for row in types:
+cave = Cave()
+
+sumx = 0
+for y in range(tgty+1):
     line = []
-    for x in row:
-        line.append( encode[x] )
+    for x in range(tgtx+1):
+        line.append( encode[cave.get(x,y)] )
+        sumx += cave.get(x,y)
     print( ''.join(line) )
 
-print( "Part 1:", sum( sum( x for x in row[:tgtx+1] ) for row in types[:tgty+1] ) )
+print( "Part 1:", sumx )
 
 # OK.
 # Gear, torch, or nothing.
@@ -69,32 +80,21 @@ NONE,TORCH,GEAR = 0,1,2
 
 directions = ( (0,-1), (-1,0), (1,0), (0,1) )
 
-
-MX = 9999999
-cost = []
-for row in types:
-    myrow = []
-    for x in row:
-        myrow.append( [MX,MX,MX] )
-    cost.append(myrow)
-cost[0][0] = [0,0,0]
-
-def printcost(cost):
-    for row in cost:
-        dbgprint( ' '.join('%3d' % min(x) for x in row) )
-
-printcost(cost)
+cost = {}
+cost[0,0,0] = 0
+cost[0,0,1] = 0
+cost[0,0,2] = 0
 
 def checkpaths():
-    probes = [(0,0,TORCH)]
+    probes = {(0,0,TORCH)}
     mincost = 999999
     while probes:
         dbgprint( "New round" )
-        newprobes = []
+        newprobes = set()
         for x,y,tool in probes:
-            dcost = cost[y][x][tool]
+            dcost = cost[x,y,tool]
             dbgprint( "Checking", x, y, "tool", tool, "cost", dcost )
-            if dcost > mincost:
+            if dcost >= mincost:
                 continue
             for dx,dy in directions:
                 nx = x+dx
@@ -103,45 +103,46 @@ def checkpaths():
                 if nx < 0 or ny < 0: 
                     dbgprint( "out of bounds" )
                     continue
-                if nx >= len(cost[0]) or ny >= len(cost):
+                if nx >= tgtx+PAD or ny > tgty+PAD:
                     dbgprint( "out of bounds" )
                     continue
-                dbgprint( types[ny][nx], "oldcost", dcost, end=' ' )
+                newtype = cave.get(nx,ny)
+                dbgprint( newtype, end=' ' )
 
                 # What would be the cost of moving here?
 
-                if tool != types[ny][nx]:
+                if tool != newtype:
                     # Yes, we can.
                     newcost = dcost+1
                     newtool = tool
                 else:
                     dbgprint( "switch", end=' ' )
                     newcost = dcost+8
-                    newtool = 3 - types[y][x] - types[ny][nx]
+                    newtool = 3 - cave.get(x,y) - newtype
 
-                if (nx,ny) == target:
-                    if newtool != TORCH:
-                        newcost += 7
+                if (nx,ny) == target and newtool != TORCH:
+                    newcost += 7
 
                 # Is this better than our last visit?
 
-                if cost[ny][nx][newtool] <= newcost:
-                    dbgprint( "no good" )
+                if (nx,ny,newtool) in cost and cost[nx,ny,newtool] <= newcost:
+                    dbgprint( "dead end" )
                     continue
 
                 dbgprint( "now", newcost, "using", newtool )
-                cost[ny][nx][newtool] = newcost
+                cost[nx,ny,newtool] = newcost
 
                 if (nx,ny) == target:
                     if newcost < mincost:
                         mincost = newcost
                         print( "New min", mincost )
                 else:
-                    newprobes.append((nx,ny,newtool))
+                    newprobes.add((nx,ny,newtool))
 
-        printcost(cost)
         probes = newprobes
-    return cost[tgty][tgtx]
+
+    # "min" would be just as good.
+    return list(cost[tgtx,tgty,c] for c in range(3) if (tgtx,tgty,c) in cost)
 
 result = checkpaths()
 
