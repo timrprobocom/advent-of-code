@@ -4,24 +4,32 @@ import sys
 def empty(*args,**kwargs):
     pass
 
-if '-v' in sys.argv:
-    from pprint import pprint
-    dbgprint = print
-else:
-    pprint = empty
-    dbgprint = empty
+depth = 0
+target = (0,0)
+
+pprint = empty
+dbgprint = empty
+for arg in sys.argv[1:]:
+    if arg == '-v':
+        from pprint import pprint
+        dbgprint = print
+    elif not depth:
+        depth = int(arg)
+    elif not target[0]:
+        target = (int(arg),0)
+    else:
+        target = (target[0],int(arg))
+
 
 # Tim's data
-depth = 3339
-target = (10,715)
+if not depth:
+    depth = 3339
+    target = (10,715)
 
-# Test data
-#depth = 510
-#target = (10,10)
+print( "depth=%d, target=(%d,%d)" % (depth, target[0], target[1]) )
 
-# Bog's data
-depth = 6969
-target = (9,796)
+# Test data:   510  10 10
+# Bog's data:   6969  9 796
 
 KY = 48271
 KX = 16807
@@ -80,24 +88,18 @@ NONE,TORCH,GEAR = 0,1,2
 
 directions = ( (0,-1), (-1,0), (1,0), (0,1) )
 
-cost = {}
-cost[0,0,0] = 0
-cost[0,0,1] = 0
-cost[0,0,2] = 0
-paths = {}
-paths[0,0,0] = [(0,0)]
-paths[0,0,1] = [(0,0)]
-paths[0,0,2] = [(0,0)]
+initial = (0,0,TORCH)
+cost = { initial: 0 }
+froms = { initial: None }
 
 def checkpaths():
-    probes = {(0,0,TORCH)}
-    mincost = 999999
+    probes = {initial}
+    mincost = 2500
     while probes:
         dbgprint( "New round" )
         newprobes = set()
         for x,y,tool in probes:
             dcost = cost[x,y,tool]
-            path = paths[x,y,tool]
             dbgprint( "Checking", x, y, "tool", tool, "cost", dcost )
             if dcost >= mincost:
                 continue
@@ -136,43 +138,47 @@ def checkpaths():
 
                 dbgprint( "now", newcost, "using", newtool )
                 cost[nx,ny,newtool] = newcost
-                paths[nx,ny,newtool] = path+[(nx,ny)]
+                froms[nx,ny,newtool] = (x,y,tool)
 
                 if (nx,ny) == target:
                     if newcost < mincost:
                         mincost = newcost
-                        print( "New min", mincost )
+                        print( "New min", mincost, file=sys.stderr )
                 else:
                     newprobes.add((nx,ny,newtool))
 
         probes = newprobes
 
-    # "min" would be just as good.
-    return list(cost[tgtx,tgty,c] for c in range(3) if (tgtx,tgty,c) in cost)
+    return min(cost[tgtx,tgty,c] for c in range(3) if (tgtx,tgty,c) in cost)
 
 result = checkpaths()
 
-print( "Part 2:", min(result) )
+print( "Part 2:", result )
 
 # Plot it.
 
 if (tgtx,tgty,1) in cost and cost[tgtx,tgty,1] > cost[tgtx,tgty,2]:
-    path = paths[tgtx,tgty,1]
+    finish = (tgtx,tgty,1)
 else:
-    path = paths[tgtx,tgty,2]
+    finish = (tgtx,tgty,2)
 
+def iterate(lst,f):
+    while f:
+        yield f
+        f = lst[f]
 
-maxx = max(p[0] for p in path )
-maxy = max(p[1] for p in path )
+maxx = max(n[0] for n in iterate(froms,finish))
+maxy = max(n[1] for n in iterate(froms,finish))
 
 print( "Maxima:", maxx, maxy )
+
 
 grid = []
 for y in range(maxy+1):
     grid.append( [' '] * (maxx+1) )
 
-for x,y in path:
-    grid[y][x] = '#'
+for node in iterate(froms,finish):
+    grid[node[1]][node[0]] = '#'
 
 for y in grid:
     print( ''.join(y) )
