@@ -89,11 +89,11 @@ NONE,TORCH,GEAR = 0,1,2
 directions = ( (0,-1), (-1,0), (1,0), (0,1) )
 
 initial = (0,0,TORCH)
-cost = { initial: 0 }
 froms = { initial: None }
 
 def checkpaths():
-    probes = {initial}
+    cost = { initial: 0 }
+    probes = { initial }
     mincost = 2500
     while probes:
         dbgprint( "New round" )
@@ -143,24 +143,22 @@ def checkpaths():
                 if (nx,ny) == target:
                     if newcost < mincost:
                         mincost = newcost
+                        mintool = newtool
                         print( "New min", mincost, file=sys.stderr )
                 else:
                     newprobes.add((nx,ny,newtool))
 
         probes = newprobes
 
-    return min(cost[tgtx,tgty,c] for c in range(3) if (tgtx,tgty,c) in cost)
+    return mincost, mintool
 
-result = checkpaths()
+result,tool = checkpaths()
 
 print( "Part 2:", result )
 
 # Plot it.
 
-if (tgtx,tgty,1) in cost and cost[tgtx,tgty,1] > cost[tgtx,tgty,2]:
-    finish = (tgtx,tgty,1)
-else:
-    finish = (tgtx,tgty,2)
+finish = (tgtx,tgty,tool)
 
 def iterate(lst,f):
     while f:

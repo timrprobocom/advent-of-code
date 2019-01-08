@@ -29,9 +29,9 @@ enum gear_t {NONE,TORCH,GEAR};
 typedef std::tuple<int,int> Coord;
 typedef std::tuple<int,int,int> CoordPlus;
 
-Coord operator+(const Coord & a, const Coord & b )
+CoordPlus make( Coord c, int tool )
 {
-    return Coord(std::get<0>(a)+std::get<0>(b),std::get<1>(a)+std::get<1>(b));
+    return CoordPlus(std::get<0>(c),std::get<1>(c),tool);
 }
 
 struct Cave
@@ -145,6 +145,7 @@ int main( int argc, char ** argv )
 
     probes.insert( initial );
     int mincost = 99999;
+    int mintool = NONE;
     while( !probes.empty() )
     {
 #if 0
@@ -231,6 +232,7 @@ int main( int argc, char ** argv )
                     if( newcost < mincost )
                     {
                         mincost = newcost;
+                        mintool = newtool;
                         std::cout << "New min " << mincost << "\n";
                     }
                 }
@@ -242,17 +244,7 @@ int main( int argc, char ** argv )
         probes = newprobes;
     }
 
-    CoordPlus winner;
-    for( int tool = NONE; tool <= GEAR; tool++ )
-    {
-        CoordPlus poss( CoordPlus(gTargetX,gTargetY,tool) );
-        if( 
-            cost.find(poss) != cost.end()
-            &&
-            cost[poss] == mincost 
-        )
-            winner = poss;
-    }
+    CoordPlus winner(gTargetX,gTargetY,mintool);
 
     std::cout << "Part 2: " << mincost << " " << cost[winner] << "\n";
 
@@ -276,6 +268,7 @@ int main( int argc, char ** argv )
 
     std::vector<std::string> grid;
     grid.resize( maxy+1, std::string(maxx+1, ' '));
+    grid[0][0] = '#';
 
     for( 
         CoordPlus node = winner;
@@ -287,5 +280,8 @@ int main( int argc, char ** argv )
     }
 
     for( auto row : grid )
-        std::cout << row << "\n";
+    {
+        size_t i = row.find_last_not_of(" ");
+        std::cout << row.substr(0,i+1) << "\n";
+    }
 }
