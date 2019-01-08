@@ -84,6 +84,10 @@ cost = {}
 cost[0,0,0] = 0
 cost[0,0,1] = 0
 cost[0,0,2] = 0
+paths = {}
+paths[0,0,0] = [(0,0)]
+paths[0,0,1] = [(0,0)]
+paths[0,0,2] = [(0,0)]
 
 def checkpaths():
     probes = {(0,0,TORCH)}
@@ -93,6 +97,7 @@ def checkpaths():
         newprobes = set()
         for x,y,tool in probes:
             dcost = cost[x,y,tool]
+            path = paths[x,y,tool]
             dbgprint( "Checking", x, y, "tool", tool, "cost", dcost )
             if dcost >= mincost:
                 continue
@@ -131,6 +136,7 @@ def checkpaths():
 
                 dbgprint( "now", newcost, "using", newtool )
                 cost[nx,ny,newtool] = newcost
+                paths[nx,ny,newtool] = path+[(nx,ny)]
 
                 if (nx,ny) == target:
                     if newcost < mincost:
@@ -147,3 +153,6 @@ def checkpaths():
 result = checkpaths()
 
 print( "Part 2:", result )
+for c in range(3):
+    if (tgtx,tgty,c) in paths:
+        print( paths[tgtx,tgty,c] )
