@@ -16,8 +16,8 @@ depth = 3339
 target = (10,715)
 
 # Test data
-depth = 510
-target = (10,10)
+#depth = 510
+#target = (10,10)
 
 # Bog's data
 depth = 6969
@@ -61,7 +61,7 @@ for y in range(tgty+1):
     for x in range(tgtx+1):
         line.append( encode[cave.get(x,y)] )
         sumx += cave.get(x,y)
-    print( ''.join(line) )
+    dbgprint( ''.join(line) )
 
 print( "Part 1:", sumx )
 
@@ -152,7 +152,27 @@ def checkpaths():
 
 result = checkpaths()
 
-print( "Part 2:", result )
-for c in range(3):
-    if (tgtx,tgty,c) in paths:
-        print( paths[tgtx,tgty,c] )
+print( "Part 2:", min(result) )
+
+# Plot it.
+
+if (tgtx,tgty,1) in cost and cost[tgtx,tgty,1] > cost[tgtx,tgty,2]:
+    path = paths[tgtx,tgty,1]
+else:
+    path = paths[tgtx,tgty,2]
+
+
+maxx = max(p[0] for p in path )
+maxy = max(p[1] for p in path )
+
+print( "Maxima:", maxx, maxy )
+
+grid = []
+for y in range(maxy+1):
+    grid.append( [' '] * (maxx+1) )
+
+for x,y in path:
+    grid[y][x] = '#'
+
+for y in grid:
+    print( ''.join(y) )
