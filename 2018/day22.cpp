@@ -14,7 +14,7 @@ int gTargetY = 0;
 
 // Test data:   510  10 10
 //    Answer: 116   45
-// Tim's data: 3389 10 715
+// Tim's data: 3339 10 715
 //    Answer: 7915  980
 // Bog's data:   6969  9 796
 //    Answer: 7901  1087
@@ -28,6 +28,8 @@ enum gear_t {NONE,TORCH,GEAR};
 
 typedef std::tuple<int,int> Coord;
 typedef std::tuple<int,int,int> CoordPlus;
+typedef std::map<CoordPlus,int> CostMap;
+typedef std::map<CoordPlus,CoordPlus> TrackMap;
 
 CoordPlus make( Coord c, int tool )
 {
@@ -67,6 +69,47 @@ struct Cave
         return gete(x,y) % 3;
     }
 };
+
+
+void ShowPlot( TrackMap & backtrack, CoordPlus winner )
+{
+    // Find maxima.
+
+    int maxx = 0;
+    int maxy = 0;
+    for( 
+        CoordPlus node = winner;
+        backtrack.find(node) != backtrack.end();
+        node = backtrack[node]
+    )
+    {
+        maxx = std::max( maxx, std::get<0>(node) );
+        maxy = std::max( maxy, std::get<1>(node) );
+    }
+
+    std::cout << "Maxima: " << maxx << " " << maxy << "\n";
+
+    // Plot it.
+
+    std::vector<std::string> grid;
+    grid.resize( maxy+1, std::string(maxx+1, ' '));
+    grid[0][0] = '#';
+
+    for( 
+        CoordPlus node = winner;
+        backtrack.find(node) != backtrack.end();
+        node = backtrack[node]
+    )
+    {
+        grid[std::get<1>(node)][std::get<0>(node)] = '#';
+    }
+
+    for( auto row : grid )
+    {
+        size_t i = row.find_last_not_of(" ");
+        std::cout << row.substr(0,i+1) << "\n";
+    }
+}
 
 
 int main( int argc, char ** argv )
@@ -118,7 +161,6 @@ int main( int argc, char ** argv )
 //        std::cout << line << "\n";
     }
 
-
     std::cout << "Part 1: " << sumx << "\n";
 
     // OK.
@@ -134,8 +176,8 @@ int main( int argc, char ** argv )
     Coord directions[] = { Coord(0,-1), Coord(-1,0), Coord(1,0), Coord(0,1) };
 
     CoordPlus initial(0,0,TORCH);
-    std::map<CoordPlus,int> cost;
-    std::map<CoordPlus,CoordPlus> backtrack;
+    CostMap cost;
+    TrackMap  backtrack;
     std::set<CoordPlus> probes;
     std::set<CoordPlus> newprobes;
 
@@ -247,41 +289,6 @@ int main( int argc, char ** argv )
     CoordPlus winner(gTargetX,gTargetY,mintool);
 
     std::cout << "Part 2: " << mincost << " " << cost[winner] << "\n";
-
-    // Find maxima.
-
-    int maxx = 0;
-    int maxy = 0;
-    for( 
-        CoordPlus node = winner;
-        backtrack.find(node) != backtrack.end();
-        node = backtrack[node]
-    )
-    {
-        maxx = std::max( maxx, std::get<0>(node) );
-        maxy = std::max( maxy, std::get<1>(node) );
-    }
-
-    std::cout << "Maxima: " << maxx << " " << maxy << "\n";
-
-    // Plot it.
-
-    std::vector<std::string> grid;
-    grid.resize( maxy+1, std::string(maxx+1, ' '));
-    grid[0][0] = '#';
-
-    for( 
-        CoordPlus node = winner;
-        backtrack.find(node) != backtrack.end();
-        node = backtrack[node]
-    )
-    {
-        grid[std::get<1>(node)][std::get<0>(node)] = '#';
-    }
-
-    for( auto row : grid )
-    {
-        size_t i = row.find_last_not_of(" ");
-        std::cout << row.substr(0,i+1) << "\n";
-    }
+    
+    ShowPlot( backtrack, winner );
 }
