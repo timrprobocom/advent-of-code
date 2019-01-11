@@ -13,8 +13,8 @@ struct Bot
     int z;
     int r;
 
-    Bot( int _x, int _y, int _z, int _r )
-    : x( _x ) , y( _y ) , z( _z ) , r( _r )
+    Bot( int _x, int _y, int _z, int _r=0 )
+        : x( _x ) , y( _y ) , z( _z ) , r( _r )
     {}
 
     void multiply( int scale )
@@ -107,6 +107,8 @@ Bot Part2( botlist_t & bots, int scale, Bot centroid )
         std::back_inserter(subbots),
         [scale](Bot base) { return base.divide(scale); }
     );
+std::cout << "Centroid: (" << centroid.x << "," << centroid.y << "," << centroid.z << ")\n";
+    
 
     Bot maxloc(0,0,0,0);
     int maxcnt = 0;

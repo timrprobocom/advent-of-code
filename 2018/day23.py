@@ -14,12 +14,9 @@ for ln in sys.stdin:
         maxbot = bots[-1]
 
 print( maxr )
-print( min(x[0] for x in bots) )
-print( max(x[0] for x in bots) )
-print( min(x[1] for x in bots) )
-print( max(x[1] for x in bots) )
-print( min(x[2] for x in bots) )
-print( max(x[2] for x in bots) )
+print( "X range:", min(x[0] for x in bots), ",", max(x[0] for x in bots) )
+print( "Y range:", min(x[1] for x in bots), ",", max(x[1] for x in bots) )
+print( "Z range:", min(x[2] for x in bots), ",", max(x[2] for x in bots) )
 
 def mandist( a, b ):
     return abs(a[0]-b[0]) + abs(a[1]-b[1]) + abs(a[2]-b[2])
@@ -52,14 +49,11 @@ def check_at_scale( scale, centroid ):
     for z in range(-15,15):
         for y in range(-15,15):
             for x in range(-15,15):
-                cnt = 0
-                for bot in subbots:
-                    if inrange( bot, (cx+x,cy+y,cz+z) ):
-                        cnt += 1
+                cnt = sum(1 for bot in subbots if inrange(bot,(cx+x,cy+y,cz+z)))
                 if cnt > maxcnt:
                     maxcnt = cnt
                     maxloc = (cx+x,cy+y,cz+z)
-                    print( maxcnt,maxloc )
+                    print( maxcnt,'@', maxloc )
     return maxloc
 
 scale = 10000000
