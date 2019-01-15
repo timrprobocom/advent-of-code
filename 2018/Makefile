@@ -3,21 +3,20 @@
 ifndef windir
 O = .o
 EXE =
+CPPFLAGS = --std=c++11
 else
 O = .obj
-EXE = .EXE
+EXE = .exe
+CPPFLAGS = -EHsc
+OUTPUT_OPTION = -Fe$@
 endif
 
-CPPFLAGS = --std=c++11
 SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.cpp=$O)
 EXES = $(SRCS:.cpp=$(EXE))
 
-%.$O: %.cpp
+%$(EXE): %.cpp
 	cl $(CPPFLAGS) $(OUTPUT_OPTION) $<
-
-%: %.$O
-	$(LINK)$@ $(LDFLAGS) $< $(LIBS)
 
 all:	$(EXES)
 

@@ -99,8 +99,9 @@ int Part1( botlist_t & bots, Bot maxbot )
 }
 
 
-Bot Part2( botlist_t & bots, int scale, Bot centroid )
+Bot Part2( int DIVISOR, botlist_t & bots, int scale, Bot centroid )
 {
+    int bound = DIVISOR * 3 / 2;
     botlist_t subbots;
     std::transform(
         bots.begin(), bots.end(),
@@ -112,9 +113,9 @@ std::cout << "Centroid: (" << centroid.x << "," << centroid.y << "," << centroid
 
     Bot maxloc(0,0,0,0);
     int maxcnt = 0;
-    for( int z = -15; z < 15; z++ )
-        for( int y = -15; y < 15; y++ )
-            for( int x = -15; x < 15; x++ )
+    for( int z = -bound; z < bound; z++ )
+        for( int y = -bound; y < bound; y++ )
+            for( int x = -bound; x < bound; x++ )
             {
                 Bot check = centroid.add(x, y, z);
                 int cnt = std::count_if(
@@ -135,20 +136,33 @@ std::cout << "Centroid: (" << centroid.x << "," << centroid.y << "," << centroid
     return maxloc;
 }
 
-
-int main()
+int less_than_100m( int factor )
 {
+    int base = 1;
+    while( base < 99999999 )
+        base *= factor;
+    return base;
+}
+
+
+int main( int argc, char ** argv )
+{
+    int DIVISOR = 10;
+    if( argc > 1 )
+        DIVISOR = std::stoi( *++argv );
+
     botlist_t bots;
     Bot maxbot = scan(bots);
     std::cout << "Max r:" << maxbot.r << "\n";
     std::cout << "Part 1:" << Part1(bots, maxbot) << "\n";
 
+    int base = less_than_100m( DIVISOR );
     Bot centroid(0,0,0,0);
-    for( int scale = 10000000; scale > 0; scale /= 10 )
+    for( int scale = base; scale > 0; scale /= DIVISOR )
     {
         std::cout << "Checking scale " << scale << "\n";
-        centroid.multiply( 10 );
-        centroid = Part2( bots, scale, centroid );
+        centroid.multiply( DIVISOR );
+        centroid = Part2( DIVISOR, bots, scale, centroid );
     }
 
     Bot zero(0,0,0,0);
