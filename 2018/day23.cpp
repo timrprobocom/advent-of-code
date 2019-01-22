@@ -101,7 +101,7 @@ int Part1( botlist_t & bots, Bot maxbot )
 
 Bot Part2( int DIVISOR, botlist_t & bots, int scale, Bot centroid )
 {
-    int bound = DIVISOR * 3 / 2;
+    int bound = DIVISOR + 1;
     botlist_t subbots;
     std::transform(
         bots.begin(), bots.end(),

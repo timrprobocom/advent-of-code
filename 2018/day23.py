@@ -46,9 +46,9 @@ def check_at_scale( scale, centroid ):
 
     maxloc = (0,0,0)
     maxcnt = 0
-    for z in range(-15,15):
-        for y in range(-15,15):
-            for x in range(-15,15):
+    for z in range(-12,12):
+        for y in range(-12,12):
+            for x in range(-12,12):
                 cnt = sum(1 for bot in subbots if inrange(bot,(cx+x,cy+y,cz+z)))
                 if cnt > maxcnt:
                     maxcnt = cnt
