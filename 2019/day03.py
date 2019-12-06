@@ -11,42 +11,41 @@ test = (
 
 
 deltas = {
-    'R': (1,0),
-    'L': (-1,0),
-    'U': (0,-1),
-    'D': (0,1)
+    'R': 1,
+    'L': -1,
+    'U': -1j,
+    'D': 1j
 }
 
 # This was the wrong tactic.
 
 def find_extent( s1 ):
-    pt = (0,0)
+    pt = 0
     minptx, minpty = (999,999)
     maxptx, maxpty = (0,0)
     steps = 0
     for move in s1.split(','):
         val = int(move[1:])
         steps += val
-        d = deltas[move[0]]
-        pt = (pt[0]+val*d[0],pt[1]+val*d[1])
-        if pt[0] < minptx: minptx = pt[0]
-        if pt[0] > maxptx: maxptx = pt[0]
-        if pt[1] < minpty: minpty = pt[1]
-        if pt[1] > maxpty: maxpty = pt[1]
+        pt += deltas[move[0]] * val
+        if pt.real < minptx: minptx = pt.real
+        if pt.real > maxptx: maxptx = pt.real
+        if pt.imag < minpty: minpty = pt.imag
+        if pt.imag > maxpty: maxpty = pt.imag
     return steps,(minptx,minpty),(maxptx,maxpty)
 
 # Construct the set of all points visited on this path.
 
 def makepath( s1 ):
     steps = {}
-    pt = (0,0)
+    pt = 0
     dist = 0
     for move in s1.split(','):
         d = deltas[move[0]]
         val = int(move[1:])
         for v in range(val):
             dist += 1
-            pt = (pt[0]+d[0],pt[1]+d[1])
+            pt += d
             if pt not in steps:
                 steps[pt] = dist
     return steps
@@ -54,7 +53,7 @@ def makepath( s1 ):
 # Return Manhattan distance between two points.
 
 def mandist( p1, p2 ):
-    return abs(p1[0]-p2[0]) + abs(p1[1]-p2[1])
+    return abs(p1.real-p2.real) + abs(p1.imag-p2.imag)
 
 for tries in (test[0],test[1],real):
 # Construct the paths.
@@ -66,7 +65,7 @@ for tries in (test[0],test[1],real):
 # Find the intersection.
     inx = ps1.intersection(ps2)
 # For part 1, find the minimum distance from 0,0.
-    dist = min(mandist((0,0),pt) for pt in inx)
+    dist = min(int(mandist(0,pt)) for pt in inx)
     print( "Part 1", dist )
 # For part 2, find the minimum total steps taken.
     sigdist = min(p1[pt]+p2[pt] for pt in inx)
