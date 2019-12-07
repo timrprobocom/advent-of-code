@@ -1,6 +1,7 @@
 
 import sys
 import itertools
+from intcode import Program
 
 test = (
 [3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0],  # 43210
@@ -14,77 +15,6 @@ real = [ 3,8,1001,8,10,8,105,1,0,0,21,38,55,80,97,118,199,280,361,442,99999,3,9,
 TRACE = 'trace' in sys.argv
 TESTS = 'test' in sys.argv
 
-# The IntCode computer.
-
-class Program(object):
-    def __init__(self, array):
-        self.pgm = array[:]
-        self.pc = 0
-        self.inputs = []
-        self.output = None
-
-    def opcode(self):
-        opc = self.pgm[self.pc]
-        self.modes = [(opc//100)%10, (opc//1000)%10, opc//10000]
-        if TRACE:
-            print( f"At {self.pc}: {opc}" )
-        self.pc += 1
-        return opc % 100
-
-    def fetch(self):
-        nxtmode = self.modes.pop(0)
-        operand = self.pgm[self.pc]
-        self.pc += 1
-        if TRACE:
-            print( "fetch", operand if nxtmode else self.pgm[operand] )
-        return operand if nxtmode else self.pgm[operand]
-
-    def store(self, n):
-        if TRACE:
-            print( f"store {n} at {self.pgm[self.pc]}" )
-        self.pgm[self.pgm[self.pc]] = n
-        self.pc += 1
-
-    def jump(self):
-        self.pc = self.fetch()
-
-    def skip(self):
-        self.pc += 1
-
-    def run(self):
-        while 1:
-            opcode = self.opcode()
-            if opcode == 1:
-                self.store( self.fetch() + self.fetch() )
-            elif opcode == 2:
-                self.store( self.fetch() * self.fetch() )
-            elif opcode == 3:
-                self.store( self.inputs.pop(0) )
-            elif opcode == 4:
-                self.output = self.fetch()
-                print( "output", self.output )
-            elif opcode == 5:  # JT
-                if self.fetch():
-                    self.jump()
-                else:
-                    self.skip()
-            elif opcode == 6:  # JF
-                if not self.fetch():
-                    self.jump()
-                else:
-                    self.skip()
-            elif opcode == 7:  # JLT
-                self.store( 1 if self.fetch() < self.fetch() else 0 )
-            elif opcode == 8:  # JE
-                self.store( 1 if self.fetch() == self.fetch() else 0 )
-            elif opcode == 99:
-#                if TESTS or TRACE:
-#                    print( self.pgm )
-                return self.output
-            else:
-                print( f"Explode, pc={self.pc}, self={self.self}" )
-                return None
-
 def runsequence( pgm0 ):
     maxval = 0
     for inputset in itertools.permutations((0,1,2,3,4)):
@@ -92,8 +22,10 @@ def runsequence( pgm0 ):
         lastval = 0
         for ip in inputset:
             pgm = Program( pgm0 )
-            pgm.inputs = [ip,lastval]
-            lastval = pgm.run()
+            pgm.push( ip )
+            pgm.push( lastval )
+            pgm.run()
+            lastval = pgm.pop()
             print( lastval )
         maxval = max(maxval,lastval)
     return maxval

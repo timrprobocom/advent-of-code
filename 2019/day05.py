@@ -1,4 +1,5 @@
 import sys
+from intcode import Program
 
 test = (
     [1101,100,-1,4,0,0],
@@ -25,91 +26,35 @@ real = [
 
 TRACE = 'trace' in sys.argv
 TESTS = 'test' in sys.argv
-inputs = [int(k) for k in sys.argv[1:] if k[0] >= '0' and k[0] <= '9']
-
-def get_input():
-    if not inputs:
-        return int( input('Number input: ') )
-    if len(inputs) > 1:
-        return inputs.pop(0)
-    return inputs[0]
-
-# The IntCode computer.
-
-class Program(object):
-    def __init__(self, array):
-        self.pgm = array
-        self.pc = 0
-
-    def opcode(self):
-        opc = self.pgm[self.pc]
-        self.modes = [(opc//100)%10, (opc//1000)%10, opc//10000]
-        if TRACE:
-            print( f"At {self.pc}: {opc}" )
-        self.pc += 1
-        return opc % 100
-
-    def fetch(self):
-        nxtmode = self.modes.pop(0)
-        operand = self.pgm[self.pc]
-        self.pc += 1
-        if TRACE:
-            print( "fetch", operand if nxtmode else self.pgm[operand] )
-        return operand if nxtmode else self.pgm[operand]
-
-    def store(self, n):
-        if TRACE:
-            print( f"store {n} at {self.pgm[self.pc]}" )
-        self.pgm[self.pgm[self.pc]] = n
-        self.pc += 1
-
-    def jump(self):
-        self.pc = self.fetch()
-
-    def skip(self):
-        self.pc += 1
-
-    def run(self):
-        while 1:
-            opcode = self.opcode()
-            if opcode == 1:
-                self.store( self.fetch() + self.fetch() )
-            elif opcode == 2:
-                self.store( self.fetch() * self.fetch() )
-            elif opcode == 3:
-                self.store( get_input() )
-            elif opcode == 4:
-                print( "output", self.fetch() )
-            elif opcode == 5:  # JT
-                if self.fetch():
-                    self.jump()
-                else:
-                    self.skip()
-            elif opcode == 6:  # JF
-                if not self.fetch():
-                    self.jump()
-                else:
-                    self.skip()
-            elif opcode == 7:  # JLT
-                self.store( 1 if self.fetch() < self.fetch() else 0 )
-            elif opcode == 8:  # JE
-                self.store( 1 if self.fetch() == self.fetch() else 0 )
-            elif opcode == 99:
-                if TESTS or TRACE:
-                    print( self.pgm )
-                return 1
-            else:
-                print( f"Explode, pc={self.pc}, self={self.self}" )
-                return None
 
 if TESTS:
     for p in test:
-        print( "" )
-        Program(p).run() 
+        print( p )
+        for i in (1,5,12):
+            print( "Trying", i )
+            pgm = Program(p)
+            pgm.push( i )
+            pgm.push( i )
+            pgm.push( i )
+            pgm.run()
+            if pgm.output.empty():
+                print( "HALT empty" )
+            else:
+                print( pgm.pop() )
 
-    Program(t2).run()
+    pgm = Program(t2)
+    pgm.push( 1 )
+    pgm.run()
+    print( pgm.pop() )
 
 # For part 1, enter 1.  For part 2, enter 5.
 
 else:
-    Program(real).run()
+    pgm = Program(real)
+    pgm.push( 1 )
+    pgm.run()
+    print( "Part 1", pgm.final )
+    pgm = Program(real)
+    pgm.push( 5 )
+    pgm.run()
+    print( "Part 2", pgm.final )
