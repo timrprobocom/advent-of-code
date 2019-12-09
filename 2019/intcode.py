@@ -4,13 +4,12 @@ import itertools
 import threading
 
 TRACE = 'trace' in sys.argv
-TESTS = 'test' in sys.argv
 
 # The IntCode computer.
 
 class Program(threading.Thread):
     count = 0
-    def __init__(self, program, inputs=None):
+    def __init__(self, program, inputs=[]):
         threading.Thread.__init__(self)
         self.id = Program.count
         Program.count += 1
@@ -18,9 +17,8 @@ class Program(threading.Thread):
         self.pc = 0
         self.input = queue.Queue()
         self.output = queue.Queue()
-        if inputs:
-            for i in inputs:
-                self.input.put(i)
+        for i in inputs:
+            self.input.put(i)
         self.rbase = 0
 
     def push(self, val):
@@ -37,11 +35,16 @@ class Program(threading.Thread):
 
     def opcode(self):
         opc = self.pgm[self.pc]
-        self.modes = [(opc//100)%10, (opc//1000)%10, opc//10000]
+        self.modes = opc//100
         if TRACE:
             print( f"{self.id}: At {self.pc}: {opc}" )
         self.pc += 1
         return opc % 100
+
+    def nextmode(self):
+        p = self.modes % 10
+        self.modes //= 10
+        return p
 
     def verify(self,loc):
         if loc >= len(self.pgm):
@@ -50,31 +53,31 @@ class Program(threading.Thread):
             self.pgm += [0] * (loc-len(self.pgm)+1)
 
     def fetch(self):
-        nxtmode = self.modes.pop(0)
+        mode = self.nextmode()
         operand = self.pgm[self.pc]
         self.pc += 1
-        if nxtmode == 0:
+        if mode == 0:
             self.verify(operand)
             val = self.pgm[operand]
-        elif nxtmode == 1:
+        elif mode == 1:
             val = operand
-        elif nxtmode == 2:
+        elif mode == 2:
             self.verify(operand+self.rbase)
             val = self.pgm[operand+self.rbase]
         if TRACE:
-            print( f"{self.id} fetch[{nxtmode}] {operand} = {val}" )
+            print( f"{self.id} fetch[{mode}] {operand} = {val}" )
         return val
 
     def store(self, n):
-        nxtmode = self.modes.pop(0)
+        mode = self.nextmode()
         operand = self.pgm[self.pc]
         if TRACE:
-            print( f"{self.id} store {n} at {operand}" )
+            print( f"{self.id} store[{mode}] {n} at {operand}" )
         self.pc += 1
-        if nxtmode == 0:
+        if mode == 0:
             self.verify(operand)
             self.pgm[operand] = n
-        elif nxtmode == 2:
+        elif mode == 2:
             self.verify(operand+self.rbase)
             self.pgm[operand+self.rbase] = n
 
@@ -96,7 +99,6 @@ class Program(threading.Thread):
                  if TRACE:
                      print( self.id, "input", ip )
                  self.store( ip )
-#                self.store( self.input.get() )
             elif opcode == 4:
                 p = self.fetch()
                 self.final = p
@@ -114,9 +116,9 @@ class Program(threading.Thread):
                 else:
                     self.skip()
             elif opcode == 7:  # JLT
-                self.store( 1 if self.fetch() < self.fetch() else 0 )
+                self.store( int(self.fetch() < self.fetch()))
             elif opcode == 8:  # JE
-                self.store( 1 if self.fetch() == self.fetch() else 0 )
+                self.store( int(self.fetch() == self.fetch()))
             elif opcode == 9:  # set rbase
                 self.rbase += self.fetch()
             elif opcode == 99:
