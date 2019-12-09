@@ -10,20 +10,30 @@ TESTS = 'test' in sys.argv
 
 class Program(threading.Thread):
     count = 0
-    def __init__(self, array):
+    def __init__(self, program, inputs=None):
         threading.Thread.__init__(self)
         self.id = Program.count
         Program.count += 1
-        self.pgm = array[:]
+        self.pgm = program[:]
         self.pc = 0
         self.input = queue.Queue()
         self.output = queue.Queue()
+        if inputs:
+            for i in inputs:
+                self.input.put(i)
+        self.rbase = 0
 
     def push(self, val):
         self.input.put( val )
 
     def pop(self):
         return self.output.get()
+
+    def dump(self):
+        q = []
+        while not self.output.empty():
+            q.append( self.output.get() )
+        return q
 
     def opcode(self):
         opc = self.pgm[self.pc]
@@ -33,19 +43,40 @@ class Program(threading.Thread):
         self.pc += 1
         return opc % 100
 
+    def verify(self,loc):
+        if loc >= len(self.pgm):
+            if TRACE:
+                print( f"Extending memory to {loc}" )
+            self.pgm += [0] * (loc-len(self.pgm)+1)
+
     def fetch(self):
         nxtmode = self.modes.pop(0)
         operand = self.pgm[self.pc]
         self.pc += 1
+        if nxtmode == 0:
+            self.verify(operand)
+            val = self.pgm[operand]
+        elif nxtmode == 1:
+            val = operand
+        elif nxtmode == 2:
+            self.verify(operand+self.rbase)
+            val = self.pgm[operand+self.rbase]
         if TRACE:
-            print( self.id, "fetch", operand if nxtmode else self.pgm[operand] )
-        return operand if nxtmode else self.pgm[operand]
+            print( f"{self.id} fetch[{nxtmode}] {operand} = {val}" )
+        return val
 
     def store(self, n):
+        nxtmode = self.modes.pop(0)
+        operand = self.pgm[self.pc]
         if TRACE:
-            print( f"{self.id} store {n} at {self.pgm[self.pc]}" )
-        self.pgm[self.pgm[self.pc]] = n
+            print( f"{self.id} store {n} at {operand}" )
         self.pc += 1
+        if nxtmode == 0:
+            self.verify(operand)
+            self.pgm[operand] = n
+        elif nxtmode == 2:
+            self.verify(operand+self.rbase)
+            self.pgm[operand+self.rbase] = n
 
     def jump(self):
         self.pc = self.fetch()
@@ -86,9 +117,11 @@ class Program(threading.Thread):
                 self.store( 1 if self.fetch() < self.fetch() else 0 )
             elif opcode == 8:  # JE
                 self.store( 1 if self.fetch() == self.fetch() else 0 )
+            elif opcode == 9:  # set rbase
+                self.rbase += self.fetch()
             elif opcode == 99:
                 break
             else:
                 print( f"Explode, pc={self.pc}, pgm={self.pgm}" )
                 break
-        return 1
+        return self

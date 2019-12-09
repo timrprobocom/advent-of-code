@@ -21,11 +21,7 @@ def runsequence( pgm0 ):
         print( inputset )
         lastval = 0
         for ip in inputset:
-            pgm = Program( pgm0 )
-            pgm.push( ip )
-            pgm.push( lastval )
-            pgm.run()
-            lastval = pgm.pop()
+            lastval = Program(pgm0, [ip, lastval]).run().dump()[0]
             print( lastval )
         maxval = max(maxval,lastval)
     return maxval
