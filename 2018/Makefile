@@ -9,6 +9,7 @@ O = .obj
 EXE = .exe
 CPPFLAGS = -EHsc
 OUTPUT_OPTION = -Fe$@
+COMPILE.cpp = cl $(CPPFLAGS)
 endif
 
 SRCS = $(wildcard *.cpp)
@@ -16,7 +17,7 @@ OBJS = $(SRCS:.cpp=$O)
 EXES = $(SRCS:.cpp=$(EXE))
 
 %$(EXE): %.cpp
-	cl $(CPPFLAGS) $(OUTPUT_OPTION) $<
+	$(COMPILE.cpp) $(OUTPUT_OPTION) $<
 
 all:	$(EXES)
 
