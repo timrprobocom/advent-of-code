@@ -144,7 +144,7 @@ def scan(t):
                 maxcount = count
                 maxelem = (x,y)
     print( maxelem, " sees ", maxcount )
-    return maxcount
+    return maxcount,maxelem
 
 
 def laser(t,x0,y0):
@@ -177,7 +177,7 @@ def part1():
     scan(read(t2.splitlines()))
     scan(read(t3.splitlines()))
     scan(read(t4.splitlines()))
-    scan(read(t5.splitlines()))
+    (k5,x5,y0) = scan(read(t5.splitlines()))
     print( "Part 1: ", scan(read(open('day10.txt').readlines())) )
 
 # Answer was 26, 29.
