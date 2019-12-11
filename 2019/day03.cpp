@@ -45,10 +45,11 @@ void fill() {
 
 typedef std::map<Point,int> paths_t;
 
-void makepath( paths_t & steps, std::string s1 )
+paths_t makepath( std::string s1 )
 {
     Point pt(0, 0);
     int dist = 0;
+    paths_t steps;
     std::istringstream iss( s1 );
     for( std::string move; std::getline(iss,move,','); )
     {
@@ -62,6 +63,7 @@ void makepath( paths_t & steps, std::string s1 )
             steps[pt] = dist;
         }
     }
+    std::cout << "Path has " << steps.size() << " elements\n" ;
 }
 
 // Return Manhattan distance between two points.
@@ -77,9 +79,8 @@ int main()
     fill();
 
 // Construct the paths.
-    paths_t p1, p2;
-    makepath(p1, data[0]);
-    makepath(p2, data[1]);
+    paths_t p1 = makepath(data[0]);
+    paths_t p2 = makepath(data[1]);
 // Extract the keys, which are the points themselves.
     std::set<Point> inx;
 // Find the intersection.
