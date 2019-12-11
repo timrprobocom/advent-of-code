@@ -93,35 +93,14 @@ const char * t5 = "\
 ";
 
 
-typedef std::vector<std::vector<char>> spacemap_t;
-
-
-spacemap_t read( std::istream  && t )
-{
-    spacemap_t map;
-    for( std::string ln; getline( t, ln); )
-    {
-        map.emplace_back( ln.size() );
-        std::copy( 
-            ln.begin(),
-            ln.end(),
-            map.back().begin()
-        );
-    }
-    return map;
-}
-
-
-spacemap_t read( const char * t )
-{
-    return read( std::istringstream(t) );
-}
-
-
 struct Point {
     int x;
     int y;
-    Point( int _x=0, int _y=0 )
+    Point( )
+        : x(0)
+        , y(0)
+        {}
+    Point( int _x, int _y )
         : x(_x)
         , y(_y)
         {}
@@ -153,6 +132,53 @@ struct Point {
         return *this;
     }
 };
+
+
+//typedef std::vector<std::vector<char>> spacemap_t;
+
+struct spacemap_t : public std::vector<std::vector<char>> 
+{
+    // This seems silly.
+
+    std::vector<char> & operator[]( int y )
+    {
+        return at(y);
+    }
+    const std::vector<char> & operator[]( int y ) const
+    {
+        return at(y);
+    }
+    char & operator[]( const Point & pt )
+    {
+        return at(pt.y)[pt.x];
+    }
+    char operator[]( const Point & pt ) const
+    {
+        return at(pt.y)[pt.x];
+    }
+};
+
+
+spacemap_t read( std::istream  && t )
+{
+    spacemap_t map;
+    for( std::string ln; getline( t, ln); )
+    {
+        map.emplace_back( ln.size() );
+        std::copy( 
+            ln.begin(),
+            ln.end(),
+            map.back().begin()
+        );
+    }
+    return map;
+}
+
+
+spacemap_t read( const char * t )
+{
+    return read( std::istringstream(t) );
+}
 
 
 int gcd( int x, int y )
@@ -188,7 +214,7 @@ bool visible( const spacemap_t & graph, Point p0, Point p1 )
     // Until we reach the target (which we always will), check for blocks.
 
     for( p0 += step; p0 != p1; p0 += step )
-        if( graph[p0.y][p0.x] == '#' )
+        if( graph[p0] == '#' )
             return false;
 
     return true;
@@ -207,7 +233,7 @@ std::set<Point> check( const spacemap_t & graph, Point(target) )
             Point pt(x1,y1);
             if( pt == target )
                 continue;
-            if( graph[y1][x1] != '#' )
+            if( graph[pt] != '#' )
                 continue;
             if( visible( graph, target, pt ) )
             {
@@ -263,7 +289,7 @@ int laser(spacemap_t graph, Point target)
     while( (found = check(graph,target)).size() < remains )
     {
         for( auto pt : found )
-            graph[pt.y][pt.x] = '.';
+            graph[pt] = '.';
         remains -= found.size();
     }
 
