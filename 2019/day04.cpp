@@ -24,11 +24,10 @@ int valid( int pw, int part )
         cnts[dig[i]]++;
     }
 
-    return std::any_of( cnts.begin(), cnts.end(), 
-        part == 1 
-            ? [](int i){return i>=2;}
-            : [](int i){return i==2;}
-    );
+    return part == 1
+        ? std::any_of( cnts.begin(), cnts.end(), [](int i){return i>=2;})
+        : std::any_of( cnts.begin(), cnts.end(), [](int i){return i==2;})
+    ;
 }
 
 
