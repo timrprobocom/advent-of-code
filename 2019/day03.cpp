@@ -22,7 +22,7 @@ test = (
 struct Point {
     int x;
     int y;
-    Point( int _x, int _y )
+    Point( int _x=0, int _y=0 )
         : x(_x)
         , y(_y)
         {}
@@ -73,6 +73,7 @@ int mandist( Point p1, Point p2 )
 
 int main()
 {
+    std::cout << "This doesn't work yet.\n";
     fill();
 
 // Construct the paths.
@@ -101,7 +102,6 @@ int main()
     });
     int sigdist = p1[win]+p2[win];
     std::cout << "Part 2 " << sigdist << "\n";
-
 }
 
 
