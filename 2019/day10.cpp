@@ -92,7 +92,9 @@ const char * t5 = "\
 ###.##.####.##.#..##\n\
 ";
 
+
 typedef std::vector<std::vector<char>> spacemap_t;
+
 
 spacemap_t read( std::istream  && t )
 {
@@ -109,25 +111,12 @@ spacemap_t read( std::istream  && t )
     return map;
 }
 
+
 spacemap_t read( const char * t )
 {
-#if 0
-    spacemap_t map;
-    std::istringstream iss( t );
-    for( std::string ln; getline( iss, ln); )
-    {
-        map.emplace_back( ln.size() );
-        std::copy( 
-            ln.begin(),
-            ln.end(),
-            map.back().begin()
-        );
-    }
-    return map;
-#else
     return read( std::istringstream(t) );
-#endif
 }
+
 
 struct Point {
     int x;
@@ -163,9 +152,8 @@ struct Point {
         y += other.y;
         return *this;
     }
-
-
 };
+
 
 int gcd( int x, int y )
 {
@@ -179,33 +167,35 @@ int gcd( int x, int y )
 }
 
 
-bool visible( spacemap_t & graph, Point p0, Point p1 )
+bool visible( const spacemap_t & graph, Point p0, Point p1 )
 {
     // Get the slope of the line.
+
     int dx = p1.x - p0.x;
     int dy = p1.y - p0.y;
     
     // Compute the GCD.  If they are relatively prime, then this star 
     // is visible.
+
     int div = gcd(abs(dx),abs(dy));
     if( div == 1 )
         return true;
 
     // Compute the steps at which stars will interfere.
+
     Point step( dx / div, dy / div );
 
     // Until we reach the target (which we always will), check for blocks.
 
     for( p0 += step; p0 != p1; p0 += step )
-    {
         if( graph[p0.y][p0.x] == '#' )
             return false;
-    }
+
     return true;
 }
 
 
-std::set<Point> check( spacemap_t & graph, Point(target) )
+std::set<Point> check( const spacemap_t & graph, Point(target) )
 {
 //    std::cout << "Checking " << target.x << " " <<  target.y << "\n";
     int dim = graph.size();
@@ -231,7 +221,7 @@ std::set<Point> check( spacemap_t & graph, Point(target) )
 
 
 
-std::pair<int,Point> scan(spacemap_t graph) 
+std::pair<int,Point> scan(const spacemap_t & graph) 
 {
     int maxcount = 0;
     Point maxelem(0,0);
@@ -257,13 +247,18 @@ std::pair<int,Point> scan(spacemap_t graph)
 }
 
 
+double angle( Point & a, Point & b )
+{
+    return M_PI/4 - atan2((a.x-b.x),(a.y-b.y));
+}
+
 
 int laser(spacemap_t graph, Point target)
 {
     int remains = 200;
     std::set<Point> found;
 
-// If we don't catch them all in one round, eliminate these.
+    // If we don't catch them all in one round, eliminate this whole set.
 
     while( (found = check(graph,target)).size() < remains )
     {
@@ -271,10 +266,6 @@ int laser(spacemap_t graph, Point target)
             graph[pt.y][pt.x] = '.';
         remains -= found.size();
     }
-
-    auto angle = [&target](Point& pt) {
-        return M_PI/4 - atan2((pt.x-target.x),(pt.y-target.y));
-    };
 
     // Convert to a vector.
 
@@ -285,8 +276,8 @@ int laser(spacemap_t graph, Point target)
     std::sort(
         data.begin(),
         data.end(),
-        [&target, angle](Point & a, Point & b) {
-            return angle(a) < angle(b);
+        [&target](Point & a, Point & b) {
+            return angle(a,target) < angle(b,target);
         } 
     );
 
@@ -305,7 +296,9 @@ void part1()
     scan(read(t3));
     scan(read(t4));
     scan(read(t5));
-    std::cout << "Part 1: " << scan(read(std::ifstream("day10.txt"))).first << "\n";
+    std::cout 
+        << "\nPart 1: " 
+        << scan(read(std::ifstream("day10.txt"))).first << "\n";
 }
 
 // Answer was 26, 29.
@@ -315,10 +308,13 @@ void part2()
     Point best = scan(read(t5)).second;
     std::cout << laser( read(t5), best ) << "\n";
 
-    // Find most visible point.
+    // Find the point with the most visible asteroids.
     best = scan(read(std::ifstream("day10.txt"))).second;
+
     // Find the 200th blasted asteroid.
-    std::cout << "\nPart 2: " << laser(read(std::ifstream("day10.txt")), best)  << "\n";
+    std::cout 
+        << "\nPart 2: " 
+        << laser(read(std::ifstream("day10.txt")), best)  << "\n";
 }
 
 int main()
