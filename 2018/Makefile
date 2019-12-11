@@ -4,13 +4,16 @@ ifndef windir
 O = .o
 EXE =
 CPPFLAGS = --std=c++11
+CXX = g++
 else
 O = .obj
 EXE = .exe
 CPPFLAGS = -EHsc
 OUTPUT_OPTION = -Fe$@
-COMPILE.cpp = cl $(CPPFLAGS)
+CXX = cl
 endif
+
+COMPILE.cpp = $(CXX) $(CPPFLAGS)
 
 SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.cpp=$O)

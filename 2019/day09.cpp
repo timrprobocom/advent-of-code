@@ -49,7 +49,6 @@ std::vector<int64_t> real({1102,34463338,34463338,63,1007,63,34463338,63,1005,63
 
 int main( int argc, char ** argv )
 {
-    std::cout << t3[1] << "\n";
     while( *++argv )
     {
         std::string s(*argv);
