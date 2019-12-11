@@ -94,23 +94,7 @@ const char * t5 = "\
 
 typedef std::vector<std::vector<char>> spacemap_t;
 
-spacemap_t read( const char * t )
-{
-    spacemap_t map;
-    std::istringstream iss( t );
-    for( std::string ln; getline( iss, ln); )
-    {
-        map.emplace_back( ln.size() );
-        std::copy( 
-            ln.begin(),
-            ln.end(),
-            map.back().begin()
-        );
-    }
-    return map;
-}
-
-spacemap_t read( std::istream  & t )
+spacemap_t read( std::istream  && t )
 {
     spacemap_t map;
     for( std::string ln; getline( t, ln); )
@@ -123,6 +107,26 @@ spacemap_t read( std::istream  & t )
         );
     }
     return map;
+}
+
+spacemap_t read( const char * t )
+{
+#if 0
+    spacemap_t map;
+    std::istringstream iss( t );
+    for( std::string ln; getline( iss, ln); )
+    {
+        map.emplace_back( ln.size() );
+        std::copy( 
+            ln.begin(),
+            ln.end(),
+            map.back().begin()
+        );
+    }
+    return map;
+#else
+    return read( std::istringstream(t) );
+#endif
 }
 
 struct Point {
@@ -301,8 +305,7 @@ void part1()
     scan(read(t3));
     scan(read(t4));
     scan(read(t5));
-    std::ifstream real("day10.txt");
-    std::cout << "Part 1: " << scan(read(real)).first << "\n";
+    std::cout << "Part 1: " << scan(read(std::ifstream("day10.txt"))).first << "\n";
 }
 
 // Answer was 26, 29.
@@ -312,11 +315,10 @@ void part2()
     Point best = scan(read(t5)).second;
     std::cout << laser( read(t5), best ) << "\n";
 
-    std::ifstream real("day10.txt");
-    best = scan(read(real)).second;
-    real.close();
-    real.open("day10.txt");
-    std::cout << "\nPart 2: " << laser(read(real), best)  << "\n";
+    // Find most visible point.
+    best = scan(read(std::ifstream("day10.txt"))).second;
+    // Find the 200th blasted asteroid.
+    std::cout << "\nPart 2: " << laser(read(std::ifstream("day10.txt")), best)  << "\n";
 }
 
 int main()
