@@ -32,7 +32,8 @@ class Moon(object):
     def __repr__(self):
         return "pos<%d,%d,%d> vel<%d,%d,%d>" % tuple(self.pos+self.vel)
 
-
+# I made so many typos in this data (missing minus signs) that it would
+# have been better to write a parser for their <...> formatting.
 
 test = (
   (-1,0,2),
@@ -63,16 +64,20 @@ def makemoons( pts ):
 def energy(system):
     return sum(m.pot() * m.kin() for m in system)
 
+def sign(a,b):
+    if a<b:
+        return 1
+    elif a>b:
+        return -1
+    else:
+        return 0
+
 def step(system):
     # Apply gravity
     for m1,m2 in itertools.combinations(system,2):
         for axis in range(3):
-            if m1.pos[axis] < m2.pos[axis]:
-                m1.vel[axis] += 1
-                m2.vel[axis] -= 1
-            elif m1.pos[axis] > m2.pos[axis]:
-                m1.vel[axis] -= 1
-                m2.vel[axis] += 1
+            m1.vel[axis] += sign(m1.pos[axis],m2.pos[axis])
+            m2.vel[axis] -= sign(m1.pos[axis],m2.pos[axis])
     # Apply velocity.
     for m1 in system:
         m1.apply()
@@ -105,21 +110,25 @@ def lcm(x,y):
 def lcm3(x,y,z):
     return lcm(lcm(x,y),z)
 
-def findrepeat( system, axis ):
-    states = set()
-    state = getstate(system, axis)
-    while state not in states:
-        states.add( state )
-        step( system )
-        state = getstate(system, axis)
-    return len(states)
+def findrepeat( system ):
+    states = (set(),set(),set())
+    found = [0,0,0]
+    while not all(found):
+        for axis in range(3):
+            if not found[axis]:
+                state = getstate(system,axis)
+                if state in states[axis]:
+                    print("Found",axis,"at",len(states[axis]))
+                    found[axis] = len(states[axis])
+                else:
+                    states[axis].add( state )
+        step(system)
+    return found
 
 def run2(system):
-    i1 = findrepeat( makemoons(system), 0 )
-    i2 = findrepeat( makemoons(system), 1 )
-    i3 = findrepeat( makemoons(system), 2 )
-    print( i1, i2, i3, lcm3(i1,i2,i3) )
-    return lcm3(i1,i2,i3)
+    cycles = findrepeat( makemoons(system) )
+    print( cycles, lcm3(*cycles) )
+    return lcm3(*cycles)
 
 def part2():
     print( "Part 2:", run2( real ) )
