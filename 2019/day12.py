@@ -2,6 +2,7 @@
 import os
 import sys
 import copy
+import time
 import itertools
 
 
@@ -90,14 +91,14 @@ def run(system, n):
     return energy( system )
 
 def part1():
-    run( makemoons(test), 10 )
-    run( makemoons(test2), 100 )
+#    run( makemoons(test), 10 )
+#    run( makemoons(test2), 100 )
     print( "Part 1: ", run( makemoons(real), 1000 ))
 
 # Part 2.
 
 def getstate(system,axis):
-    return sum( ((m.pos[axis],m.vel[axis]) for m in system), () )
+    return tuple( m.vel[axis] for m in system )
 
 def gcd(x,y):
     while y:
@@ -110,19 +111,22 @@ def lcm(x,y):
 def lcm3(x,y,z):
     return lcm(lcm(x,y),z)
 
+# This is my third algorithm.  The velocities all reach zero at
+# the halfway point, so we can look for that without tracking the
+# previous positions.  This is 60% faster.
+
 def findrepeat( system ):
-    states = (set(),set(),set())
     found = [0,0,0]
+    zeros = tuple([0]*len(system))
+    step(system)
+    nstep = 1
     while not all(found):
         for axis in range(3):
-            if not found[axis]:
-                state = getstate(system,axis)
-                if state in states[axis]:
-                    print("Found",axis,"at",len(states[axis]))
-                    found[axis] = len(states[axis])
-                else:
-                    states[axis].add( state )
+            if not found[axis] and getstate(system,axis) == zeros:
+                print("Found",axis,"at",nstep)
+                found[axis] = nstep*2
         step(system)
+        nstep += 1
     return found
 
 def run2(system):
@@ -133,5 +137,12 @@ def run2(system):
 def part2():
     print( "Part 2:", run2( real ) )
 
-part1()
-part2()
+def dotiming(fn):
+    p1 = time.time()
+    fn()
+    p2 = time.time()
+    print( "Elapsed:", p2-p1)
+
+dotiming( part1 )
+dotiming( part2 )
+
