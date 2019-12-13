@@ -1,5 +1,6 @@
 
 import os
+import re
 import sys
 import copy
 import time
@@ -33,32 +34,31 @@ class Moon(object):
     def __repr__(self):
         return "pos<%d,%d,%d> vel<%d,%d,%d>" % tuple(self.pos+self.vel)
 
-# I made so many typos in this data (missing minus signs) that it would
-# have been better to write a parser for their <...> formatting.
+test1 = """\
+<x=-1, y=0, z=2>
+<x=2, y=-10, z=-7>
+<x=4, y=-8, z=8>
+<x=3, y=5, z=-1>"""
 
-test = (
-  (-1,0,2),
-  (2,-10,-7),
-  (4,-8,8),
-  (3,5,-1)
-)
+test2 = """\
+<x=-8, y=-10, z=0>
+<x=5, y=5, z=10>
+<x=2, y=-7, z=3>
+<x=9, y=-8, z=-3>"""
 
-test2 = (
-  (-8, -10, 0),
-  (5, 5, 10),
-  (2, -7, 3),
-  (9, -8, -3)
-)
+real = """\
+<x=-8, y=-18, z=6>
+<x=-11, y=-14, z=4>
+<x=8, y=-3, z=-10>
+<x=-2, y=-16, z=1>"""
 
-real = (
-  (-8,-18,6),
-  (-11,-14,4),
-  (8,-3,-10),
-  (-2,-16,1)
-)
+match=re.compile("<x=([0-9-]*), y=([0-9-]*), z=([0-9-]*)>")
 
-def makemoons( pts ):
-    return tuple( Moon(*pt) for pt in pts )
+def makemoons( txt ):
+    return tuple( 
+        Moon( *(int(i) for i in match.match(ln).groups()) )
+        for ln in txt.splitlines()
+    )
 
 # Part 1
 
