@@ -24,6 +24,9 @@ class Program(threading.Thread):
     def push(self, val):
         self.input.put( val )
 
+    def read_input(self):
+        return self.input.get()
+
     def pop(self):
         return self.output.get()
 
@@ -95,7 +98,7 @@ class Program(threading.Thread):
             elif opcode == 2:
                 self.store( self.fetch() * self.fetch() )
             elif opcode == 3:
-                 ip = self.input.get()
+                 ip = self.read_input()
                  if TRACE:
                      print( self.id, "input", ip )
                  self.store( ip )
