@@ -91,20 +91,16 @@ class Prog15( Program ):
             grid[self.target.y-ymin][self.target.x-ymin] = '$'
         print( '\n'.join(''.join(row) for row in grid) )
 
-    # We so a simple random walk.
+    # We follow the left-hand rule.
 
     def read_input(self):
         if not self.input.empty():
             return self.input.get()
 
         self.count += 1
-        if self.count % 10000 == 0:
-            print( self.count )
-            self.printmap()
-        #if self.count > 400000:
-        if len(self.walls) == 860:
-            print( "Iteration", self.count )
-            self.printmap()
+        print( "\nIteration", self.count )
+        self.printmap()
+        if self.count > 4 and self.position == Point(0,0):
             return 5
 
         facing = self.position + movement[self.dir]
@@ -112,15 +108,12 @@ class Prog15( Program ):
         code = self.pop()
         if code == 0:
             self.walls.add( facing )
-        elif code == 1:
+            self.dir = nextright[self.dir]
+        else:
             self.position = facing
-        elif code == 2:
-            self.target = facing
-            self.position = facing
-
-        self.dir = random.choice((1,2,3,4))
-        while self.position+movement[self.dir] in self.walls:
-            self.dir = random.choice((1,2,3,4))
+            self.dir = nextleft[self.dir]
+            if code == 2:
+                self.target = facing
 
         return self.dir
 
