@@ -2,17 +2,18 @@ import sys
 import queue
 import itertools
 import threading
+import copy
 
-TRACE = 'trace' in sys.argv
+TRACE = 'itrace' in sys.argv
 
 # The IntCode computer.
 
 class Program(threading.Thread):
-    count = 0
+    count = itertools.count()
+
     def __init__(self, program, inputs=[]):
         threading.Thread.__init__(self)
-        self.id = Program.count
-        Program.count += 1
+        self.id = next(Program.count)
         self.pgm = program[:]
         self.pc = 0
         self.input = queue.Queue()
@@ -20,6 +21,9 @@ class Program(threading.Thread):
         for i in inputs:
             self.input.put(i)
         self.rbase = 0
+
+    def clone(self):
+        return copy.deepcopy(self)
 
     def push(self, val):
         self.input.put( val )
@@ -36,7 +40,7 @@ class Program(threading.Thread):
             q.append( self.output.get() )
         return q
 
-    def opcode(self):
+    def opcode(self): 
         opc = self.pgm[self.pc]
         self.modes = opc//100
         if TRACE:
@@ -84,11 +88,6 @@ class Program(threading.Thread):
             self.verify(operand+self.rbase)
             self.pgm[operand+self.rbase] = n
 
-    def jump(self):
-        self.pc = self.fetch()
-
-    def skip(self):
-        self.pc += 1
 
     def run(self):
         while 1:
@@ -110,14 +109,14 @@ class Program(threading.Thread):
                     print( self.id, "output", p )
             elif opcode == 5:  # JT
                 if self.fetch():
-                    self.jump()
+                    self.pc = self.fetch()
                 else:
-                    self.skip()
+                    self.pc += 1
             elif opcode == 6:  # JF
                 if not self.fetch():
-                    self.jump()
+                    self.pc = self.fetch()
                 else:
-                    self.skip()
+                    self.pc += 1
             elif opcode == 7:  # JLT
                 self.store( int(self.fetch() < self.fetch()))
             elif opcode == 8:  # JE

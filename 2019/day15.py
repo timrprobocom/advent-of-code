@@ -1,5 +1,8 @@
 import sys
+import random
 from collections import defaultdict
+
+TRACE = 'trace' in sys.argv
 
 real = [
 3,1033,1008,1033,1,1032,1005,1032,31,1008,1033,2,1032,1005,1032,58,1008,1033,3,1032,1005,1032,81,1008,1033,4,1032,1005,1032,104,99,101,0,1034,1039,101,0,1036,1041,1001,1035,-1,1040,1008,1038,0,1043,102,-1,1043,1032,1,1037,1032,1042,1105,1,124,102,1,1034,1039,101,0,1036,1041,1001,1035,1,1040,1008,1038,0,1043,1,1037,1038,1042,1105,1,124,1001,1034,-1,1039,1008,1036,0,1041,1002,1035,1,1040,1002,1038,1,1043,1001,1037,0,1042,1105,1,124,1001,1034,1,1039,1008,1036,0,1041,1002,1035,1,1040,101,0,1038,1043,101,0,1037,1042,1006,1039,217,1006,1040,217,1008,1039,40,1032,1005,1032,217,1008,1040,40,1032,1005,1032,217,1008,1039,35,1032,1006,1032,165,1008,1040,33,1032,1006,1032,165,1102,2,1,1044,1106,0,224,2,1041,1043,1032,1006,1032,179,1101,1,0,1044,1106,0,224,1,1041,1043,1032,1006,1032,217,1,1042,1043,1032,1001,1032,-1,1032,1002,1032,39,1032,1,1032,1039,1032,101,-1,1032,1032,101,252,1032,211,1007,0,27,1044,1105,1,224,1101,0,0,1044,1105,1,224,1006,1044,247,101,0,1039,1034,1002,1040,1,1035,101,0,1041,1036,1001,1043,0,1038,101,0,1042,1037,4,1044,1106,0,0,8,86,20,11,8,18,84,20,96,25,15,28,96,20,74,24,7,5,77,6,77,6,23,74,3,23,93,21,72,23,1,57,87,10,17,9,23,48,16,9,32,11,62,73,5,70,2,10,77,23,16,76,24,28,13,46,92,26,15,10,87,
@@ -20,11 +23,41 @@ from intcode import Program
 
 # start position
 
+# so, at every position:
+# Try 1, 2, 3, 4
 
-movement = ( (0,0), (0,-1),(0,1),(-1,0),(1,0) )
-nextleft = ( 0, 3, 4, 2, 1 )
+class Point:
+    """Simple 2-dimensional point."""
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return f"<x={self.x},y={self.y}>"
+
+    def __add__(self, other):
+        return Point(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other):
+        return Point(self.x - other.x, self.y - other.y)
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __lt__(self, other):
+        return self.length < other.length
+
+    def __hash__(self):
+        return hash(tuple((self.x, self.y)))
+
+
+movement = ( Point(0,0), Point(0,-1),Point(0,1),Point(-1,0),Point(1,0) )
+nextleft  = ( 0, 3, 4, 2, 1 )
 nextright = ( 0, 4, 3, 1, 2 )
-opposite = ( 0, 2, 1, 4, 3 )
+opposite  = ( 0, 2, 1, 4, 3 )
 
 def add(a,b):
     return (a[0]+b[0],a[1]+b[1])
@@ -32,86 +65,94 @@ def add(a,b):
 class Prog15( Program ):
     def __init__(self, program):
         Program.__init__(self,program)
-        self.position = (0,0)
+        self.position = Point(0,0)
         self.dir = 1
         self.push( self.dir )
         self.walls = set()
         self.target = None
         self.count = 0
-        self.trace = []
-        self.untried = {self.position: [1,2,3,4]}
 
-    def printmap(self, path=None):
+    def printmap(self):
         if not self.walls:
             return
-        xmin = min(min(x[0] for x in self.walls),self.position[0])
-        xmax = max(max(x[0] for x in self.walls),self.position[0]) + 1
-        ymin = min(min(x[1] for x in self.walls),self.position[1])
-        ymax = max(max(x[1] for x in self.walls),self.position[1]) + 1
+        xmin = min(min(t.x  for t in self.walls),self.position.x)
+        xmax = max(max(t.x  for t in self.walls),self.position.x) + 1
+        ymin = min(min(t.y  for t in self.walls),self.position.y)
+        ymax = max(max(t.y  for t in self.walls),self.position.y) + 1
+        #print( '\n', self.position, xmin, ymin, xmax, ymax )
         grid = []
         for i in range(ymin,ymax):
             grid.append( [' ']*(xmax-xmin))
         for w in self.walls:
-            grid[w[1]-ymin][w[0]-xmin] = '#'
+            grid[w.y-ymin][w.x-xmin] = '#'
         grid[-ymin][-xmin] = '@'
-        print( '\n', self.position, xmin, ymin, xmax, ymax )
-        grid[self.position[1]-ymin][self.position[0]-xmin] = 'D'
-        if path:
-            for p in path:
-                grid[p[1]-ymin][p[0]-xmin] = '.'
+        grid[self.position.y-ymin][self.position.x-xmin] = 'D'
+        if self.target:
+            grid[self.target.y-ymin][self.target.x-ymin] = '$'
         print( '\n'.join(''.join(row) for row in grid) )
 
+    # We so a simple random walk.
 
     def read_input(self):
         if not self.input.empty():
             return self.input.get()
-        code = self.pop()
-        print( "At", self.position, "facing", self.dir, "got", code )
-        self.printmap(self.trace)
+
         self.count += 1
-        if self.count > 5000:
-            print( "LIMIT EXCEEDED" )
-            print( self.trace )
-            sys.exit(0)
-        facing = add(self.position, movement[self.dir] )
-# If we are facing the way we came in, choose a different direction.
-# If we run out of directions, then pop out state and step back the
-# way we came?
-        if code == 0:
-# Wall.
-            self.walls.add( facing )
-            if self.dir in self.untried[self.position]:
-                self.untried[self.position].remove( self.dir )
-            self.dir = nextleft[ self.dir ]
-            print( "wall, next direction", self.dir )
-            return self.dir
-        elif code == 1:
-# Movement.
-            if self.position in self.trace:
-                i = self.trace.index(self.position)
-                self.trace = self.trace[0:i]
-            self.trace.append(self.position)
-            self.position = facing
-            if self.position not in self.untried:
-                self.untried[self.position] = [1,2,3,4]
-                self.untried[self.position].remove( opposite[self.dir] )
-            elif not self.untried[self.position]:
-# Back up.
-                self.trace.pop()
-                del self.untried[self.position]
-            else:
-                self.dir = self.untried[self.position].pop()
-            if facing not in self.untried:
-                self.untried[facing] = [1,2,3,4]
-            print( "space, next direction", self.dir )
-            return self.dir
-        elif code == 2:
-# Target!
-            self.target = facing
-            print( "GOAL" )
-            print( self.trace )
-            print( len(self.trace ) )
+        if self.count % 10000 == 0:
+            print( self.count )
+            self.printmap()
+        #if self.count > 400000:
+        if len(self.walls) == 860:
+            print( "Iteration", self.count )
+            self.printmap()
             return 5
+
+        facing = self.position + movement[self.dir]
+
+        code = self.pop()
+        if code == 0:
+            self.walls.add( facing )
+        elif code == 1:
+            self.position = facing
+        elif code == 2:
+            self.target = facing
+            self.position = facing
+
+        self.dir = random.choice((1,2,3,4))
+        while self.position+movement[self.dir] in self.walls:
+            self.dir = random.choice((1,2,3,4))
+
+        return self.dir
 
 pgm = Prog15( real )
 pgm.run()
+print( pgm.walls, file=open('maze.txt','w') )
+print( "Target", pgm.target )
+
+
+# Now, given the maze, we can do a breadth-first search for the oxygen.
+
+# We track a visited list.  From each point, add all the points we can visit
+# that haven't been visited.  When we reach the oxygen, we win.
+
+def part1( start, target = None ):
+    visited = set()
+    upcoming = [start]
+    step = 0
+    
+    while upcoming:
+        step += 1
+        more = []
+        for cur in upcoming:
+            if target and cur == target:
+                return step
+            visited.add( cur )
+            for dir in (1,2,3,4):
+                facing = cur + movement[dir]
+                if not facing in pgm.walls and not facing in visited and not facing in more:
+                    more.append( facing )
+        upcoming = more
+    return step-1
+
+print( "Part 1:", part1(Point(0,0), pgm.target) )
+print( "Part 2:", part1(pgm.target) )
