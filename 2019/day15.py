@@ -75,16 +75,27 @@ class Prog15( Program ):
     def printmap(self):
         if not self.walls:
             return
+
+        # Estblish the bounds.
+
         xmin = min(min(t.x  for t in self.walls),self.position.x)
         xmax = max(max(t.x  for t in self.walls),self.position.x) + 1
         ymin = min(min(t.y  for t in self.walls),self.position.y)
         ymax = max(max(t.y  for t in self.walls),self.position.y) + 1
-        #print( '\n', self.position, xmin, ymin, xmax, ymax )
+
+        # Create empty grid
+
         grid = []
         for i in range(ymin,ymax):
             grid.append( [' ']*(xmax-xmin))
+
+        # Fill in the walls.
+
         for w in self.walls:
             grid[w.y-ymin][w.x-xmin] = '#'
+
+        # Fill in the base, the droid, and the oxygen.
+
         grid[-ymin][-xmin] = '@'
         grid[self.position.y-ymin][self.position.x-xmin] = 'D'
         if self.target:
@@ -100,10 +111,18 @@ class Prog15( Program ):
         self.count += 1
         print( "\nIteration", self.count )
         self.printmap()
+
+        # We're done when return to base (after leaving base).
+
         if self.count > 4 and self.position == Point(0,0):
             return 5
 
+        # This is the cell we are facing.
+
         facing = self.position + movement[self.dir]
+
+        # Get the next result.  If 0, mark a wall, and turn right.
+        # Otherwise, turn left.
 
         code = self.pop()
         if code == 0:
@@ -117,35 +136,40 @@ class Prog15( Program ):
 
         return self.dir
 
+# Run the program to produce the maze.
+
 pgm = Prog15( real )
 pgm.run()
 print( pgm.walls, file=open('maze.txt','w') )
 print( "Target", pgm.target )
-
 
 # Now, given the maze, we can do a breadth-first search for the oxygen.
 
 # We track a visited list.  From each point, add all the points we can visit
 # that haven't been visited.  When we reach the oxygen, we win.
 
-def part1( start, target = None ):
+def process( start, target = None ):
     visited = set()
-    upcoming = [start]
+    upcoming = set([start])
     step = 0
-    
+
     while upcoming:
         step += 1
-        more = []
+        more = set()
         for cur in upcoming:
             if target and cur == target:
                 return step
             visited.add( cur )
             for dir in (1,2,3,4):
                 facing = cur + movement[dir]
-                if not facing in pgm.walls and not facing in visited and not facing in more:
-                    more.append( facing )
+                if not facing in pgm.walls and not facing in visited:
+                    more.add( facing )
         upcoming = more
+
+    # This comes out one step too large because we count the final
+    # step that actually produces nothing.
+
     return step-1
 
-print( "Part 1:", part1(Point(0,0), pgm.target) )
-print( "Part 2:", part1(pgm.target) )
+print( "Part 1:", process(Point(0,0), pgm.target) )
+print( "Part 2:", process(pgm.target) )
