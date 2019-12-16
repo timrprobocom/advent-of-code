@@ -1,5 +1,6 @@
 import itertools
 import sys
+import time
 
 tests = (
 "80871224585914546619083218645595", # becomes 24176176.
@@ -47,10 +48,10 @@ def offsetpass(digits,offset):
 def make(s):
     return list(int(k) for k in s)
 
-def do100(pat,maker,rep=1,ofs=0):
+def do100(pat,process,rep=1,ofs=0):
     base = (make(pat)*rep)[ofs:]
     for i in range(100):
-        base = maker(base,ofs)
+        base = process(base,ofs)
     return ''.join(str(k) for k in base[:8])
 
 if "tests" in sys.argv:
@@ -66,6 +67,10 @@ def part2(seq):
 
 if "tests" in sys.argv:
     for seq in test2:
+        before = time.time()
         print( part2(seq) )
+        print( "Elapsed", time.time() - before )
 
+before = time.time()
 print( "Part 2:", part2( real ) )
+print( "Elapsed", time.time() - before )
