@@ -1,6 +1,7 @@
 import sys
 import random
 from collections import defaultdict
+from tools import Point
 
 TRACE = 'trace' in sys.argv
 
@@ -25,33 +26,6 @@ from intcode import Program
 
 # so, at every position:
 # Try 1, 2, 3, 4
-
-class Point:
-    """Simple 2-dimensional point."""
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __repr__(self):
-        return f"<x={self.x},y={self.y}>"
-
-    def __add__(self, other):
-        return Point(self.x + other.x, self.y + other.y)
-
-    def __sub__(self, other):
-        return Point(self.x - other.x, self.y - other.y)
-
-    def __eq__(self, other):
-        return self.x == other.x and self.y == other.y
-
-    def __ne__(self, other):
-        return not self == other
-
-    def __lt__(self, other):
-        return self.length < other.length
-
-    def __hash__(self):
-        return hash(tuple((self.x, self.y)))
 
 
 movement = ( Point(0,0), Point(0,-1),Point(0,1),Point(-1,0),Point(1,0) )
