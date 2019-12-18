@@ -32,6 +32,14 @@ def run( base, blacks, whites ):
             print( loc )
     pgm.join()
 
+def bounds(blacks,whites):
+    lowx  = int(min(min(k.real for k in blacks), min(k.real for k in whites)))
+    lowy  = int(min(min(k.imag for k in blacks), min(k.imag for k in whites)))
+    highx = int(max(max(k.real for k in blacks), max(k.real for k in whites)))
+    highy = int(max(max(k.imag for k in blacks), max(k.imag for k in whites)))
+    return lowx,lowy,highx,highy
+
+
 def part1():
     blacks = set()
     whites = set()
@@ -40,6 +48,18 @@ def part1():
     print( len(blacks), len(whites) )
     print( "Part 1: ", len(blacks) + len(whites) )
 
+    if 'image' in sys.argv:
+        lowx,lowy,highx,highy = bounds(blacks,whites)
+        array = []
+        for x in range(lowy,highy+1):
+            array.append( [' ']*(highx-lowx+1) )
+        for pt in blacks:
+            array[int(pt.imag)-lowy][int(pt.real)-lowx] = '.'
+        for pt in whites:
+            array[int(pt.imag)-lowy][int(pt.real)-lowx] = '#'
+        for row in array:
+            print( ''.join(row) )
+
 def part2():
     blacks = set()
     whites = set()
@@ -47,10 +67,7 @@ def part2():
     run( (0+0j), blacks, whites )
     print( len(blacks), len(whites) )
 
-    lowx  = int(min(min(k.real for k in blacks), min(k.real for k in whites)))
-    lowy  = int(min(min(k.imag for k in blacks), min(k.imag for k in whites)))
-    highx = int(max(max(k.real for k in blacks), max(k.real for k in whites)))
-    highy = int(max(max(k.imag for k in blacks), max(k.imag for k in whites)))
+    lowx,lowy,highx,highy = bounds(blacks,whites)
 
     array = []
     for x in range(lowy,highy+1):

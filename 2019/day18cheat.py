@@ -44,11 +44,14 @@ def reachable4(grid, starts, havekeys):
 
 seen = {}
 def minwalk(grid, starts, havekeys):
+    # all the keys we have, in order.
     hks = ''.join(sorted(havekeys))
+    # If we have been in this exact position before, return it.
     if (starts, hks) in seen:
         return seen[starts, hks]
     if len(seen) % 10 == 0:
         print(hks)
+    # Determine all the keys reachable from this position.
     keys = reachable4(grid, starts, havekeys)
     if len(keys) == 0:
         # done!
@@ -65,6 +68,8 @@ def minwalk(grid, starts, havekeys):
 
 with open(sys.argv[1]) as f:
     grid = [l.rstrip('\n') for l in f]
+
+# Collect all of the robots.
 
     starts = []
     for i in range(len(grid)):

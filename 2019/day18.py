@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import collections
 from pprint import pprint
 from tools import Point
 
@@ -120,6 +121,8 @@ for key,ptx in targets.items():
     tgt = maze.findall(ptx[0])
     stats[key] = tgt
 
+# We no longer need the points.
+
 print( count )
 
 #  Stats key is char, value is (pt,steps,doors in the way)
@@ -149,6 +152,19 @@ def traverse( sitting ):
                     more.append( (k, steps+dstep, found+k) )
         unchecked = more
     return minim
+
+def reachable(sitting, found):
+    unchecked = collections.deque(sitting)
+    while unchecked:
+        xxx = unchecked.popleft()
+        for k,v in stats[sitting].items():
+            if k in found:
+                continue
+            if any( d.lower() not in found for d in doord ):
+                continue
+            # THis is stupid.
+
+
 
 
 pprint( stats )
