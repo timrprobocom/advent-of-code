@@ -109,72 +109,59 @@ class Maze(object):
     def restore( self, state ):
         self.steps, self.unlocked, self.grabbed, self.visited = state
 
-#maze = Maze(open('day18.txt'))
-maze = Maze(test3)
+if '1' in sys.argv:
+    maze = Maze(test1)
+elif '2' in sys.argv:
+    maze = Maze(test2)
+elif '3' in sys.argv:
+    maze = Maze(test3)
+elif '4' in sys.argv:
+    maze = Maze(test4)
+else:
+    maze = Maze(open('day18.txt'))
 maze.print()
 print( maze.adit )
+
+# Find all of the targets.
+
 targets = maze.findall(maze.adit)
 count = len(targets)
+
+# Find the distance betweeen targets.
 
 stats = { '@': targets }
 for key,ptx in targets.items():
     tgt = maze.findall(ptx[0])
     stats[key] = tgt
 
-# We no longer need the points.
+# (We no longer need the points.)
 
 print( count )
 
 #  Stats key is char, value is (pt,steps,doors in the way)
 
-def traverse( sitting ):
-    minim = 99999999
-    unchecked = [(sitting,0,sitting)]
-    depth = 0
-    while unchecked:
-        more = []
-        for sitting,steps,found in unchecked:
-            if len(found) > depth:
-                depth = len(found)
-                print( "Now at depth", depth )
-#            print( sitting, steps, found )
-            if len(found) == count+1:
-                if steps < minim:
-                    print( "NEW MINIMUM", steps )
-                    minim = steps
-            for k,v in stats[sitting].items():
-                if k in found:
-                    continue
-                _, dstep, doors = v
-                if any( d.lower() not in found for d in doors ):
-                    continue
-                if steps+dstep < minim:
-                    more.append( (k, steps+dstep, found+k) )
-        unchecked = more
-    return minim
+# We need to do a depth-first search to weed out duplicates.
 
-def reachable(sitting, found):
-    unchecked = collections.deque(sitting)
-    while unchecked:
-        xxx = unchecked.popleft()
-        for k,v in stats[sitting].items():
-            if k in found:
-                continue
-            if any( d.lower() not in found for d in doord ):
-                continue
-            # THis is stupid.
-
+seen = {}
+def search( sitting, found ):
+#    print( "New search", sitting, found )
+    f = ''.join(sorted(list(found)))
+    if sitting+f in seen:
+        return seen[sitting+f]
+    paths = []
+    for k,v in stats[sitting].items():
+        if k in found:
+            continue
+        _, dstep, doors = v
+        if any( d.lower() not in found for d in doors ):
+            continue
+        paths.append( dstep + search(k, f+k) )
+    ans = min(paths) if paths else 0
+    seen[sitting+f] = ans
+    return ans
 
 
 
 pprint( stats )
-print( traverse( '@' ) )
+print( "Part 1:", search( '@', '@' ) )
 
-
-sys.exit(0)
-
-
-# So, at each step, find ALL the moves.
-# If there is one, take it.
-# If there are several, push state, try each one.
-# If a complete path is already longer than the shortest, skip it.

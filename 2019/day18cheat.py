@@ -71,10 +71,10 @@ with open(sys.argv[1]) as f:
 
 # Collect all of the robots.
 
-    starts = []
-    for i in range(len(grid)):
-        for j in range(len(grid[0])):
-            if grid[i][j] == '@':
-                starts.append((i,j))
+starts = []
+for i in range(len(grid)):
+    for j in range(len(grid[0])):
+        if grid[i][j] == '@':
+            starts.append((i,j))
 
-    print(minwalk(grid, tuple(starts), ''))
+print(minwalk(grid, tuple(starts), ''))
