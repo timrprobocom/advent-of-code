@@ -1,9 +1,12 @@
 import os
 import sys
 import time
+import itertools
 import collections
 from pprint import pprint
 from tools import Point
+
+TRACE = False
 
 # Answer 8.
 test1 = """\
@@ -38,6 +41,18 @@ test4 = """\
 ###g#h#i################
 ########################"""
 
+# Part 2, answer 72.
+test5 = """\
+#############
+#g#f.D#..h#l#
+#F###e#E###.#
+#dCba@#@BcIJ#
+#############
+#nK.L@#@G...#
+#M###N#H###.#
+#o#m..#i#jk.#
+#############"""
+
 movements = ( Point(0,-1),Point(0,1),Point(-1,0),Point(1,0) )
 lower = 'abcdefghijklmnopqrstuvwxyz'
 upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -45,21 +60,16 @@ upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 class Maze(object):
     def __init__(self,source):
         if not isinstance(source,str):
-            source = open('day18.txt').read()
+            source = source.read()
         maze = []
+        self.adit = []
         for ln in source.splitlines():
             maze.append( list(ln.strip()) )
-            i = ln.find('@')
-            if i >= 0:
-                self.adit = Point(i,len(maze)-1)
+            for i,ch in enumerate(ln):
+                if ch == '@':
+                    self.adit.append( Point(i,len(maze)-1 ))
         self.maze = maze
         self.size = len(maze)
-
-        self.steps = 0
-        self.location = self.adit
-        self.unlocked = []
-        self.grabbed = []
-        self.visited = set()
 
     def print(self):
         print( '\n'.join(''.join(ln) for ln in self.maze) )
@@ -90,57 +100,46 @@ class Maze(object):
             steps += 1
         return found
 
-    def commit( self, possible ):
-        cur,steps = possible
-        self.steps = steps
-        self.grabbed.append( self[cur] )
-        self.unlocked.append( self[cur].upper() )
-
     def __getitem__(self,pt):
         """ Allow indexing by a Point. """
         return self.maze[pt.y][pt.x]
 
-    def erase(self, pt):
-        self.maze[pt.y][pt.x] = '.'
+for arg in sys.argv[1:]:
+    if arg == 'trace':
+        TRACE = True
+    elif arg[-4:] == '.txt':
+        maze = Maze(open(arg))
+    elif arg in '12345':
+        maze = Maze((test1,test2,test3,test4,test5)[int(arg)-1])
 
-    def state( self ):
-        return (self.steps, self.unlocked[:], self.grabbed[:], self.visited.copy())
-
-    def restore( self, state ):
-        self.steps, self.unlocked, self.grabbed, self.visited = state
-
-if '1' in sys.argv:
-    maze = Maze(test1)
-elif '2' in sys.argv:
-    maze = Maze(test2)
-elif '3' in sys.argv:
-    maze = Maze(test3)
-elif '4' in sys.argv:
-    maze = Maze(test4)
-else:
-    maze = Maze(open('day18.txt'))
 maze.print()
 print( maze.adit )
 
 # Find all of the targets.
 
-targets = maze.findall(maze.adit)
-count = len(targets)
+stats = {'@': {}}
+for i,adit in enumerate(maze.adit):
+    ch = str(i)
+    stats['@'][ch] = (adit, 0, [] )
+    stats[ch] = maze.findall( adit )
+    for j,other in enumerate(maze.adit):
+        if i != j:
+            print( ch, str(j), other )
+            stats[ch][str(j)] = (other, 0, [])
+print( sum(len(v) for v in stats.values() ))
 
 # Find the distance betweeen targets.
 
-stats = { '@': targets }
-for key,ptx in targets.items():
-    tgt = maze.findall(ptx[0])
-    stats[key] = tgt
+for v in list(stats.values()):
+    for key,ptx in v.items():
+        if key >= 'a':
+            stats[key] = maze.findall(ptx[0])
 
-# (We no longer need the points.)
-
-print( count )
-
-#  Stats key is char, value is (pt,steps,doors in the way)
+# Stats key is char, value is (pt,steps,doors in the way)
 
 # We need to do a depth-first search to weed out duplicates.
+#
+# Ouch, for day 2, we need "sitting" to be four separate things.
 
 seen = {}
 def search( sitting, found ):
@@ -157,11 +156,12 @@ def search( sitting, found ):
             continue
         paths.append( dstep + search(k, f+k) )
     ans = min(paths) if paths else 0
+#    print( sitting+f, ans )
     seen[sitting+f] = ans
     return ans
 
-
-
 pprint( stats )
-print( "Part 1:", search( '@', '@' ) )
-
+if len(maze.adit) == 1:
+    print( "Part 1:", search( '@', '@' ) )
+else:
+    print( "Part 2:", search( '@', '@' ) )
