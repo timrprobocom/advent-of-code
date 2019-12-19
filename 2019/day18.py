@@ -22,6 +22,7 @@ test = ("""\
 #d.....................#
 ########################""",
 
+# Answer 136.
 """\
 #################
 #i.G..c...e..H.p#
@@ -33,6 +34,7 @@ test = ("""\
 #l.F..d...h..C.m#
 #################""",
 
+# Answer 81.
 """\
 ########################
 #@..............ac.GI.b#
@@ -55,8 +57,6 @@ test = ("""\
 )
 
 movements = ( Point(0,-1),Point(0,1),Point(-1,0),Point(1,0) )
-#lower = 'abcdefghijklmnopqrstuvwxyz'
-#upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 class Maze(object):
     def __init__(self,source):
@@ -115,22 +115,31 @@ def sub(s,i,c):
 def search( sitting, found ):
     if TRACE:
         print( "New search", sitting, found )
-    f = ''.join(sorted(list(found)))
-    if sitting+f in search.seen:
-        return search.seen[sitting+f]
+    found = ''.join(sorted(list(found)))
+
+    # If we've been in this situation before, we don't need to go again.
+    if sitting+found in search.seen:
+        return search.seen[sitting+found]
+
     paths = []
+
+    # For each robot:
     for si,s in enumerate(sitting):
+        # For each key the robot can see:
         for k,v in stats[s].items():
+            # If we've already picked it up, ignore.
             if k in found:
                 continue
             _, dstep, doors = v
+            # If there's a door in the way without a key, ignore.
             if any( d.lower() not in found for d in doors ):
                 continue
-            paths.append( dstep + search(sub(sitting,si,k), f+k) )
+            # Go explore this path.
+            paths.append( dstep + search(sub(sitting,si,k), found+k) )
     ans = min(paths) if paths else 0
     if TRACE:
-        print( sitting+f, ans )
-    search.seen[sitting+f] = ans
+        print( sitting+found, ans )
+    search.seen[sitting+found] = ans
     return ans
 
 search.seen = {}
@@ -138,7 +147,7 @@ search.seen = {}
 for arg in sys.argv[1:]:
     if arg == 'trace':
         TRACE = True
-    elif arg in '123456789':
+    elif arg.isdigit():
         maze = Maze(test[int(arg)-1])
     elif arg[-4:] == '.txt':
         maze = Maze(open(arg))
