@@ -9,20 +9,20 @@ from tools import Point
 TRACE = False
 
 # Answer 8.
-test1 = """\
+test = ("""\
 #########
 #b.A.@.a#
-#########"""
+#########""",
 
 # Answer 86.
-test2 = """\
+"""\
 ########################
 #f.D.E.e.C.b.A.@.a.B.c.#
 ######################.#
 #d.....................#
-########################"""
+########################""",
 
-test3 = """\
+"""\
 #################
 #i.G..c...e..H.p#
 ########.########
@@ -31,18 +31,18 @@ test3 = """\
 #k.E..a...g..B.n#
 ########.########
 #l.F..d...h..C.m#
-#################"""
+#################""",
 
-test4 = """\
+"""\
 ########################
 #@..............ac.GI.b#
 ###d#e#f################
 ###A#B#C################
 ###g#h#i################
-########################"""
+########################""",
 
 # Part 2, answer 72.
-test5 = """\
+"""\
 #############
 #g#f.D#..h#l#
 #F###e#E###.#
@@ -52,6 +52,7 @@ test5 = """\
 #M###N#H###.#
 #o#m..#i#jk.#
 #############"""
+)
 
 movements = ( Point(0,-1),Point(0,1),Point(-1,0),Point(1,0) )
 lower = 'abcdefghijklmnopqrstuvwxyz'
@@ -107,25 +108,22 @@ class Maze(object):
 for arg in sys.argv[1:]:
     if arg == 'trace':
         TRACE = True
+    elif arg in '123456789':
+        maze = Maze(test[int(arg)-1])
     elif arg[-4:] == '.txt':
         maze = Maze(open(arg))
-    elif arg in '12345':
-        maze = Maze((test1,test2,test3,test4,test5)[int(arg)-1])
 
 maze.print()
 print( maze.adit )
 
 # Find all of the targets.
 
-stats = {'@': {}}
+#stats = {'@': {}}
+stats = {}
 for i,adit in enumerate(maze.adit):
     ch = str(i)
-    stats['@'][ch] = (adit, 0, [] )
+#    stats['@'][ch] = (adit, 0, [] )
     stats[ch] = maze.findall( adit )
-    for j,other in enumerate(maze.adit):
-        if i != j:
-            print( ch, str(j), other )
-            stats[ch][str(j)] = (other, 0, [])
 print( sum(len(v) for v in stats.values() ))
 
 # Find the distance betweeen targets.
@@ -136,10 +134,11 @@ for v in list(stats.values()):
             stats[key] = maze.findall(ptx[0])
 
 # Stats key is char, value is (pt,steps,doors in the way)
-
-# We need to do a depth-first search to weed out duplicates.
 #
-# Ouch, for day 2, we need "sitting" to be four separate things.
+# We need to do a depth-first search to weed out duplicates.
+
+def sub(s,i,c):
+    return s[0:i]+c+s[i+1:]
 
 seen = {}
 def search( sitting, found ):
@@ -148,13 +147,14 @@ def search( sitting, found ):
     if sitting+f in seen:
         return seen[sitting+f]
     paths = []
-    for k,v in stats[sitting].items():
-        if k in found:
-            continue
-        _, dstep, doors = v
-        if any( d.lower() not in found for d in doors ):
-            continue
-        paths.append( dstep + search(k, f+k) )
+    for si,s in enumerate(sitting):
+        for k,v in stats[s].items():
+            if k in found:
+                continue
+            _, dstep, doors = v
+            if any( d.lower() not in found for d in doors ):
+                continue
+            paths.append( dstep + search(sub(sitting,si,k), f+k) )
     ans = min(paths) if paths else 0
 #    print( sitting+f, ans )
     seen[sitting+f] = ans
@@ -162,6 +162,6 @@ def search( sitting, found ):
 
 pprint( stats )
 if len(maze.adit) == 1:
-    print( "Part 1:", search( '@', '@' ) )
+    print( "Part 1:", search( '0', '@' ) )
 else:
-    print( "Part 2:", search( '@', '@' ) )
+    print( "Part 2:", search( '0123', '@' ) )
