@@ -55,8 +55,8 @@ test = ("""\
 )
 
 movements = ( Point(0,-1),Point(0,1),Point(-1,0),Point(1,0) )
-lower = 'abcdefghijklmnopqrstuvwxyz'
-upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+#lower = 'abcdefghijklmnopqrstuvwxyz'
+#upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 class Maze(object):
     def __init__(self,source):
@@ -86,9 +86,9 @@ class Maze(object):
             more = {}
             for cur,intheway in upcoming.items():
                 ch = self[cur]
-                if ch in lower and steps:
+                if ch.islower() and steps:
                     found[ch] = (cur, steps, intheway[:])
-                if ch in upper:
+                if ch.isupper():
                     intheway.append( ch )
                 visited.add( cur )
                 for facing in movements:
@@ -105,6 +105,36 @@ class Maze(object):
         """ Allow indexing by a Point. """
         return self.maze[pt.y][pt.x]
 
+# Stats key is char, value is (pt,steps,doors in the way)
+#
+# We need to do a depth-first search to weed out duplicates.
+
+def sub(s,i,c):
+    return s[0:i]+c+s[i+1:]
+
+def search( sitting, found ):
+    if TRACE:
+        print( "New search", sitting, found )
+    f = ''.join(sorted(list(found)))
+    if sitting+f in search.seen:
+        return search.seen[sitting+f]
+    paths = []
+    for si,s in enumerate(sitting):
+        for k,v in stats[s].items():
+            if k in found:
+                continue
+            _, dstep, doors = v
+            if any( d.lower() not in found for d in doors ):
+                continue
+            paths.append( dstep + search(sub(sitting,si,k), f+k) )
+    ans = min(paths) if paths else 0
+    if TRACE:
+        print( sitting+f, ans )
+    search.seen[sitting+f] = ans
+    return ans
+
+search.seen = {}
+
 for arg in sys.argv[1:]:
     if arg == 'trace':
         TRACE = True
@@ -118,12 +148,10 @@ print( maze.adit )
 
 # Find all of the targets.
 
-#stats = {'@': {}}
 stats = {}
 for i,adit in enumerate(maze.adit):
-    ch = str(i)
-#    stats['@'][ch] = (adit, 0, [] )
-    stats[ch] = maze.findall( adit )
+    stats[str(i)] = maze.findall( adit )
+
 print( sum(len(v) for v in stats.values() ))
 
 # Find the distance betweeen targets.
@@ -133,34 +161,9 @@ for v in list(stats.values()):
         if key >= 'a':
             stats[key] = maze.findall(ptx[0])
 
-# Stats key is char, value is (pt,steps,doors in the way)
-#
-# We need to do a depth-first search to weed out duplicates.
+if TRACE:
+    pprint( stats )
 
-def sub(s,i,c):
-    return s[0:i]+c+s[i+1:]
-
-seen = {}
-def search( sitting, found ):
-#    print( "New search", sitting, found )
-    f = ''.join(sorted(list(found)))
-    if sitting+f in seen:
-        return seen[sitting+f]
-    paths = []
-    for si,s in enumerate(sitting):
-        for k,v in stats[s].items():
-            if k in found:
-                continue
-            _, dstep, doors = v
-            if any( d.lower() not in found for d in doors ):
-                continue
-            paths.append( dstep + search(sub(sitting,si,k), f+k) )
-    ans = min(paths) if paths else 0
-#    print( sitting+f, ans )
-    seen[sitting+f] = ans
-    return ans
-
-pprint( stats )
 if len(maze.adit) == 1:
     print( "Part 1:", search( '0', '@' ) )
 else:
