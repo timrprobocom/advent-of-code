@@ -112,47 +112,54 @@ class Maze(object):
 def sub(s,i,c):
     return s[0:i]+c+s[i+1:]
 
-# So, why doesn't this work?  Are we really unable to do the duplicate
-# culling in a breadth-first search?
+def ssort(s):
+    return ''.join(sorted(list(s)))
 
 def bfs( start, found ):
-    unchecked = []
-    unchecked.append( (start, 0, found ) )
-    phase = 0
+    unchecked = {(start,found): 0 }
     result = 0
+
+    # Keep going as long as there are paths we haven't tested.
+    # Because this is "breadth-first", each time through this loop
+    # processed all of the paths of a single length.  The next pass
+    # will be one step longer.
     while unchecked:
-        phase += 1
-        print( "Phase", phase )
-        more = []
+        if TRACE:
+            print('Depth',len(next(iter(unchecked.keys()))[1]))
+        more = {}
         paths = []
-        seen = {}
-        for sitting, steps, found in unchecked:
-#            print( sitting, steps, found )
+
+        # For each path that needs to be checked:
+        for (sitting, found), steps in unchecked.items():
             paths.append( steps )
+            # For each robot:
             for si,s in enumerate(sitting):
+                # For each key this robot can see:
                 for k,v in stats[s].items():
+                    # If we've already picked it up, ignore.
                     if k in found or k < 'a':
                         continue
-                    newfound = found+k
-                    newfound = ''.join(sorted(list(newfound)))
-                    if sitting+newfound in seen:
-                        continue
+                    # If any intervening doors are locked, ignore.
                     _, dstep, doors = v
                     if any( d.lower() not in found for d in doors ):
                         continue
-                    newsit = sub(sitting,si,k)
-                    seen[sitting+newfound] = steps
-                    more.append( (newsit, steps+dstep, newfound) )
+                    # If this new path has alread been enumerated, and
+                    # this path to the same state is shorter, keep it.
+                    newsit = (sub(sitting,si,k),ssort(found+K))
+                    if newsit in more and more[newsit] <= steps+dstep:
+                        continue
+                    more[newsit] = steps+dstep
+        # When we have nothing new, we have our answer.
+        if not more:
+            return min(paths)
         unchecked = more
-        if paths:
-            result = min(paths)
-    return min(paths) #result
+    return None
 
 
 def search( sitting, found ):
     if TRACE:
         print( "New search", sitting, found )
-    found = ''.join(sorted(list(found)))
+    found = ssort(found)
 
     # If we've been in this situation before, we don't need to go again.
     if sitting+found in search.seen:
@@ -184,6 +191,8 @@ search.seen = {}
 for arg in sys.argv[1:]:
     if arg == 'trace':
         TRACE = True
+    elif arg == 'bfs':
+        search = bfs
     elif arg.isdigit():
         maze = Maze(test[int(arg)-1])
     elif arg[-4:] == '.txt':
@@ -210,8 +219,10 @@ for v in list(stats.values()):
 if TRACE:
     pprint( stats )
 
+begin = time.time()
 if len(maze.adit) == 1:
     print( "Part 1:", search( '0', '@' ) )
-#    print( "Part 1:", bfs( '0', '@' ) )
 else:
     print( "Part 2:", search( '0123', '@' ) )
+delta = time.time() - begin
+print( "Elapsed:", delta )
