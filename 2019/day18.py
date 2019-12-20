@@ -112,6 +112,43 @@ class Maze(object):
 def sub(s,i,c):
     return s[0:i]+c+s[i+1:]
 
+# So, why doesn't this work?  Are we really unable to do the duplicate
+# culling in a breadth-first search?
+
+def bfs( start, found ):
+    unchecked = []
+    unchecked.append( (start, 0, found ) )
+    phase = 0
+    result = 0
+    while unchecked:
+        phase += 1
+        print( "Phase", phase )
+        more = []
+        paths = []
+        seen = {}
+        for sitting, steps, found in unchecked:
+#            print( sitting, steps, found )
+            paths.append( steps )
+            for si,s in enumerate(sitting):
+                for k,v in stats[s].items():
+                    if k in found or k < 'a':
+                        continue
+                    newfound = found+k
+                    newfound = ''.join(sorted(list(newfound)))
+                    if sitting+newfound in seen:
+                        continue
+                    _, dstep, doors = v
+                    if any( d.lower() not in found for d in doors ):
+                        continue
+                    newsit = sub(sitting,si,k)
+                    seen[sitting+newfound] = steps
+                    more.append( (newsit, steps+dstep, newfound) )
+        unchecked = more
+        if paths:
+            result = min(paths)
+    return min(paths) #result
+
+
 def search( sitting, found ):
     if TRACE:
         print( "New search", sitting, found )
@@ -175,5 +212,6 @@ if TRACE:
 
 if len(maze.adit) == 1:
     print( "Part 1:", search( '0', '@' ) )
+#    print( "Part 1:", bfs( '0', '@' ) )
 else:
     print( "Part 2:", search( '0123', '@' ) )
