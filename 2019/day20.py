@@ -1,8 +1,10 @@
 import os
 import sys
+import time
 import itertools
 import collections
 from tools import Point
+
 
 test = """\
                    A               
@@ -44,9 +46,46 @@ YN......#               VT..#....QG
            U   P   P               
 """
 
+test2 = """\
+             Z L X W       C                 
+             Z P Q B       K                 
+  ###########.#.#.#.#######.###############  
+  #...#.......#.#.......#.#.......#.#.#...#  
+  ###.#.#.#.#.#.#.#.###.#.#.#######.#.#.###  
+  #.#...#.#.#...#.#.#...#...#...#.#.......#  
+  #.###.#######.###.###.#.###.###.#.#######  
+  #...#.......#.#...#...#.............#...#  
+  #.#########.#######.#.#######.#######.###  
+  #...#.#    F       R I       Z    #.#.#.#  
+  #.###.#    D       E C       H    #.#.#.#  
+  #.#...#                           #...#.#  
+  #.###.#                           #.###.#  
+  #.#....OA                       WB..#.#..ZH
+  #.###.#                           #.#.#.#  
+CJ......#                           #.....#  
+  #######                           #######  
+  #.#....CK                         #......IC
+  #.###.#                           #.###.#  
+  #.....#                           #...#.#  
+  ###.###                           #.#.#.#  
+XF....#.#                         RF..#.#.#  
+  #####.#                           #######  
+  #......CJ                       NM..#...#  
+  ###.#.#                           #.###.#  
+RE....#.#                           #......RF
+  ###.###        X   X       L      #.#.#.#  
+  #.....#        F   Q       P      #.#.#.#  
+  ###.###########.###.#######.#########.###  
+  #.....#...#.....#.......#...#.....#.#...#  
+  #####.#.###.#######.#######.###.###.#.#.#  
+  #.......#.......#.#.#.#.#...#...#...#.#.#  
+  #####.###.#####.#.#.#.#.###.###.#.###.###  
+  #.......#.....#.#...#...............#...#  
+  #############.#.#.###.###################  
+               A O F   N                     
+               A A D   M                     
+"""
 
-
-# The challenge will be to parse the maze.  After that, it's a BFS.
 
 movements = ( Point(0,-1),Point(0,1),Point(-1,0),Point(1,0) )
 
@@ -58,7 +97,7 @@ class Maze(object):
     def __init__(self,source):
         if not isinstance(source,str):
             source = source.read()
-        maze = [ln  for ln in source.splitlines()]
+        maze = [ln for ln in source.splitlines()]
 
         self.maze = maze
         self.w = w = len(maze[3])
@@ -92,31 +131,52 @@ class Maze(object):
         self.start = self.gates['AA']
         self.goal = self.gates['ZZ']
 
+        self.outer = set(pt for pt in paths if (pt.x in (2,w-3) or pt.y in (2,h-3)))
+        self.inner = set(self.paths) - self.outer
+
     def __getitem__(self,pt):
         """ Allow indexing by a Point. """
         return self.maze[pt.y][pt.x]
 
-    def bfs( self, start ):
-       unchecked = collections.deque()
-       unchecked.append( (start,[start]) )
-       while unchecked:
-           pt,path = unchecked.popleft()
-           if pt == self.goal:
-               if TRACE:
-                   print( "GOAL", path )
-               return len(path) - 1
-           if pt in self.paths:
-               newpt = self.paths[pt]
-               if newpt not in path:
-                   unchecked.appendleft( (newpt,path+[newpt]) )
-           for move in movements:
-               newpt = pt + move
-               if newpt in path or newpt.x < 2 or newpt.y < 2 or newpt.y >= self.h-2:
-                   continue
-               elif self[pt] == '.':
-                   unchecked.append( (newpt,path+[newpt]) )
+    def bfs( self, part, start ):
+        seen = set()
+        unchecked = collections.deque()
+        unchecked.append( (start,0,0) )
+        lowerwalls = (self.start,self.goal)
+        sec = int(time.time())
+        while unchecked:
+            pt,dist,level = unchecked.popleft()
+            if TRACE and int(time.time()) != sec:
+                sec = int(time.time())
+                print( "Examine", pt, dist, level, len(unchecked) )
+            if (pt,level) in seen:
+                continue
+            if pt == self.goal and level == 0:
+                print( "GOAL" )
+                return dist
+            seen.add( (pt,level) )
+            if pt in self.paths:
+                newpt = self.paths[pt]
+                newlvl = level
+                if part == 2:
+                    newlvl += 1 if pt in self.inner else -1
+                if (newpt,newlvl) not in seen:
+                    unchecked.append( (newpt,dist+1,newlvl) )
+                    continue
+            for move in movements:
+                newpt = pt + move
+                if newpt in self.outer and level == 0:
+                    continue
+                if (newpt,level) in seen:
+                    continue
+                if level > 0 and newpt in lowerwalls:
+                    continue
+                if self[newpt] == '.':
+                    unchecked.append( (newpt,dist+1,level) )
 
 TRACE = 'trace' in sys.argv
+
+# Part 1.
 
 if 'test' in sys.argv:
     maze = Maze(test)
@@ -124,4 +184,11 @@ else:
     maze = Maze(open('day20.txt'))
 
 print( maze.start, maze.goal )
-print( "Part 1:", maze.bfs(maze.start) )
+print( "Part 1:", maze.bfs(1, maze.start) )
+
+# Part 2.
+
+if 'test' in sys.argv:
+    maze = Maze(test2)
+
+print( "Part 2:", maze.bfs(2, maze.start) )
