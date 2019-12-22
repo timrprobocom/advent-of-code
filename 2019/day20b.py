@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import itertools
 import collections
 from tools import Point
@@ -56,7 +57,7 @@ class Maze(object):
     def __init__(self,source):
         if not isinstance(source,str):
             source = source.read()
-        maze = [ln  for ln in source.splitlines()]
+        maze = [ln for ln in source.splitlines()]
 
         self.maze = maze
         self.w = w = len(maze[3])
@@ -90,7 +91,7 @@ class Maze(object):
         self.start = self.gates['AA']
         self.goal = self.gates['ZZ']
 
-        self.outer = set(k for k in paths if isinstance(k,Point) and k.x < 5 or k.x > w-5 or k.y < 5 or k.y > h-5)
+        self.outer = set(pt for pt in paths if (pt.x in (2,w-3) or pt.y in (2,h-3)))
         self.inner = set(self.paths) - self.outer
 
     def __getitem__(self,pt):
@@ -99,45 +100,47 @@ class Maze(object):
 
     def bfs( self, start ):
         unchecked = collections.deque()
-        unchecked.append( (start,[(start,0)], 0) )
+        unchecked.append( (start,[(start,0)]) )
         lowerwalls = (self.start,self.goal)
+        sec = int(time.time())
         while unchecked:
-            pt,path,level = unchecked.popleft()
-#            print( "Examine", pt, len(path), level )
-#            if pt in self.doors:
-#                print( "We're at", self.doors[pt], level )
-#                print( path )
-            if len(path) > 400:
-                return -1
+            pt,path = unchecked.popleft()
+            level = path[-1][1] 
+            if int(time.time()) != sec:
+                sec = int(time.time())
+                print( "Examine", pt, len(path), level, len(unchecked) )
+            if pt == self.goal and level == 0:
+                print( "GOAL", print( path ) )
+                return len(path) - 1
             if pt in self.paths:
                 newpt = self.paths[pt]
-                if (newpt,level) not in path:
-                    unchecked.appendleft( (newpt,path+[newpt],level) )
-            if pt == self.goal and level == 0:
-                print( "GOAL" )
-                print( path )
-                return len(path) - 1
+                newlvl = level+1 if pt in self.inner else level-1
+                if newlvl > 50:
+                    continue
+                if (newpt,newlvl) not in path:
+                    unchecked.append( (newpt,path+[(newpt,newlvl)]) )
+                    continue
             for move in movements:
                 newpt = pt + move
-                if str.isupper(self[newpt]) and pt != start:
-                    if self[newpt] == 'Z':
-                        continue
-                    newpt,delta = self.paths[newpt]
-                    level += delta
-                    if level < 0:
-                        continue
-#                print( newpt )
-                if (newpt,level) in path or newpt.x < 2 or newpt.y < 2 or newpt.y >= self.h-2:
+                if newpt in self.outer and level == 0:
+                    continue
+                if (newpt,level) in path:
                     continue
                 if level > 0 and newpt in lowerwalls:
                     continue
-                elif self[newpt] == '.':
-                    unchecked.append( (newpt,path+[(newpt,level)],level) )
+                if self[newpt] == '.':
+                    unchecked.append( (newpt,path+[(newpt,level)]) )
 
+TRACE = 'trace' in sys.argv
 
-#maze = Maze(open('day20.txt'))
-maze = Maze(test2)
-print("Inner",maze.inner)
-print("Outer",maze.outer)
+if 'test' in sys.argv:
+    maze = Maze(test2)
+else:
+    maze = Maze(open('day20.txt'))
+
+if TRACE:
+    print("Inner",maze.inner)
+    print("Outer",maze.outer)
+
 print( maze.start, maze.goal )
-print( maze.bfs(maze.start) )
+print( "Part 2:", maze.bfs(maze.start) )
