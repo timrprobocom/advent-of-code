@@ -40,7 +40,9 @@ part1 = (
 
 print( "Part 1:", run(part1) )
 
-# I like this because it's more general.
+# I like this because it's more general:
+#   A jump is required, a landing spot is 
+# available, and a second jump is also available.
 # ( !1 | !2 | !3 ) & 4 & (8 | (5 & 9))
 
 part2 = (

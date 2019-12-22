@@ -6,6 +6,46 @@ import collections
 from tools import Point
 
 
+test = """\
+                   A               
+                   A               
+  #################.#############  
+  #.#...#...................#.#.#  
+  #.#.#.###.###.###.#########.#.#  
+  #.#.#.......#...#.....#.#.#...#  
+  #.#########.###.#####.#.#.###.#  
+  #.............#.#.....#.......#  
+  ###.###########.###.#####.#.#.#  
+  #.....#        A   C    #.#.#.#  
+  #######        S   P    #####.#  
+  #.#...#                 #......VT
+  #.#.#.#                 #.#####  
+  #...#.#               YN....#.#  
+  #.###.#                 #####.#  
+DI....#.#                 #.....#  
+  #####.#                 #.###.#  
+ZZ......#               QG....#..AS
+  ###.###                 #######  
+JO..#.#.#                 #.....#  
+  #.#.#.#                 ###.#.#  
+  #...#..DI             BU....#..LF
+  #####.#                 #.#####  
+YN......#               VT..#....QG
+  #.###.#                 #.###.#  
+  #.#...#                 #.....#  
+  ###.###    J L     J    #.#.###  
+  #.....#    O F     P    #.#...#  
+  #.###.#####.#.#####.#####.###.#  
+  #...#.#.#...#.....#.....#.#...#  
+  #.#####.###.###.#.#.#########.#  
+  #...#.#.....#...#.#.#.#.....#.#  
+  #.###.#####.###.###.#.#.#######  
+  #.#.........#...#.............#  
+  #########.###.###.#############  
+           B   J   C               
+           U   P   P               
+"""
+
 test2 = """\
              Z L X W       C                 
              Z P Q B       K                 
@@ -98,49 +138,57 @@ class Maze(object):
         """ Allow indexing by a Point. """
         return self.maze[pt.y][pt.x]
 
-    def bfs( self, start ):
+    def bfs( self, part, start ):
+        seen = set()
         unchecked = collections.deque()
-        unchecked.append( (start,[(start,0)]) )
+        unchecked.append( (start,0,0) )
         lowerwalls = (self.start,self.goal)
         sec = int(time.time())
         while unchecked:
-            pt,path = unchecked.popleft()
-            level = path[-1][1] 
-            if int(time.time()) != sec:
+            pt,dist,level = unchecked.popleft()
+            if TRACE and int(time.time()) != sec:
                 sec = int(time.time())
-                print( "Examine", pt, len(path), level, len(unchecked) )
+                print( "Examine", pt, dist, level, len(unchecked) )
+            if (pt,level) in seen:
+                continue
             if pt == self.goal and level == 0:
-                print( "GOAL", print( path ) )
-                return len(path) - 1
+                print( "GOAL" )
+                return dist
+            seen.add( (pt,level) )
             if pt in self.paths:
                 newpt = self.paths[pt]
-                newlvl = level+1 if pt in self.inner else level-1
-                if newlvl > 50:
-                    continue
-                if (newpt,newlvl) not in path:
-                    unchecked.append( (newpt,path+[(newpt,newlvl)]) )
+                newlvl = level
+                if part == 2:
+                    newlvl += 1 if pt in self.inner else -1
+                if (newpt,newlvl) not in seen:
+                    unchecked.append( (newpt,dist+1,newlvl) )
                     continue
             for move in movements:
                 newpt = pt + move
                 if newpt in self.outer and level == 0:
                     continue
-                if (newpt,level) in path:
+                if (newpt,level) in seen:
                     continue
                 if level > 0 and newpt in lowerwalls:
                     continue
                 if self[newpt] == '.':
-                    unchecked.append( (newpt,path+[(newpt,level)]) )
+                    unchecked.append( (newpt,dist+1,level) )
 
 TRACE = 'trace' in sys.argv
 
+# Part 1.
+
 if 'test' in sys.argv:
-    maze = Maze(test2)
+    maze = Maze(test)
 else:
     maze = Maze(open('day20.txt'))
 
-if TRACE:
-    print("Inner",maze.inner)
-    print("Outer",maze.outer)
-
 print( maze.start, maze.goal )
-print( "Part 2:", maze.bfs(maze.start) )
+print( "Part 1:", maze.bfs(1, maze.start) )
+
+# Part 2.
+
+if 'test' in sys.argv:
+    maze = Maze(test2)
+
+print( "Part 2:", maze.bfs(2, maze.start) )
