@@ -21,6 +21,7 @@ class Program(threading.Thread):
         for i in inputs:
             self.input.put(i)
         self.rbase = 0
+        self.die = False
 
     def clone(self):
         return copy.deepcopy(self)
@@ -30,6 +31,9 @@ class Program(threading.Thread):
 
     def read_input(self):
         return self.input.get()
+
+    def send_output(self,p):
+        self.output.put( p )
 
     def pop(self):
         return self.output.get()
@@ -90,7 +94,7 @@ class Program(threading.Thread):
 
 
     def run(self):
-        while 1:
+        while not self.die:
             opcode = self.opcode()
             if opcode == 1:
                 self.store( self.fetch() + self.fetch() )
@@ -104,7 +108,7 @@ class Program(threading.Thread):
             elif opcode == 4:
                 p = self.fetch()
                 self.final = p
-                self.output.put( p )
+                self.send_output( p )
                 if TRACE:
                     print( self.id, "output", p )
             elif opcode == 5:  # JT

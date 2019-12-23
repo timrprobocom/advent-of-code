@@ -17,14 +17,13 @@ class Prog23(Program):
             return i
         if not self.input.empty():
             self.idle = False
-            ip = self.input.get()
-            if isinstance( ip, int ):
-                return ip
-            a,self.nextin = ip
+            a,self.nextin = self.input.get()
             if TRACE:
                 print( f"{self.id}: read {a} {self.nextin}" )
             return a
         time.sleep( 0.1 )
+        if TRACE:
+            sys.stdout.flush()
         self.idle = True
         return -1
 
@@ -54,7 +53,6 @@ for i in range(50):
 for i in range(50):
     progs[i].start()
 
-
 lastnat = None
 while 1:
     # Wait for idle.
@@ -67,8 +65,7 @@ while 1:
             break
         if TRACE:
             print( "Delivering", nat )
-        progs[0].push( nat[0] )
-        progs[0].push( nat[1] )
+        progs[0].push( nat )
         nat,lastnat = None,nat
 
 for p in progs:
