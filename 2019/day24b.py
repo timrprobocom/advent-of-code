@@ -1,3 +1,4 @@
+import sys
 import itertools
 
 real="""\
@@ -47,11 +48,6 @@ test = """\
 #Tile N has eight adjacent tiles: I, O, S, and five tiles within the sub-grid marked ?.
 #grid = inp.splitlines()
 
-# What a data structure.  It's almost easier to have individual rules.
-# W N E S
-
-#  1,1  3,1  1,3  3,3 are normal.
-
 #  0,0 has 4:  (1,2,-1)  (2,1,-1)  (1,0,0)  (0,1,0)
 #  1,0 has 4:  (0,0,0)   (2,1,-1)  (2,0,0)  (1,1,0)
 #  2,0 has 4:  (1,0,0)   (2,1,-1)  (3,0,0)  (2,1,0)
@@ -85,18 +81,18 @@ test = """\
 
 coords = (
     (
-     ((1,2,-1), (2,1,-1), (1,0,0), (0,1,0)),
-     ((0,0,0),  (2,1,-1), (2,0,0), (1,1,0)),
-     ((1,0,0),  (2,1,-1), (3,0,0), (2,1,0)),
-     ((2,0,0),  (2,1,-1), (4,0,0), (3,1,0)),
-     ((3,0,0),  (2,1,-1), (3,2,-1),(4,1,0)),
+     (  (1,2,-1), (2,1,-1), (1,0,0), (0,1,0)),
+     (  (0,0,0),  (2,1,-1), (2,0,0), (1,1,0)),
+     (  (1,0,0),  (2,1,-1), (3,0,0), (2,1,0)),
+     (  (2,0,0),  (2,1,-1), (4,0,0), (3,1,0)),
+     (  (3,0,0),  (2,1,-1), (3,2,-1),(4,1,0)),
     ),
     (
-     (  (1,2,-1), (0,0,0), (1,1,0), (0,2,0)),
-     (  (0,1,0),  (1,0,0), (2,1,0), (1,2,0)),
-     (  (1,1,0),  (2,0,0), (3,1,0),          (0,0,1), (1,0,1), (2,0,1), (3,0,1), (4,0,1)),
-     (  (2,1,0),  (3,0,0), (4,1,0), (3,2,0)),
-     (  (3,1,0),  (4,0,0), (3,2,-1),(4,2,0))
+     (  (1,2,-1), (0,0,0),  (1,1,0), (0,2,0)),
+     (  (0,1,0),  (1,0,0),  (2,1,0), (1,2,0)),
+     (  (1,1,0),  (2,0,0),  (3,1,0),          (0,0,1), (1,0,1), (2,0,1), (3,0,1), (4,0,1)),
+     (  (2,1,0),  (3,0,0),  (4,1,0), (3,2,0)),
+     (  (3,1,0),  (4,0,0),  (3,2,-1),(4,2,0))
     ),
     (
      (  (1,2,-1), (0,1,0),  (1,2,0), (0,3,0)),
@@ -121,12 +117,10 @@ coords = (
     )
 )
 
-print( coords[2][0] )
-print( coords[2][1] )
 
 def makegrids( depth ):
     grid = []
-    for i in range(depth*2+1):
+    for i in range(depth+1):
         grid.append( ["....."]*5 )
     return grid
 
@@ -139,9 +133,6 @@ def onelevel(grid,lvl):
         for x in range(5):
             ch = grid[lvl][y][x]
             nbrs = sum( 1 for xx,yy,zz in coords[y][x] if 0 <= lvl+zz < depth and grid[lvl+zz][yy][xx] == '#' )
-#            for x,y,z in coords[y][x]:
-#                if grid[lvl+z][y][x] == '#'
-#                    nbrs += 1
             if nbrs == 1 or (nbrs == 2 and ch == '.'):
                 row.append('#')
             else:
@@ -155,7 +146,8 @@ def doall(grid):
         new.append( onelevel(grid,i) )
     return new
 
-def printgrid(grid,depth):
+def printgrid(grid):
+    depth = len(grid) // 2
     sumx = 0
     for i,sub in enumerate(grid):
         print( "Level", i-depth )
@@ -164,16 +156,37 @@ def printgrid(grid,depth):
     print( sumx )
     return sumx
 
+def fancyrow( depth, i, subgrids ):
+    sumx = 0
+    print( '   '.join("%4d" % (i+ii-depth) for ii in range(len(subgrids)) ) )
+    for y in range(5):
+        s = '  '.join(g[y] for g in subgrids)
+        sumx += s.count('#')
+        print( s )
+    print( )
+    return sumx
+
+def fancyprint(grid):
+    depth = len(grid) // 2
+    sumx = 0
+    for i in range(0,len(grid),10):
+        if i+10 < len(grid):
+            sumx += fancyrow( depth, i, grid[i:i+10] )
+        else:
+            sumx += fancyrow( depth, i, grid[i:] )
+    return sumx
+
 
 def doit( inp, depth ):
     grids = makegrids( depth )
-    grids[depth] = inp.splitlines()
-    printgrid(grids,depth)
-    for i in range(depth+depth):
+    grids[depth//2] = inp.splitlines()
+    for i in range(depth):
         grids = doall(grids)
-    printgrid(grids,depth)
+    return fancyprint(grids)
 
-#doit( test, 5 )
-doit( real, 100 )
+if 'test' in sys.argv:
+    print( doit( test, 10 ) )
+else:
+    print( "Part 2:", doit( real, 200 ) )
 
 
