@@ -46,7 +46,6 @@ test = """\
 #Tile E has four adjacent tiles: 8, D, 14, and J.
 #Tile 14 has eight adjacent tiles: 9, E, J, O, T, Y, 15, and 19.
 #Tile N has eight adjacent tiles: I, O, S, and five tiles within the sub-grid marked ?.
-#grid = inp.splitlines()
 
 #  0,0 has 4:  (1,2,-1)  (2,1,-1)  (1,0,0)  (0,1,0)
 #  1,0 has 4:  (0,0,0)   (2,1,-1)  (2,0,0)  (1,1,0)
@@ -117,13 +116,35 @@ coords = (
     )
 )
 
+# This is cute, but it takes more than twice as long.
+
+def gettop( x, y ):
+    if y == 0:
+        yield (2, 1, -1)
+    elif x == 2 and y == 2:
+        yield (2, 2, 0)
+    elif x == 2 and y == 3:
+        for i in range(5):
+            yield (i, 4, 1)
+    else:
+        yield( x, y-1, 0)
+
+def getadj( x, y ):
+    # Rotate CCW
+    for dx,dy,dl in gettop( 4-y, x ):
+        yield (dy, 4-dx, dl)
+    # Normal
+    for dx,dy,dl in gettop( x, y ):
+        yield (dx, dy, dl)
+    # Rotate CW
+    for dx,dy,dl in gettop( y, 4-x ):
+        yield (4-dy, dx, dl)
+    # Rotate 180
+    for dx,dy,dl in gettop( 4-x, 4-y ):
+        yield (4-dx, 4-dy, dl)
 
 def makegrids( depth ):
-    grid = []
-    for i in range(depth+1):
-        grid.append( ["....."]*5 )
-    return grid
-
+    return list(["."*5]*5 for i in range(depth+1))
 
 def onelevel(grid,lvl):
     depth = len(grid)
@@ -133,6 +154,7 @@ def onelevel(grid,lvl):
         for x in range(5):
             ch = grid[lvl][y][x]
             nbrs = sum( 1 for xx,yy,zz in coords[y][x] if 0 <= lvl+zz < depth and grid[lvl+zz][yy][xx] == '#' )
+#            nbrs = sum( 1 for xx,yy,zz in getadj(x,y) if 0 <= lvl+zz < depth and grid[lvl+zz][yy][xx] == '#' )
             if nbrs == 1 or (nbrs == 2 and ch == '.'):
                 row.append('#')
             else:
@@ -141,10 +163,7 @@ def onelevel(grid,lvl):
     return new
 
 def doall(grid):
-    new = []
-    for i in range(len(grid)):
-        new.append( onelevel(grid,i) )
-    return new
+    return list( onelevel(grid,i) for i in range(len(grid)))
 
 def printgrid(grid):
     depth = len(grid) // 2
@@ -153,7 +172,7 @@ def printgrid(grid):
         print( "Level", i-depth )
         print( '\n'.join(sub) )
         sumx += sum( s.count('#') for s in sub)
-    print( sumx )
+    print( )
     return sumx
 
 def fancyrow( depth, i, subgrids ):
