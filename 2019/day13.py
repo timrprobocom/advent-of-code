@@ -45,7 +45,7 @@ def part1():
 
 
 def display(grid):
-    print()
+    print("\033[0;0H")
     print( '\n'.join(''.join(row) for row in grid) )
     if SLOW:
         time.sleep( 0.05 )
@@ -60,7 +60,7 @@ class Prog13( Program ):
     def updatecell( self, x, y, t ):
         if x == -1:
             self.score = t
-            print( "Score: ", t )
+            print( "Score: ", t, "   " )
         else:
             if t > 4:
                 print(x,y,t)
