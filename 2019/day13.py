@@ -1,6 +1,7 @@
 import sys
 import time
 import itertools
+import tools
 from intcode import Program
 
 TRACE = 'trace' in sys.argv
@@ -41,11 +42,11 @@ def part1():
     queue = pgm.dump()
     print( len(queue) )
     twos = [1 for k in take(queue,3) if k[2] == 2]
-    print( len(twos) ) # 228
+    print( "Part 1:", len(twos) ) # 228
 
 
 def display(grid):
-    print("\033[0;0H")
+    tools.gotoxy( 0, 5 )
     print( '\n'.join(''.join(row) for row in grid) )
     if SLOW:
         time.sleep( 0.05 )
@@ -141,5 +142,6 @@ def part2():
 
     print( "Part 2:", pgm.score )  # 10776
 
+tools.cls()
 part1()
 part2()

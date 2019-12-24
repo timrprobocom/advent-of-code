@@ -1,4 +1,10 @@
+import sys
 
+def gotoxy(x,y):
+    sys.stdout.write( f"\033[{y};{x}H" )
+
+def cls():
+    sys.stdout.write( "\033[2J\033[0;0H" )
 
 class Point:
     """Simple 2-dimensional point."""
