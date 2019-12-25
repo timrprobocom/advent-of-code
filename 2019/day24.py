@@ -1,4 +1,6 @@
 import itertools
+import sys
+from pprint import pprint
 
 inp="""\
 ...#.
@@ -14,43 +16,49 @@ test = """\
 ..#..
 #...."""
 
-grid = inp.splitlines()
+def makegrid(txt):
+    grid = []
+    for ln in txt.splitlines():
+        grid.append( list(".#".index(c) for c in ln) )
+    return grid
+
 
 def rating(grid):
-    tot = 0
-    for i,ln in enumerate(grid):
-        for j,ch in enumerate(ln):
-            if ch == '#':
-                tot += 1 << (i*5+j)
-    return tot
+    return sum( cell << i for i,cell in enumerate(sum(grid,[])))
 
+valid = (0,1,2,3,4)
 
+checks = ((-1,0),(1,0),(0,-1),(0,1))
 
 def cycle(grid):
     new = []
     for y in range(len(grid)):
         row = []
         for x in range(len(grid[0])):
-            neighbors = 0
-            for dx,dy in ((-1,0),(1,0),(0,-1),(0,1)):
-                if 0 <= x+dx < len(grid[0]) and \
-                   0 <= y+dy < len(grid) and \
-                    grid[y+dy][x+dx] == '#':
-                    neighbors += 1
-            if neighbors == 1 or (neighbors == 2 and grid[y][x] == '.'):
-                row.append('#')
+            neighbors = sum(
+                (grid[y+dy][x+dx] 
+                for dx,dy in checks
+                if x+dx in valid and y+dy in valid)
+            )
+            if neighbors == 1 or (neighbors == 2 and grid[y][x] == 0):
+                row.append(1)
             else:
-                row.append('.')
-        new.append( ''.join(row) )
+                row.append(0)
+        new.append( row )
     return new
 
-print( '\n'.join(grid))
+
+if 'test' in sys.argv:
+    grid = makegrid(test)
+else:
+    grid = makegrid(inp)
+pprint( grid )
 print( rating( grid) )
 
 values = {rating(grid): 0}
 for i in itertools.count(1):
     grid = cycle(grid)
-    print( '\n'.join(grid))
+    pprint( grid )
     r = rating(grid)
     print( i, r )
     if rating(grid) in values:
