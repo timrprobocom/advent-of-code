@@ -1,10 +1,5 @@
 import sys
 from intcode import Program
-from tools import Point
-
-
-
-TRACE = 'trace' in sys.argv
 
 # Run the program once to get the path.
 
@@ -15,7 +10,7 @@ class Prog25(Program):
 
     def read_input(self):
         if not self.string:
-            answer = input("Input: ")
+            answer = input()
             self.string = list(ord(s) for s in answer+'\n' )
         return int(self.string.pop(0))
          
