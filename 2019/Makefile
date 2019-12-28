@@ -5,6 +5,7 @@ O = .o
 EXE =
 CPPFLAGS = --std=c++11
 CXX = g++
+LIBS = -lgmpxx -lgmp
 else
 O = .obj
 EXE = .exe
@@ -20,7 +21,7 @@ OBJS = $(SRCS:.cpp=$O)
 EXES = $(SRCS:.cpp=$(EXE))
 
 %$(EXE): %.cpp
-	$(COMPILE.cpp) $(OUTPUT_OPTION) $<
+	$(COMPILE.cpp) $(OUTPUT_OPTION) $(LIBS) $<
 
 all:	$(EXES)
 
