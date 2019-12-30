@@ -99,11 +99,34 @@ Point movements[4] = { Point(0,-1),Point(0,1),Point(-1,0),Point(1,0) };
 
 typedef std::map<char,std::tuple<Point,int,std::string> > lookupData_t;
 
+template<typename T>
+struct vector2d : public std::vector<T>
+{
+    std::vector<T> m_vec;
+    int m_w;
+    int m_h;
+    vector2d(int w, int h)
+        : m_vec(w*h)
+        , m_w(w)
+        , m_h(h)
+    {
+    }
+
+    T & at(int x, int y)
+    {
+        return m_vec.at(y*m_w+x);
+    }
+
+    T & operator[](Point & pt )
+    {
+        return at(pt.x,pt.y);
+    }
+};
+
 struct Maze
 {
     std::vector<std::string> m_Maze;
     std::vector<Point> m_Adit;
-    int m_Size;
 
     std::map<char,Point> m_Locations;
     std::map<char,std::map<char,int>> m_Steps;
@@ -121,7 +144,6 @@ struct Maze
                     m_Adit.emplace_back( i, m_Maze.size() - 1 );
             }
         }
-        m_Size = m_Maze.size();
     }
 
     void print()
@@ -135,7 +157,7 @@ struct Maze
         std::map<Point, std::string> upcoming;
         m_Locations[cfrom] = start;
         upcoming[start] = "";
-        std::set<Point> visited;
+        vector2d<uint8_t> visited( m_Maze[0].size(), m_Maze.size() );
         int steps = 0;
 
         while( !upcoming.empty() )
@@ -144,7 +166,7 @@ struct Maze
             for( auto && m : upcoming )
             {
                 Point cur = m.first;
-                std::string & intheway = m.second;
+                std::string  intheway = m.second;
 
                 char ch = at(cur);
                 if( islower(ch) && steps )
@@ -155,14 +177,14 @@ struct Maze
                     m_Steps[ch][cfrom] = steps;
                     m_Doors[ch][cfrom] = intheway;
                 }
-                if( isupper(ch) )
+                else if( isupper(ch) )
                     intheway += ch;
-                visited.insert( cur );
+                visited[cur] = 1;
                 for( auto & facing : movements )
                 {
                     Point next = cur + facing;
                     char ch = at(next);
-                    if( visited.count(next) || ch == '#' )
+                    if( visited[next] || ch == '#' )
                         continue;
                     more[next] = intheway;
                 }
@@ -180,10 +202,6 @@ struct Maze
     int search( std::string sitting, std::string found );
 };
 
-
-// Stats key is char, value is (pt,steps,doors in the way)
-//
-// We need to do a depth-first search to weed out duplicates.
 
 std::string sub(std::string s, int i, char c)
 {
@@ -273,22 +291,17 @@ int Maze::search( std::string sitting, std::string found )
             // If there's a door in the way without a key, ignore.
             int dstep = m_Steps[s][pt.first];
             std::string doors = m_Doors[s][pt.first];
-            if( TRACE ) std::cout << "  dstep " << dstep << "  doors " << doors << "  found " << found << "\n";
             if( std::any_of( 
                 doors.begin(), doors.end(),
-                [&found](char ch){ return found.find(tolower(ch)) != found.npos;})
+                [&found](char ch){ return found.find(tolower(ch)) == found.npos;})
             )
                 continue;
             // Go explore this path.
             paths.push_back( dstep + search(sub(sitting,si,pt.first), found+pt.first) );
         }
     }
-std::cout << sitting << found << " has " << paths.size() << "paths\n";
-for( auto & p : paths )
-    std::cout << " " << p;
-std::cout << "\n";
 
-    int ans = paths.empty() ? 0 : *std::min(paths.begin(),paths.end());
+    int ans = paths.empty() ? 0 : *std::min_element(paths.begin(),paths.end());
     if( TRACE )
         std::cout << (sitting+found) << ": " << ans << "\n";
     m_Seen[sitting+found] = ans;
@@ -330,25 +343,16 @@ int main( int argc, char ** argv )
 
     for( auto & v : maze->m_Locations )
     {
-        std::cout << v.first << ": " << v.second.x << "," << v.second.y << "\n";
         maze->findall( v.first, v.second );
-    }
-
-    for( auto & m : maze->m_Steps )
-    {
-        for( auto & n : m.second )
-        {
-            std::cout << m.first << " to " << n.first << ": " << n.second << "\n";
-        }
     }
 
 #if 0
     begin = time.time();
 #endif
     if( maze->m_Adit.size() == 1 )
-        std::cout << "Part 1:" << maze->search( "0", "@" ) << "\n";
+        std::cout << "Part 1 :" << maze->search( "0", "@" ) << "\n";
     else
-        std::cout << "Part 2:" << maze->search( "0123", "@" ) << "\n";
+        std::cout << "Part 2 :" << maze->search( "0123", "@" ) << "\n";
 #if 0
     delta = time.time() - begin;
     std::cout << "Elapsed:" << delta << "\n";
