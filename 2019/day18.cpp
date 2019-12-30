@@ -263,8 +263,6 @@ int Maze::search( std::string sitting, std::string found )
     if( TRACE )
         std::cout << "New search " << sitting << " " << found << "\n";
 
-    found = ssort(found);
-
     // If we've been in this situation before, we don't need to go again.
     if( m_Seen.find( sitting+found ) != m_Seen.end() )
     {
@@ -277,27 +275,26 @@ int Maze::search( std::string sitting, std::string found )
     for( int si = 0; si < sitting.size(); si++ )
     {
         char s = sitting[si];
-        if( TRACE ) std::cout << " Checking " << s << "\n";
         // For each key the robot can see:
-        for( auto pt : m_Steps )
+        for( auto pt : m_Steps[s] )
         {
-            if( pt.first < 'a' )
+            char key = pt.first;
+            if( key < 'a' )
                 continue;
-            if( TRACE ) std::cout << " Against " << pt.first << " with found " << found << "\n";
             // If we've already picked it up, ignore.
-            if( found.find( pt.first ) != found.npos )
+            if( found.find( key ) != found.npos )
                 continue;
 
             // If there's a door in the way without a key, ignore.
-            int dstep = m_Steps[s][pt.first];
-            std::string doors = m_Doors[s][pt.first];
+            int dstep = m_Steps[s][key];
+            std::string doors = m_Doors[s][key];
             if( std::any_of( 
                 doors.begin(), doors.end(),
                 [&found](char ch){ return found.find(tolower(ch)) == found.npos;})
             )
                 continue;
             // Go explore this path.
-            paths.push_back( dstep + search(sub(sitting,si,pt.first), found+pt.first) );
+            paths.push_back( dstep + search(sub(sitting,si,key), ssort(found+key)) );
         }
     }
 
@@ -346,13 +343,18 @@ int main( int argc, char ** argv )
         maze->findall( v.first, v.second );
     }
 
+    if( TRACE )
+        for( auto & v : maze->m_Steps )
+            for( auto p : v.second )
+                std::cout << v.first << " to " << p.first << ": " << p.second << "\n";
+
 #if 0
     begin = time.time();
 #endif
     if( maze->m_Adit.size() == 1 )
-        std::cout << "Part 1 :" << maze->search( "0", "@" ) << "\n";
+        std::cout << "Part 1: " << maze->search( "0", "@" ) << "\n";
     else
-        std::cout << "Part 2 :" << maze->search( "0123", "@" ) << "\n";
+        std::cout << "Part 2: " << maze->search( "0123", "@" ) << "\n";
 #if 0
     delta = time.time() - begin;
     std::cout << "Elapsed:" << delta << "\n";
