@@ -199,6 +199,26 @@ struct Maze
         return m_Maze[pt.y][pt.x];
     }
 
+    virtual int search( std::string sitting, std::string found ) = 0;
+};
+
+
+class Maze_BFS : public Maze
+{
+public:
+    Maze_BFS( std::istream && iss )
+        : Maze( std::move(iss) )
+        {}
+    int search( std::string sitting, std::string found );
+};
+
+
+class Maze_DFS : public Maze
+{
+public:
+    Maze_DFS( std::istream && iss )
+        : Maze( std::move(iss) )
+        {}
     int search( std::string sitting, std::string found );
 };
 
@@ -214,51 +234,76 @@ std::string ssort( std::string s )
     return s;
 }
 
-#if 0
-void bfs( Point start, std::string found )
+int Maze_BFS::search( std::string start, std::string found )
 {
-    unchecked = {(start,found): 0 }
-    result = 0
+    std::map<std::string, int> unchecked;
+    unchecked[start+found] = 0; 
+    int nrobots = start.size();
+    int result = 0;
 
-    # Keep going as long as there are paths we haven't tested.
-    # Because this is "breadth-first", each time through this loop
-    # processed all of the paths of a single length.  The next pass
-    # will be one step longer.
-    while unchecked:
-        if TRACE:
-            print('Depth',len(next(iter(unchecked.keys()))[1]))
-        more = {}
-        paths = []
+    // Keep going as long as there are paths we haven't tested.
+    // Because this is "breadth-first", each time through this loop
+    // processed all of the paths of a single length.  The next pass
+    // will be one step longer.
+    while( !unchecked.empty() )
+    {
+        if( TRACE )
+            std::cout << "Depth " << unchecked.begin()->second << "\n";
 
-        # For each path that needs to be checked:
-        for (sitting, found), steps in unchecked.items():
-            paths.append( steps )
-            # For each robot:
-            for si,s in enumerate(sitting):
-                # For each key this robot can see:
-                for k,v in stats[s].items():
-                    # If we've already picked it up, ignore.
-                    if k in found or k < 'a':
-                        continue
-                    # If any intervening doors are locked, ignore.
-                    _, dstep, doors = v
-                    if any( d.lower() not in found for d in doors ):
-                        continue
-                    # If this new path has alread been enumerated, and
-                    # this path to the same state is shorter, keep it.
-                    newsit = (sub(sitting,si,k),ssort(found+K))
-                    if newsit in more and more[newsit] <= steps+dstep:
-                        continue
-                    more[newsit] = steps+dstep
-        # When we have nothing new, we have our answer.
-        if not more:
-            return min(paths)
-        unchecked = more
-    return None
+        std::map<std::string, int> more;
+        std::vector<int> paths;
+
+        // For each path that needs to be checked:
+
+        for( auto & item : unchecked )
+        {
+            std::string sitting = item.first.substr(0,nrobots);
+            std::string found = item.first.substr(nrobots);
+            int steps = item.second;
+            paths.push_back( steps );
+
+            // For each robot:
+            for( int si = 0; si < nrobots; si++ )
+            {
+                char s = sitting[si];
+
+                // For each key this robot can see:
+                for( auto pt : m_Steps[s] )
+                {
+                    char key = pt.first;
+                    if( key < 'a' )
+                        continue;
+                    if( found.find( key ) != found.npos )
+                        continue;
+                    // If there's a door in the way without a key, ignore.
+                    int dstep = m_Steps[s][key];
+                    std::string doors = m_Doors[s][key];
+                    if( std::any_of( 
+                        doors.begin(), doors.end(),
+                        [&found](char ch){ return found.find(tolower(ch)) == found.npos;})
+                    )
+                        continue;
+
+                    // If this new path has alread been enumerated, and
+                    // this path to the same state is shorter, keep it.
+
+                    auto newsit = sub(sitting,si,key)+ssort(found+key);
+                    if( more.find(newsit) != more.end() && more[newsit] <= steps+dstep )
+                        continue;
+                    more[newsit] = steps+dstep;
+                }
+            }
+        }
+        // When we have nothing new, we have our answer.
+        if( more.empty() )
+            return *std::min_element(paths.begin(), paths.end() );
+        unchecked = more;
+    }
+    return 0;
 }
-#endif
 
-int Maze::search( std::string sitting, std::string found )
+
+int Maze_DFS::search( std::string sitting, std::string found )
 {
     if( TRACE )
         std::cout << "New search " << sitting << " " << found << "\n";
@@ -310,6 +355,8 @@ int main( int argc, char ** argv )
 {
     bool do_bfs = false;
     Maze * maze = nullptr;
+    int input = -1;
+    std::string filename;
 
     while( *++argv )
     {
@@ -318,10 +365,21 @@ int main( int argc, char ** argv )
         else if( strcmp(*argv,"bfs") == 0 )
             do_bfs = !do_bfs;
         else if( isdigit(*argv[0]) )
-            maze = new Maze( std::istringstream(test[*argv[0]-'1']) );
+            input = *argv[0]-'1';
         else
-            maze = new Maze( std::ifstream( *argv ));
+            filename = *argv;
     }
+
+    if( do_bfs )
+        if( filename.empty() )
+            maze = new Maze_BFS( std::istringstream(test[input]) );
+        else
+            maze = new Maze_BFS( std::ifstream( filename ) );
+    else
+        if( filename.empty() )
+            maze = new Maze_DFS( std::istringstream(test[input]) );
+        else
+            maze = new Maze_DFS( std::ifstream( filename ) );
 
     maze->print();
     for( auto & pt : maze->m_Adit )
@@ -348,15 +406,8 @@ int main( int argc, char ** argv )
             for( auto p : v.second )
                 std::cout << v.first << " to " << p.first << ": " << p.second << "\n";
 
-#if 0
-    begin = time.time();
-#endif
     if( maze->m_Adit.size() == 1 )
         std::cout << "Part 1: " << maze->search( "0", "@" ) << "\n";
     else
         std::cout << "Part 2: " << maze->search( "0123", "@" ) << "\n";
-#if 0
-    delta = time.time() - begin;
-    std::cout << "Elapsed:" << delta << "\n";
-#endif
 }
