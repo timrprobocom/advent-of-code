@@ -2,9 +2,12 @@
 #include <fstream>
 #include <sstream>
 #include <numeric>
-//#include "uint128.h"
+
+#include "gmpxx.h"
 
 bool TRACE = false;
+
+typedef mpz_class int999_t;
 
 // Find the multiplicative inverse in a modulus field.
 
@@ -12,20 +15,21 @@ bool TRACE = false;
 // totient.  It does, however, fail if a is negative, so we compensate.
 // It is basically doing a GCD.
 
-int64_t invert( int64_t a, int64_t n )
+template<typename T>
+T invert( T a, T n )
 {
-    int64_t t = 0;
-    int64_t newt = 1;
-    int64_t r = n;
-    int64_t newr = a > 0 ? a : a + n;
+    T t = 0;
+    T newt = 1;
+    T r = n;
+    T newr = a > 0 ? a : a + n;
 
     while( newr )
     {
-        int64_t q = r / newr;
-        int64_t t0 = t;
+        T q = r / newr;
+        T t0 = t;
         t = newt;
         newt = t0 - q * newt;
-        int64_t r0 = r;
+        T r0 = r;
         r = newr;
         newr = r0 - q * newr;
     }
@@ -35,13 +39,14 @@ int64_t invert( int64_t a, int64_t n )
 
 // Do modular exponentiation.
 
-int64_t pow( int64_t b, int64_t e, int64_t m )
+template<typename T>
+T pow( T b, T e, T m )
 {
-    int64_t result = 1;
-    b = b & m;
+    T result = 1;
+    b = b % m;
     while( e > 0 )
     {
-        if( e & 1 )
+        if( (e & 1) != 0 )
             result = (result * b) % m;
         e >>= 1;
         b = (b * b) % m;
@@ -76,14 +81,15 @@ int lastfield( const std::string & s )
 
 // A deck can be encoded as ax+b mod n.
 
+template<typename T>
 class Deck
 {
 public:
-    int64_t count;
-    int64_t base;
-    int64_t incr;
+    T count;
+    T base;
+    T incr;
 
-    Deck( int k )
+    Deck( T k )
         : count( k )
         , base( 0 )
         , incr( 1 )
@@ -91,7 +97,7 @@ public:
     }
 
 protected:
-    void cut(int64_t n)
+    void cut(T n)
     {
         base = (base + incr * n + count) % count;
     }
@@ -102,13 +108,13 @@ protected:
         base = (base + incr + count) % count;
     }
 
-    void increment(int64_t n)
+    void increment(T n)
     {
         incr = (incr * invert(n, count)) % count;
     }
 
 public:
-    void run( std::istream & iss )
+    void run( std::istream && iss )
     {
         for( std::string ln; getline( iss, ln ); )
         {
@@ -131,7 +137,7 @@ public:
 void part1test()
 {
     int COUNT = 10;
-    Deck deck(COUNT);
+    Deck<int> deck(COUNT);
     deck.run( std::istringstream(test1) );
     std::cout << "(" << deck.base << "," << deck.incr << ")\n";
     int b = deck.base;
@@ -146,7 +152,7 @@ void part1test()
 void part1()
 {
     int COUNT = 10007;
-    Deck deck(COUNT);
+    Deck<int> deck(COUNT);
     deck.run( std::ifstream("day22.txt") );
     std::cout << "(" << deck.base << "," << deck.incr << ")\n";
     int b = deck.base;
@@ -168,12 +174,12 @@ void part1()
 
 void part2()
 {
-    int64_t COUNT = 119315717514047;
-    Deck deck(COUNT);
+    int999_t COUNT = 119315717514047;
+    Deck<int999_t> deck(COUNT);
     deck.run( std::ifstream("day22.txt") );
     std::cout << "(" << deck.base << "," << deck.incr << ")\n";
-    int b = deck.base;
-    int m = deck.incr;
+    int999_t b = deck.base;
+    int999_t m = deck.incr;
 
 // So, each cycle through will do
 // bn = mn * b
@@ -182,9 +188,9 @@ void part2()
 // The formula comes from Wikipedia.  There's magic to do
 // exponentiation and inversion in a modulus field.
 
-    int64_t cycles = 101741582076661;
-    int64_t finalm = pow( m, cycles, COUNT );
-    int64_t finalb = (b * (1 - finalm) * invert(1 - m, COUNT)  ) % COUNT;
+    int999_t cycles = 101741582076661;
+    int999_t finalm = pow( m, cycles, COUNT );
+    int999_t finalb = (b * (1 - finalm) * invert(int999_t(1 - m), COUNT)  ) % COUNT;
     std::cout << "(" << finalm << "," << finalb << ")\n";
 
     int tgt = 2020;

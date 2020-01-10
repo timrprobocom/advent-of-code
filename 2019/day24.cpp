@@ -91,7 +91,7 @@ public:
 };
 
 
-void main( int argc, char ** argv )
+int main( int argc, char ** argv )
 {
     while( *++argv )
     {
@@ -120,4 +120,5 @@ void main( int argc, char ** argv )
         }
         track[r] = i;
     }
+    return 0;
 }
