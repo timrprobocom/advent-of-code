@@ -1,6 +1,7 @@
 import os
 import sys
 from collections import defaultdict
+from pprint import pprint
 
 #13312 ORE for 1 FUEL:
 
@@ -86,6 +87,7 @@ class Graph(object):
 
 
 TRACE = 'trace' in sys.argv[1:]
+TEST = 'test' in sys.argv[1:]
 
 class Mix(object):
     def __init__(self, sym, qty ):
@@ -131,6 +133,8 @@ def processloop(tree, amts, chem ):
 
 def process( s, target ):
     tree, order = parse(s)
+    if TRACE:
+        print( order )
     amts = defaultdict(int)
     amts["FUEL"] = target
     amts["ORE"] = 0
@@ -140,13 +144,18 @@ def process( s, target ):
             break
         processloop(tree, amts, i )
         if TRACE:
-            print( amts["ORE"] )
+            print( "Stores: ", end='' )
+            for k in order:
+                print( f"'{k}': {amts[k]}, ", end='' )
+            print()
+#            print( amts["ORE"] )
     return amts["ORE"]
 real = open('day14.txt').read()
 
-print( "Test 1: ", process(test1, 1) )
-print( "Test 2: ", process(test2, 1) )
-print( "Test 3: ", process(test3, 1) )
+if TEST:
+    print( "Test 1: ", process(test1, 1) )
+    print( "Test 2: ", process(test2, 1) )
+    print( "Test 3: ", process(test3, 1) )
 print( "*** Part 1: ", process(real,1) )
 
 
@@ -166,7 +175,7 @@ def part2( setup ):
     # Back down and do one digit at a time.
 
     guess //= 10
-    incr = guess // 10
+    incr = guess
 
     while incr:
         guess += incr
@@ -180,7 +189,8 @@ def part2( setup ):
 
 
 
-print( "Test 1: ", part2( test1 ) )
-print( "Test 2: ", part2( test2 ) )
-print( "Test 3: ", part2( test3 ) )
+if TEST:
+    print( "Test 1: ", part2( test1 ) )
+    print( "Test 2: ", part2( test2 ) )
+    print( "Test 3: ", part2( test3 ) )
 print( "*** Part 2: ", part2( real ) )
