@@ -95,9 +95,10 @@ int main( int argc, char ** argv )
 {
     while( *++argv )
     {
-        if( strcmp( *argv, "trace" ) == 0 )
+        std::string arg(*argv);
+        if( arg == "trace" )
             TRACE = true;
-        else if( strcmp( *argv, "test" ) == 0 )
+        else if( arg == "test" )
             TEST = true;
     }
 

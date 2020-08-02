@@ -21,7 +21,7 @@ OBJS = $(SRCS:.cpp=$O)
 EXES = $(SRCS:.cpp=$(EXE))
 
 %$(EXE): %.cpp
-	$(COMPILE.cpp) $(OUTPUT_OPTION) $(LIBS) $<
+	$(COMPILE.cpp) $(OUTPUT_OPTION) $< $(LIBS)
 
 all:	$(EXES)
 
