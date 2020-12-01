@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 #include <vector>
 #include <set>
 #include <map>
@@ -291,9 +292,10 @@ int main(int argc, char ** argv )
 
     while( *++argv )
     {
-        if( strcmp( *argv, "trace") == 0 )
+        std::string arg(*argv);
+        if( arg == "trace" )
             TRACE = true;
-        if( strcmp( *argv, "test") == 0 )
+        if( arg == "test" )
             TEST = true;
     }
 

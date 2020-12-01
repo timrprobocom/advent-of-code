@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <tuple>
@@ -360,14 +361,15 @@ int main( int argc, char ** argv )
 
     while( *++argv )
     {
-        if( strcmp(*argv,"trace") == 0 )
+        std::string arg(*argv);
+        if( arg == "trace" )
             TRACE = true;
-        else if( strcmp(*argv,"bfs") == 0 )
+        else if( arg == "bfs" )
             do_bfs = !do_bfs;
-        else if( isdigit(*argv[0]) )
-            input = *argv[0]-'1';
+        else if( isdigit(arg[0]) )
+            input = arg[0]-'1';
         else
-            filename = *argv;
+            filename = arg;
     }
 
     if( do_bfs )
