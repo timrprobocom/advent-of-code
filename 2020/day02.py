@@ -1,23 +1,25 @@
 #! /usr/bin/env python3
 
+import re
+
 test = (
 '1-3 a: abcde',
 '1-3 b: cdefg',
 '2-9 c: ccccccccc'
 )
 
+pat = r"(\d+)-(\d+) (.): (.*)$"
+pat = re.compile(pat)
+
 def pass1( line ):
-    count,target,haystack = line.split()
-    a,b = [int(k) for k in count.split('-')]
-    target = target[0]
-    haystack = list(haystack)
-    return a <= haystack.count(target)  <= b
+    a, b, tgt, haystack = pat.match(line).groups()
+    a, b = int(a), int(b)
+    return a <= haystack.count(tgt)  <= b
 
 def pass2( line ):
-    count,target,haystack = line.split()
-    a,b = [int(k) for k in count.split('-')]
-    target = target[0]
-    return (haystack[a-1] == target) != (haystack[b-1] == target)
+    a, b, tgt, haystack = pat.match(line).groups()
+    a, b = int(a), int(b)
+    return (haystack[a-1] == tgt) != (haystack[b-1] == tgt)
 
 live = open('day02.txt').readlines()
 
