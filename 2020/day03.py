@@ -18,7 +18,8 @@ test = """
 if 'test' in sys.argv:
     data = test
 else:
-    data = [ln.strip() for ln in open('day03.txt').readlines()]
+#    data = [ln.strip() for ln in open('day03.txt').readlines()]
+    data = open('day03.txt').read().split('\n')[:-1]
 
 # This could have been done smarter.
 
