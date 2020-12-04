@@ -14,7 +14,7 @@ ecl:brn pid:760753108 byr:1931
 hgt:179cm
 
 hcl:#cfa07d eyr:2025 pid:166559648
-iyr:2011 ecl:brn hgt:59in""".splitlines()
+iyr:2011 ecl:brn hgt:59in"""
 
 #byr (Birth Year)
 #iyr (Issue Year)
@@ -28,10 +28,9 @@ iyr:2011 ecl:brn hgt:59in""".splitlines()
 DEBUG = 'debug' in sys.argv
 
 if 'test' in sys.argv:
-    data = test
+    data = test.split('\n\n')
 else:
-    # Tackily, we rely on the extra blank this generates.
-    data = open('day04.txt').read().split('\n')
+    data = open('day04.txt').read().split('\n\n')
 
 
 #byr (Birth Year) - four digits; at least 1920 and at most 2002.
@@ -45,74 +44,37 @@ else:
 #pid (Passport ID) - a nine-digit number, including leading zeroes.
 #cid (Country ID) - ignored, missing or not.
 
-def validate(field,value):
-    if DEBUG:
-        print( "Checking", field, value )
-    try:
-        if field == 'byr':
-            yr = int(value)
-            return 1920 <= yr <= 2002
-        if field == 'iyr':
-            yr = int(value)
-            return 2010 <= yr <= 2020
-        if field == 'eyr':
-            yr = int(value)
-            return 2020 <= yr <= 2030
-        if field == 'hgt':
-            if value[-2:] == 'cm':
-                val = int(value[:-2])
-                return 150 <= val <= 193
-            if value[-2:] == 'in':
-                val = int(value[:-2])
-                return 59 <= val <= 76
-            return False
-        if field == 'hcl':
-            return re.fullmatch( r'#[0-9a-f]{6}', value )
-        if field == 'ecl':
-            return value in ('amb','blu','brn','gry','grn','hzl','oth')
-        if field == 'pid':
-            return re.fullmatch( '\d{9}', value )
-        if field == 'cid':
-            return True
 
-    except ValueError:
-        return False
+digits4 = re.compile('\d{4}')
+digits9 = re.compile('\d{9}')
+color =  re.compile('#[0-9a-f]{6}')
 
-    return False
-
+must = set(('byr','iyr','eyr','hgt','hcl','ecl','pid'))
 
 def part2(data):
     count1 = 0
     count2 = 0
-    keys = {'cid':0}
-    for line in data:
-        line = line.strip()
-        if not line:
-            fail = False
-            if len(keys) != 8:
-                if DEBUG:
-                    print("FAIL not enough keys")
-                fail = True
-            else:
-                count1 += 1
-                for key,val in keys.items():
-                    if not validate(key,val):
-                        if DEBUG:
-                            print( "FAIL", key, val )
-                        fail = True
-                        break
-            if not fail:
-                if DEBUG:
-                    print("PASS")
-                count2 += 1
-            keys = {'cid': 0 }
-        if DEBUG:
-            print( line )
-        for part in line.split():
+    for record in data:
+        keys = {}
+        for part in record.split():
             key,_,val = part.partition(':')
             keys[key] = val
-    return (count1,count2)
+        if DEBUG:
+            print( record )
 
+        if all( k in keys for k in must ):
+            count1 += 1
+            if  digits4.fullmatch(keys['byr']) and 1920 <= int(keys['byr']) <= 2002 and \
+                digits4.fullmatch(keys['iyr']) and 2010 <= int(keys['iyr']) <= 2020 and \
+                digits4.fullmatch(keys['eyr']) and 2020 <= int(keys['eyr']) <= 2030 and \
+                (keys['hgt'][-2:] == 'cm' and 150 <= int(keys['hgt'][:-2]) <= 193 or \
+                 keys['hgt'][-2:] == 'in' and  59 <= int(keys['hgt'][:-2]) <=  76) and \
+                color.fullmatch( keys['hcl'] ) and \
+                keys['ecl'] in ('amb','blu','brn','gry','grn','hzl','oth') and \
+                digits9.fullmatch( keys['pid'] ):
+                count2 += 1
+
+    return (count1,count2)
 
 p1,p2 = part2(data)
 print( "Part 1: ", p1 )
