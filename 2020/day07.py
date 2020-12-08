@@ -55,7 +55,7 @@ def descend1( rules, bag, target ):
 target = 'shiny gold'
 
 def part1( target ):
-    return sum( 1 for key in rules.keys() if key != target and descend1(rules,key,target) )
+    return sum( key != target and descend1(rules,key,target) for key in rules.keys() )
 
 print( "Part 1:", part1(target) )
 
