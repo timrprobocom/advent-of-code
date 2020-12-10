@@ -63,9 +63,7 @@ data.sort()
 builtin = max(data) + 3
 data = [0] + data + [builtin]
 
-diffs = []
-for i in range(len(data)-1):
-    diffs.append( data[i+1]-data[i] )
+diffs = [data[i+1]-data[i] for i in range(len(data)-1)]
 
 if DEBUG:
     print( diffs )
@@ -100,3 +98,13 @@ if DEBUG:
     print(sets)
 
 print( "Part 2:", functools.reduce(operator.mul,sets))
+
+# Why does this work?  
+# It says the ways to get to N is the sum of the ways to get to the past 3.
+# I suppose that's right.
+
+stairs = [0] * (data[-1]+1)
+stairs[0] = 1
+for n in data[1:]:
+    stairs[n] = stairs[n-3] + stairs[n-2] + stairs[n-1]
+print( stairs )
