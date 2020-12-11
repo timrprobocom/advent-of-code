@@ -15,17 +15,12 @@ LLLLLLLLLL
 L.LLLLLL.L
 L.LLLLL.LL""".splitlines()
 
-test2 = """\
-""".splitlines()
-
 from pprint import pprint
 
 DEBUG = 'debug' in sys.argv
 
 if 'test' in sys.argv:
     data = test
-elif 'test2' in sys.argv:
-    data = test2
 else:
     data = open('day11.txt').read().split('\n')[:-1]
 
