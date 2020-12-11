@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 //BFFFBBFRRR: row 70, column 7, seat ID 567.
