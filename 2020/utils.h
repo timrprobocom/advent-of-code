@@ -54,15 +54,15 @@ struct Point {
 
     void left()
     {
-        int x = self.x
-        self.x = self.y
-        self.y = -x;
+        int tmp = x;
+        x = y;
+        y = -tmp;
     }
 
     void right()
     {
-        int x = self.x
-        self.x = -self.y
-        self.y = x;
+        int tmp = x;
+        x = -y;
+        y = tmp;
     }
 };
