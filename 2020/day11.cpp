@@ -4,46 +4,11 @@
 #include <array>
 #include <vector>
 #include <algorithm>
+#include "utils.h"
 
 using namespace std;
 
 typedef vector<string> Grid;
-
-struct Point {
-    int x;
-    int y;
-    Point( int _x=0, int _y=0 )
-        : x(_x)
-        , y(_y)
-        {}
-
-    bool operator< (const Point & other) const
-    {
-        return x < other.x || y < other.y;
-    }
-
-    bool operator== (const Point & other) const
-    {
-        return x==other.x && y==other.y;
-    }
-
-    bool operator!= (const Point & other) const
-    {
-        return x!=other.x || y!=other.y;
-    }
-
-    Point operator+( const Point & other )
-    {
-        return Point( x+other.x, y+other.y );
-    }
-
-    Point& operator+=( const Point & other )
-    {
-        x += other.x;
-        y += other.y;
-        return *this;
-    }
-};
 
 std::array<Point,8> deltas { 
     Point(-1,-1),Point(-1,0),Point(-1,1),
