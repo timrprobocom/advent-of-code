@@ -83,13 +83,25 @@ print( "Part 1:", pass1() )
 # we return here is the second type.  The 0 in 7,0 doesn't
 # care, so it works either way.
 
-def findcommon( a1, n1, a2, n2 ):
+def findcommon2( a1, n1, a2, n2 ):
+    # This version returns a (t % n == a) answer, and
+    # thus needs posns to be negated, but also works
+    # with the arrays reversed.
+    inc = n1
+    t = inc - a1
+    while (t+a2) % n2:
+        t += inc
+    return n1*n2 - t, n1*n2
+
+def findcommon1( a1, n1, a2, n2 ):
+    # This version returns a (t+a % n) answer.
     inc = n1
     t = inc + a1
     while (t+a2) % n2:
         t += inc
     return t, n1*n2
 
+findcommon = findcommon1
 
 # Satisfy 2 at a time until we get them all.
 
