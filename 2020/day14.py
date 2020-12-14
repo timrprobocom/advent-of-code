@@ -38,7 +38,7 @@ def xlatemask1(mask):
             value += int(c)
     return mask0, value
         
-def part1():
+def part1(data):
     memory = {}
     for ln in data:
         left,_,right = ln.split()
@@ -81,7 +81,7 @@ def invert(addr):
     return addr ^ 0xfffffffff
 
 
-def part2():
+def part2(data):
 
 # Construct the list of floating memory writes.
 
@@ -103,8 +103,13 @@ def part2():
     
 # For each write, for each variant of the address, if the address is not
 # matched by a future write, add it to the sum.
-# Could we construct a list of "this is all potential future matches"? 
 # Can we encode the addresses more efficiently?  Maybe with ands/ors?
+
+    return sum( 
+        sum(pair[3] for addr in nextaddr(pair[0]) 
+                    if not any( addr & mem[1] == mem[2] for mem in memory[i+1:]))
+        for i,pair in enumerate(memory)
+    )
 
     sumx = 0
     for i,pair in enumerate(memory):
@@ -115,6 +120,6 @@ def part2():
 
 # Part 1's test doesn't work in part 2.
 
-print( "Part 1:", part1() )
+print( "Part 1:", part1(data) )
 if data != test:
-    print( "Part 2:", part2() )
+    print( "Part 2:", part2(data) )
