@@ -26,21 +26,16 @@ bool DEBUG = false;
 // Given 3,2,1, the 30000000th number spoken is 18.
 // Given 3,1,2, the 30000000th number spoken is 362.
 
-struct npair {
-    int left;
-    int right;
-    npair( int l=0, int r=0 )
-        : left( l )
-        , right( r )
-        {}
-};
+// The Python version is 2.5 times faster.  Why?
+
 
 int run( vector<int> & data, int count )
 {
     int tape = data.size() - 1;
-    map<int,npair> found;
+
+    map<int,int> found;
     for( int i = 0; i < tape; i++ )
-        found[data[i]] = npair( 0, i+1 );
+        found[data[i]] = i+1;
 
     int nextx = data.back();
 
@@ -52,17 +47,9 @@ int run( vector<int> & data, int count )
         tape++;
 
         auto fnd = found.find( nextx );
-        if( fnd != found.end() )
-        {
-            nextx = fnd->second.left = fnd->second.right;
-            fnd->second.right = tape;
-            nextx = tape - nextx;
-        }
-        else
-        {
-            found[nextx] = npair(0,tape);
-            nextx = 0;
-        }
+        int lastx = fnd == found.end() ? tape : fnd->second;
+        found[nextx] = tape;
+        nextx = tape - lastx;
     }
 
     return nextx;

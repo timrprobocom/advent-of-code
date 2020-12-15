@@ -29,18 +29,15 @@ else:
 
 def run(data, count):
     tape = len(data) - 1
-    found = dict( (t,(0,i+1))  for i,t in enumerate(data[:-1]))
+    found = dict( (t,i+1)  for i,t in enumerate(data[:-1]))
     nextx = data[-1]
     while tape < count - 1:
         if tape % 500000 == 0:
             print( '  %d%%' % (tape * 100 / count), end='\r' )
         tape += 1
-        if nextx in found:
-            found[nextx] = (found[nextx][1],tape)
-            nextx = tape - found[nextx][-2] 
-        else:
-            found[nextx] = (0,tape)
-            nextx = 0
+        lastx = found[nextx] if nextx in found else tape
+        found[nextx] = tape
+        nextx = tape - lastx
 
     return nextx
 
