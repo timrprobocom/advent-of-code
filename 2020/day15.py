@@ -28,14 +28,14 @@ else:
     data = live
 
 def run(data, count):
-    tape = len(data) - 1
-    found = dict( (t,i+1)  for i,t in enumerate(data[:-1]))
+    found = [-1] * count
+    for i,t in enumerate(data[:-1]):
+        found[t] = i+1
     nextx = data[-1]
-    while tape < count - 1:
-        if tape % 500000 == 0:
+    for tape in range(len(data),count):
+        if tape % 1000000 == 0:
             print( '  %d%%' % (tape * 100 / count), end='\r' )
-        tape += 1
-        lastx = found[nextx] if nextx in found else tape
+        lastx = found[nextx] if found[nextx] >= 0 else tape
         found[nextx] = tape
         nextx = tape - lastx
 

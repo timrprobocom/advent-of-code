@@ -26,28 +26,18 @@ bool DEBUG = false;
 // Given 3,2,1, the 30000000th number spoken is 18.
 // Given 3,1,2, the 30000000th number spoken is 362.
 
-// The Python version is 2.5 times faster.  Why?
-
 
 int run( vector<int> & data, int count )
 {
-    int tape = data.size() - 1;
-
-    map<int,int> found;
-    for( int i = 0; i < tape; i++ )
+    vector<int> found( count, -1 );
+    for( int i = 0; i < data.size()-1; i++ )
         found[data[i]] = i+1;
 
     int nextx = data.back();
 
-    while( tape < count - 1 )
+    for( int tape = data.size(); tape < count; tape++ )
     {
-        if( tape % 500000 == 0 )
-            cout << "*" << flush;
-
-        tape++;
-
-        auto fnd = found.find( nextx );
-        int lastx = fnd == found.end() ? tape : fnd->second;
+        int lastx = found[nextx] < 0 ? tape : found[nextx];
         found[nextx] = tape;
         nextx = tape - lastx;
     }
