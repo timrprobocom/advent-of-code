@@ -16,7 +16,7 @@ nearby tickets:
 7,3,47
 40,4,50
 55,2,20
-38,6,12""".splitlines()
+38,6,12""".split('\n\n')
 
 test2 = """\
 class: 0-1 or 4-19
@@ -29,7 +29,7 @@ your ticket:
 nearby tickets:
 3,9,18
 15,1,5
-5,14,9""".splitlines()
+5,14,9""".split('\n\n')
 
 from pprint import pprint
 
@@ -40,41 +40,35 @@ if 'test' in sys.argv:
 elif 'test2' in sys.argv:
     data = test2
 else:
-    data = open('day16.txt').read().split('\n')[:-1]
+    data = open('day16.txt').read().split('\n\n')
 
 def parse(lines):
-    lines = itertools.chain(lines)
+    # There are three parts to the input.
     rules = {}
-    for line in lines:
-        if not line:
-            break
+    for line in lines[0].splitlines():
         keyword,_,parts = line.partition(': ')
         valid = set()
         for rule in parts.split(' or '):
-            a,b = [int(i) for i in rule.split('-')]
+            a,b = map(int, rule.split('-'))
             valid = valid.union(set(range(a,b+1)))
         rules[keyword] = valid
 
     # Now my ticket.
-    line = next(lines)
-    line = next(lines)
-    mytix = [int(i) for i in line.split(',')]
-    line = next(lines)
+    line = lines[1].splitlines()[1]
+    mytix = list(map(int, line.split(',')))
 
-    #  Now nearby tickets.
+    # Now nearby tickets.
     nearby = []
-    line = next(lines)
-    for line in lines:
-        nearby.append( [int(i) for i in line.split(',')] )
+    for line in lines[2].splitlines():
+        if line[0] == 'n':
+            continue
+        nearby.append( list(map(int, line.split(','))) )
 
     return rules, mytix, nearby
 
 def makevalid(rules):
-    valid = set()
-    # Get all ranges
-    for rule in rules.values():
-        valid = valid.union(rule)
-    return valid
+    # Combine all ranges.
+    return set().union( *rules.values() )
 
 def part1(rules, nearby):
     valid = makevalid(rules)
@@ -84,9 +78,7 @@ def part1(rules, nearby):
 # We need to know which fields each can be.
 
 def part2( rules, mytix, nearby ):
-    possible = {}
-    for k in rules.keys():
-        possible[k] = set(range(len(rules)))
+    possible = dict( (k,set(range(len(rules)))) for k in rules.keys() )
     print( possible )
 
     valid = makevalid(rules)
