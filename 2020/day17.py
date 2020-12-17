@@ -13,6 +13,8 @@ from pprint import pprint
 
 DEBUG = 'debug' in sys.argv
 
+GRID = 'grid' in sys.argv
+
 if 'test' in sys.argv:
     data = test
 else:
@@ -74,6 +76,8 @@ state = translate( data )
 for i in range(6):
     state = nextstate( state, 1 )
     print( len(state) )
+    if GRID:
+        printgrid( state )
 
 print( "Part 1:", len(state) )
 
