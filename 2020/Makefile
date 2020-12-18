@@ -25,4 +25,10 @@ EXES = $(SRCS:.cpp=$(EXE))
 
 all:	$(EXES)
 
+day18.exe: day18.cpp day18-1.h day18-2.h
 
+day18-1.h:	day18.txt
+	sed -e "s/[0-9]/N(&)/g" -e "s/\*/-/g" -e "s/$$/,/" $< > $*.h
+
+day18-2.h:	day18.txt
+	sed -e "s/[0-9]/M(&)/g" -e "s/\*/-/g" -e "s/+/*/g" -e "s/$$/,/" $< > $*.h
