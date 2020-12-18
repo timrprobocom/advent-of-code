@@ -30,23 +30,26 @@ class M(int):
 print( "Part 1:", sum(eval(re.sub(r'(\d)',r'M(\1)', ln).replace('*','-'))                  for ln in data ))
 print( "Part 2:", sum(eval(re.sub(r'(\d)',r'M(\1)', ln).replace('*','-').replace('+','*')) for ln in data ))
 
-sys.exit( 0 )
+#sys.exit( 0 )
 
 def collapse( n, stack ):
     if not stack or stack[-1] == '(':
         stack.append( n )
     else:
-        op = stack.pop()
-        m = stack.pop()
-        if op == '+':
-            stack.append( m+n )
+        if stack.pop() == '+':
+            stack[-1] += n
         else:
-            stack.append( m*n )
+            stack[-1] *= n
 
-def collapse2( stack ):
-    n = stack.pop()
-    stack.pop()
-    stack[-1] *= n
+def collapseX( stack ):
+    stack[-3:] = [stack[-1] * stack[-3]]
+
+
+def collapse3( n, stack ):
+    if stack and stack[-1] == '+':
+        collapse( n, stack )
+    else:
+        stack.append( n )
 
 def part1(expr):
     if DEBUG:
@@ -55,14 +58,14 @@ def part1(expr):
     for c in expr:
         if c == ' ':
             continue
-        if c in '0123456789':
+        if c.isdigit():
             n = ord(c) - ord('0')
             collapse( n, stack )
         elif c in '+*(':
             stack.append( c )
         elif c == ')':
             n = stack.pop()
-            stack.pop()
+            stack.pop() # must be (
             collapse( n, stack )
     return stack[0]
 
@@ -73,17 +76,12 @@ def part2(expr):
     for c in expr:
         if c == ' ':
             continue
-        if c in '0123456789':
+        if c.isdigit():
             n = ord(c) - ord('0')
-            if not stack or stack[-1] == '(':
-                stack.append( n )
-            elif stack[-1] == '+':
-                collapse( n, stack )
-            else:
-                stack.append( n )
+            collapse3( n, stack )
         elif c == '*':
             if len(stack) > 2 and stack[-2] == '*':
-                collapse2( stack )
+                collapseX( stack )
             stack.append( c )
         elif c in '+(':
             stack.append( c )
@@ -92,15 +90,12 @@ def part2(expr):
             if stack[-1] == '*':
                 stack.pop()
                 n *= stack.pop()
-            stack.pop()
-            if stack and stack[-1] == '+':
-                collapse( n, stack )
-            else:
-                stack.append( n )
+            stack.pop() # must be (
+            collapse3( n, stack )
         if DEBUG:
             print( c, stack )
     if len(stack) > 1:
-        collapse2( stack )
+        collapseX( stack )
     return stack[0]
 
 sumx = 0
