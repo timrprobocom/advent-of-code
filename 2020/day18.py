@@ -1,8 +1,6 @@
 import os
+import re
 import sys
-import functools
-import itertools
-import operator
 
 test = """\
 2 * 3 + (4 * 5)
@@ -11,8 +9,6 @@ test = """\
 ((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2""".split('\n')
 
 # I've made this way too complicated.
-
-from pprint import pprint
 
 # 1: 26 437 12240 13632 sum 26335
 # 2: 46 1445 669060 23340 sum 693891
@@ -23,6 +19,18 @@ if 'test' in sys.argv:
     data = test
 else:
     data = open('day18.txt').read().split('\n')[:-1]
+
+# Very clever cheat.
+
+class M(int):
+    def __sub__(self,y): return M(int(self)*y)
+    def __add__(self,y): return M(int(self)+y)
+    def __mul__(self,y): return M(int(self)+y)
+
+print( "Part 1:", sum(eval(re.sub(r'(\d)',r'M(\1)', ln).replace('*','-'))                  for ln in data ))
+print( "Part 2:", sum(eval(re.sub(r'(\d)',r'M(\1)', ln).replace('*','-').replace('+','*')) for ln in data ))
+
+sys.exit( 0 )
 
 def collapse( n, stack ):
     if not stack or stack[-1] == '(':
