@@ -35,21 +35,22 @@ print( "Part 2:", sum(eval(re.sub(r'(\d)',r'M(\1)', ln).replace('*','-').replace
 def collapse( n, stack ):
     if not stack or stack[-1] == '(':
         stack.append( n )
+    elif stack.pop() == '+':
+        stack[-1] += n
     else:
-        if stack.pop() == '+':
-            stack[-1] += n
-        else:
-            stack[-1] *= n
+        stack[-1] *= n
 
-def collapseX( stack ):
+def collapse_mul( stack ):
     stack[-3:] = [stack[-1] * stack[-3]]
 
-
-def collapse3( n, stack ):
+def collapse_add( n, stack ):
     if stack and stack[-1] == '+':
         collapse( n, stack )
     else:
         stack.append( n )
+
+# Can we combine these by adding precedence rules?
+# if stack[-2] is lowest precedence then collapse
 
 def part1(expr):
     if DEBUG:
@@ -59,13 +60,12 @@ def part1(expr):
         if c == ' ':
             continue
         if c.isdigit():
-            n = ord(c) - ord('0')
-            collapse( n, stack )
+            collapse( int(c), stack )
         elif c in '+*(':
             stack.append( c )
         elif c == ')':
             n = stack.pop()
-            stack.pop() # must be (
+            assert stack.pop() == '('
             collapse( n, stack )
     return stack[0]
 
@@ -77,25 +77,23 @@ def part2(expr):
         if c == ' ':
             continue
         if c.isdigit():
-            n = ord(c) - ord('0')
-            collapse3( n, stack )
+            collapse_add( int(c), stack )
         elif c == '*':
             if len(stack) > 2 and stack[-2] == '*':
-                collapseX( stack )
+                collapse_mul( stack )
             stack.append( c )
         elif c in '+(':
             stack.append( c )
         elif c == ')':
+            if stack[-2] != '(':
+                collapse_mul( stack )
             n = stack.pop()
-            if stack[-1] == '*':
-                stack.pop()
-                n *= stack.pop()
-            stack.pop() # must be (
-            collapse3( n, stack )
+            assert stack.pop() == '('
+            collapse_add( n, stack )
         if DEBUG:
             print( c, stack )
     if len(stack) > 1:
-        collapseX( stack )
+        collapse_mul( stack )
     return stack[0]
 
 sumx = 0
