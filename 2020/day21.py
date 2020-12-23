@@ -6,6 +6,7 @@ import itertools
 import operator
 from pprint import pprint
 
+
 test = """\
 mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
 trh fvjkl sbzzf mxmxvkd (contains dairy)

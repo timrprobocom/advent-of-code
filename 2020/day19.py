@@ -43,22 +43,22 @@ def parse(x):
 # what we matched.  If we match the whole string, we yield an empty 
 # string.  If we match nothing we yield nothing.
 
-# The tuples here are either empty or contain one string.
-
 def g(rules, x, i, d=''):
     dprint( d, "Checking", x, "rule", i )
-    # For each set of possibles for this rule:
+    # For each set of alternatives for this rule:
     for option in rules[i]:
         # If we've found a terminal and our target string 
         # starts with the terminal, we yield the rest of the 
-        # string still to be matched.  It keeps getting
-        # smaller and smaller.
+        # string still to be matched.
         if option[0].startswith('"'):
             if x.startswith(option[0][1]):
                 yield x[1:]
             continue
 
-        # Start trying to match the rest of the string piece by piece.
+        # If not a terminal, then try the subparts of this alternative.
+        # We start with the whole string, and as we match more parts,
+        # the string in the tuple gets smaller and smaller.  If we fail,
+        # the tuple goes empty.
         rems = (x,)
         # For each subsequence in this alternative:
         for token in option:
@@ -66,10 +66,9 @@ def g(rules, x, i, d=''):
             # If we fail to match, rems becomes () and remains that way.
             rems = tuple(r for rem in rems for r in g(rules, rem, token, d+'+ '))
             dprint( d, token, rems )
-        # If we have matched everything so far, rems contains a string.  
-        # If we matched the whole string, rems contains an empty string.
-        # Otherwise, it is empty.   If rems is empty, we failed and yield 
-        # nothing.  Part 2 can actually return multiple successes.
+        # rems now contains the part after us, which might be empty if we
+        # matched everything.  If we failed, it is empty.
+        # In part 2, we can actually return multiple successes.
         dprint( d, "rems", rems )
         for rem in rems:
             dprint( d, x, i, "yield", rem )
