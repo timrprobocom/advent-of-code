@@ -91,9 +91,10 @@ def printgrid(blacks):
     maxx = max(int(k.real) for k in blacks)
     miny = min(int(k.imag) for k in blacks)
     maxy = max(int(k.imag) for k in blacks)
-    print( '   ' + ''.join(('%2d'%d for d in range(minx,maxx))))
+    print( '     ' + ' '.join((' -'[d<0] for d in range(minx,maxx))))
+    print( '    ' + ''.join(('%2d'%abs(d) for d in range(minx,maxx))))
     for y in range(miny,maxy):
-        ln = ['%2d '%y]
+        ln = ['%3d '%y]
         for x in range(minx,maxx):
             if complex(x,y) in blacks:
                 ln.append( ' X' )
