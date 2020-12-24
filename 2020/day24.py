@@ -44,12 +44,12 @@ else:
 #   (-1,+1)  (1,1)
 
 moves = {
-    'nw': (-1,-1),
-    'ne': (1,-1),
-    'e': (2,0),
-    'se': (1,1),
-    'sw': (-1,1),
-    'w': (-2,0)
+    'nw': (-1-1j),
+    'ne': (1-1j),
+    'e': (2),
+    'se': (1+1j),
+    'sw': (-1+1j),
+    'w': (-2)
 }
 
 
@@ -59,16 +59,9 @@ def add(a,b):
 def part1():
     blacks = set()
     for ln in data:
-        pfx = ''
-        posn = (0,0)
-        for c in ln:
-            if c in 'ns':
-                pfx = c
-            else:
-                move = moves[pfx+c]
-                posn = add(move,posn)
-                pfx = ''
-
+        posn = 0
+        for c in re.findall('[ns]?[ew]', ln):
+            posn += moves[c]
         if posn in blacks:
             blacks.remove(posn)
         else:
@@ -79,23 +72,13 @@ def part1():
 #Any white tile with exactly 2 black tiles immediately adjacent to it is flipped to black.
 
 def neighbors(blacks,cell):
-    return sum( 1 for m in moves.values() if add(cell,m) in blacks )
+    return sum( 1 for m in moves.values() if cell+m in blacks )
 
 def cycle(blacks):
-    minx = min(k[0] for k in blacks) - 2
-    maxx = max(k[0] for k in blacks) + 2
-    miny = min(k[1] for k in blacks) - 1
-    maxy = max(k[1] for k in blacks) + 1
-
-#  Not every point is valid!  That's the key.
-#  Both must be even or both must be odd.
-
     nxt = set()
-    for x in range(minx,maxx+1):
-        for y in range(miny,maxy+1):
-            if (abs(x)+abs(y)) & 1:
-                continue
-            cell = (x,y)
+    for x in range(-100,100):
+        for y in range(-100,100):
+            cell = complex(x,y)
             blks = neighbors( blacks, cell )
             if cell in blacks and blks in (1,2):
                 nxt.add( cell )
@@ -104,16 +87,15 @@ def cycle(blacks):
     return nxt
 
 def printgrid(blacks):
-    minx = min(k[0] for k in blacks) 
-    maxx = max(k[0] for k in blacks) + 1
-    miny = min(k[1] for k in blacks)
-    maxy = max(k[1] for k in blacks) + 1
-
+    minx = min(int(k.real) for k in blacks)
+    maxx = max(int(k.real) for k in blacks)
+    miny = min(int(k.imag) for k in blacks)
+    maxy = max(int(k.imag) for k in blacks)
     print( '   ' + ''.join(('%2d'%d for d in range(minx,maxx))))
     for y in range(miny,maxy):
         ln = ['%2d '%y]
         for x in range(minx,maxx):
-            if (x,y) in blacks:
+            if complex(x,y) in blacks:
                 ln.append( ' X' )
             else:
                 ln.append( '  ' )
@@ -122,7 +104,7 @@ def printgrid(blacks):
 
 blacks = part1()
 dprint(blacks)
-#printgrid(blacks)
+printgrid(blacks)
 print( "Part 1:", len(blacks) )
 for day in range(100):
     blacks = cycle(blacks)
