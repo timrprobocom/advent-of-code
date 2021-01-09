@@ -46,8 +46,7 @@ def get_moves(bldg, floor):
     contents = bldg[floor]
     # Don't go back to lower floors once cleared.
     minfloor = min( i for i,f in enumerate(bldg) if f )
-    for direc in (1, -1):
-        newfloor = floor + direc
+    for newfloor in (floor-1, floor+1):
         if newfloor < minfloor or newfloor > 3:
             continue
         # We can move any single or any pair.
@@ -56,14 +55,14 @@ def get_moves(bldg, floor):
             new2 = union(bldg[newfloor], n)
             if not valid(new1) or not valid(new2):
                 continue
-            if direc < 0:
+            if newfloor < floor:
                 newbldg = bldg[:floor-1] + (new2,new1) + bldg[floor+1:]
             else:
                 newbldg = bldg[:floor] + (new1,new2) + bldg[floor+2:]
             yield newfloor, newbldg
 
 def process(bldg):
-    seen = { (0,bldg) : 0 }
+    seen = set( (0,bldg) )
     undone = queue.Queue()
     undone.put( (bldg,0,1) )
     count = 0
@@ -81,7 +80,7 @@ def process(bldg):
                 return depth
             if (elevator,newbldg) in seen:
                 continue
-            seen[ (elevator,newbldg) ] = depth
+            seen.add( (elevator,newbldg) )
             undone.put( (newbldg, newfloor, depth+1 ) )
 
 # This does reach the correct state, but it takes 39 steps.
