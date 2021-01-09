@@ -1,27 +1,31 @@
-rules = {}
-for rule in open("day07.txt"):
-    parts = rule.split();
-    end = parts[-1]
-    if parts[0] == "NOT":
-        rules[end] = parts[:2]
-    elif parts[1] == "AND":
-        rules[end] = ("AND",parts[0],parts[2])
-    elif parts[1] == "OR":
-        rules[end] = ("OR",parts[0],parts[2])
-    elif parts[1] == "LSHIFT":
-        rules[end] = ("LSHIFT",parts[0],parts[2])
-    elif parts[1] == "RSHIFT":
-        rules[end] = ("RSHIFT",parts[0],parts[2])
-    else:
-        rules[end] = parts[0]
+import sys
 
-print( rules )
+dprint = print if 'debug' in sys.argv else lambda *s : None
+
+def makerules():
+    rules = {}
+    for rule in open("day07.txt"):
+        parts = rule.split();
+        end = parts[-1]
+        if parts[0] == "NOT":
+            rules[end] = parts[:2]
+        elif parts[1] == "AND":
+            rules[end] = ("AND",parts[0],parts[2])
+        elif parts[1] == "OR":
+            rules[end] = ("OR",parts[0],parts[2])
+        elif parts[1] == "LSHIFT":
+            rules[end] = ("LSHIFT",parts[0],parts[2])
+        elif parts[1] == "RSHIFT":
+            rules[end] = ("RSHIFT",parts[0],parts[2])
+        else:
+            rules[end] = parts[0]
+    return rules
 
 def evaluate(n):
-    if n[0] in "0123456789":
+    if n.isnumeric():
         return int(n)
     coding = rules[n]
-    print("IN:",n,coding)
+    dprint("IN:",n,coding)
     if isinstance(coding,int):
         return coding
     elif isinstance(coding,str):
@@ -37,7 +41,13 @@ def evaluate(n):
     elif coding[0] == "RSHIFT":
         res = evaluate(coding[1]) >> evaluate(coding[2])
     rules[n] = res
-    print( "OUT:", n, res )
+    dprint( "OUT:", n, res )
     return res
 
-print( evaluate('a') )
+rules = makerules()
+parta = evaluate('a')
+print( "Part 1:", parta )
+
+rules = makerules()
+rules['b'] = parta
+print( "Part 2:", evaluate('a') )
