@@ -1,7 +1,5 @@
-s = eval(open("day07.txt").read())
-
 rules = {}
-for rule in s:
+for rule in open("day07.txt"):
     parts = rule.split();
     end = parts[-1]
     if parts[0] == "NOT":
