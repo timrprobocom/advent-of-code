@@ -32,13 +32,21 @@ def diff(a,b):
         b = (b,)
     return tuple(k for k in a if k not in b)
 
+# I think there's a bug in this puzzle.
+# I get the "accepted" answer only if I allow chips on floors with
+# PAIRED generators.  That's not what the text says.
+
 def valid(contents):
     # A floor is invalid if there is a generator (-) and 
     # a micro (+) without a generator (-),
+#    return not (
+#       any(m for m in contents if m > 0 and -m not in contents) and
+#       any(m for m in contents if m < 0 and -m not in contents)
+#    )
     return not (
-       any(m for m in contents if m < 0) and 
+       contents and contents[0] < 0 and
        any(m for m in contents if m > 0 and -m not in contents)
-   )
+    )
 
 # Yield all possible moves from this floor.
 
@@ -50,7 +58,7 @@ def get_moves(bldg, floor):
         if newfloor < minfloor or newfloor > 3:
             continue
         # We can move any single or any pair.
-        for n in itertools.chain( contents, itertools.combinations(contents,2)):
+        for n in itertools.chain( itertools.combinations(contents,2), contents):
             new1 = diff(contents, n)
             new2 = union(bldg[newfloor], n)
             if not valid(new1) or not valid(new2):
