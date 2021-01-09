@@ -22,13 +22,8 @@ def escape(s):
             sz += 1
     return sz;
 
-
-sun = 0
-sesc = 0
-for ln in open('day08.txt'):
-    ln = ln.strip()
-    sun += unescape(ln)
-    sesc += escape(ln)
+sun = sum(unescape(ln.strip()) for ln in open('day08.txt'))
+sesc = sum(escape(ln.strip()) for ln in open('day08.txt'))
 
 print( "Part 1:", sun )
 print( "Part 2:", sesc )
