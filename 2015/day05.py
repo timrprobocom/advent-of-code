@@ -1,30 +1,17 @@
 
-
-nice = 0
-for ln in open('day05.txt'):
-    if any(( ln.find(x)>=0 for x in ('ab','cd','pq','xy'))):
-        continue
-    if sum(ln.count(c) for c in 'aeiou') < 3:
-        continue
-    ok = False
-    for n in range(len(ln)-1):
-        if ln[n] == ln[n+1]:
-            ok = True
-            nice += 1
-            break
+nice = sum( 1 for ln in open('day05.txt')
+    if not any(( x in ln for x in ('ab','cd','pq','xy')))
+    and sum(ln.count(c) for c in 'aeiou') >= 3
+    and any( a==b for a,b in zip(ln[:-1],ln[1:]) )
+)
 
 print( "Part 1:", nice )
 
-nice = 0
-for ln in open('day05.txt'):
-    s1, s2 = False, False
-    for n in range(len(ln)-2):
-        if ln.find( ln[n:n+2], n+2) >= 0:
-            s1 = True
-        if ln[n] == ln[n+2]:
-            s2 = True
-    if s1 and s2:
-        nice += 1
+
+nice = sum( 1 for ln in open('day05.txt') 
+    if any(ln[n:n+2] in ln[n+2:] for n in range(len(ln)-2))  
+    and any(ln[n] == ln[n+2] for n in range(len(ln)-2))
+)
 
 print( "Part 2:", nice )
 

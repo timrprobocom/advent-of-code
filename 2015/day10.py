@@ -1,9 +1,6 @@
 import os
 import re
 import sys
-import functools
-import itertools
-import operator
 from pprint import pprint
 
 test = "1"
