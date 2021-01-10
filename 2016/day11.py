@@ -62,7 +62,7 @@ def valid_ok(contents):
        any(m for m in contents if m > 0 and -m not in contents)
     )
 
-valid = valid_ok
+valid = valid_bug if 'bug' in sys.argv else valid_ok
 
 # Yield all possible moves from this floor.
 
