@@ -22,6 +22,16 @@ else:
 
 bldg = tuple(tuple(sorted(k)) for k in bldg)
 
+# The ONE TRUE OPTIMIZATION.  All pairs of items are equivalent,
+# so encode the state so they don't matter.
+
+def encode(bldg):
+    counts = [[0]*8,[0]*8]
+    for f,floor in enumerate(bldg):
+        for u in floor:
+            counts[u>0][abs(u)] = f
+    return tuple(sorted(zip(counts[0],counts[1])))
+
 def union(a,b):
     if type(b) is not tuple:
         b = (b,)
@@ -36,17 +46,23 @@ def diff(a,b):
 # I get the "accepted" answer only if I allow chips on floors with
 # PAIRED generators.  That's not what the text says.
 
-def valid(contents):
+def valid_bug(contents):
     # A floor is invalid if there is a generator (-) and 
     # a micro (+) without a generator (-),
-#    return not (
-#       any(m for m in contents if m > 0 and -m not in contents) and
-#       any(m for m in contents if m < 0 and -m not in contents)
-#    )
+    return not (
+       any(m for m in contents if m > 0 and -m not in contents) and
+       any(m for m in contents if m < 0 and -m not in contents)
+    )
+
+def valid_ok(contents):
+    # A floor is invalid if there is a generator (-) and 
+    # a micro (+) without a generator (-),
     return not (
        contents and contents[0] < 0 and
        any(m for m in contents if m > 0 and -m not in contents)
     )
+
+valid = valid_ok
 
 # Yield all possible moves from this floor.
 
@@ -70,7 +86,7 @@ def get_moves(bldg, floor):
             yield newfloor, newbldg
 
 def process(bldg):
-    seen = set( (0,bldg) )
+    seen = set( (0,encode(bldg)) )
     undone = queue.Queue()
     undone.put( (bldg,0,1) )
     count = 0
@@ -86,9 +102,10 @@ def process(bldg):
             if not any(newbldg[0:3]):
                 print( "WINNER", depth, newbldg )
                 return depth
-            if (elevator,newbldg) in seen:
+            enc = encode(newbldg)
+            if (elevator,enc) in seen:
                 continue
-            seen.add( (elevator,newbldg) )
+            seen.add( (elevator,enc) )
             undone.put( (newbldg, newfloor, depth+1 ) )
 
 # This does reach the correct state, but it takes 39 steps.
