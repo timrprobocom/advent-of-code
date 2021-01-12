@@ -42,9 +42,6 @@ def diff(a,b):
         b = (b,)
     return tuple(k for k in a if k not in b)
 
-# I think there's a bug in this puzzle.
-# I get the "accepted" answer only if I allow chips on floors with
-# PAIRED generators.  That's not what the text says.
 
 def valid_bug(contents):
     # A floor is invalid if there is a generator (-) and 
