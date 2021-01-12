@@ -102,10 +102,10 @@ def process(bldg):
             if not any(newbldg[0:3]):
                 print( "WINNER", depth, newbldg )
                 return depth
-            enc = encode(newbldg)
-            if (elevator,enc) in seen:
+            state = (elevator,encode(newbldg))
+            if state in seen:
                 continue
-            seen.add( (elevator,enc) )
+            seen.add( state )
             undone.put( (newbldg, newfloor, depth+1 ) )
 
 # This does reach the correct state, but it takes 39 steps.
