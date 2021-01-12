@@ -102,14 +102,12 @@ def process(bldg):
             if not any(newbldg[0:3]):
                 print( "WINNER", depth, newbldg )
                 return depth
-            state = (elevator,encode(newbldg))
+            state = (newfloor,encode(newbldg))
             if state in seen:
                 continue
             seen.add( state )
             undone.put( (newbldg, newfloor, depth+1 ) )
 
-# This does reach the correct state, but it takes 39 steps.
-# Should be 31.  Why?
 # Clearing a floor with N symbols is 2*(N-1)-1
 # 4 2 4 0 = 5, 9, 17 = 31
 
