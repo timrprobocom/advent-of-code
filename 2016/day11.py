@@ -95,9 +95,9 @@ def process(bldg):
         if count % 10000 == 0:
             print(count,depth)
         bldg, elevator, depth = undone.get()
-        dprint( depth, elevator, bldg )
-        dprint( list( get_moves(bldg, elevator) ) )
-        dprint( "****" )
+#        dprint( depth, elevator, bldg )
+#        dprint( list( get_moves(bldg, elevator) ) )
+#        dprint( "****" )
         for newfloor,newbldg in get_moves(bldg, elevator):
             if not any(newbldg[0:3]):
                 print( "WINNER", depth, newbldg )
