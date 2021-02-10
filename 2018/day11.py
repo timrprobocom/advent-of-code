@@ -1,7 +1,7 @@
 import time
 before = time.time()
 
-live = 7672
+live = 3613 #7672
 
 # Grid is 300x300, based at 1
 # Rack is X + 10
@@ -17,40 +17,30 @@ def findPower(x,y,serial):
     return ord(str(power)[-3]) - 48 - 5
 
 
-print findPower(3,5,8),4
-print findPower(122,79,57),-5
-print findPower(217,196,39),0
-print findPower(101,153,71),4
+print( findPower(3,5,8),4 )
+print( findPower(122,79,57),-5 )
+print( findPower(217,196,39),0 )
+print( findPower(101,153,71),4 )
 
 grid = []
 for y in range(300):
-    print y,
+    print( y, end=' ')
     row = []
     for x in range(300):
         row.append( findPower( x+1, y+1, live ) )
     grid.append(row)
 
-print
-print len(grid), len(grid[0])
+print()
+print( len(grid), len(grid[0]) )
 
-def convolute( grid, sq ):
+def convolve( grid, sq ):
     maxx = len(grid) - sq
     row = []
-#    rowbase = None
     for y in range(0,maxx):
         base = 0
         for cvy in range(sq):
             for cvx in range(sq):
                 base += grid[y+cvy][cvx]
-#        if rowbase is None:
-#            for cvy in range(sq):
-#                for cvx in range(sq):
-#                    base += grid[y+cvy][cvx]
-#        else:
-#            base = rowbase
-#            for cvx in range(sq):
-#                base = base - grid[y-1][cvx] + grid[y+sq-1][cvx]
-#        rowbase = base
         row.append(base)
         for x in range(1,maxx):
             for cvy in range(sq):
@@ -66,10 +56,12 @@ def convolute( grid, sq ):
 
 maxes = []
 
-for square in range(25):
-    c = convolute( grid, square )
-    print square, c
+for square in range(99):
+    c = convolve( grid, square )
+    print( square, c )
+    if c[0] < 0:
+            break
     maxes.append( c )
 
-print max(maxes), maxes.index(max(maxes))
-print time.time() - before
+print( max(maxes), maxes.index(max(maxes)) )
+print( time.time() - before )
