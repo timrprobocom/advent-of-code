@@ -49,9 +49,8 @@ def coords(dx,dy,limx,limy):
         y += dy
 
 def counttrees( dx, dy ):
-    return sum( 1 
+    return sum( data[y][x]=='#' 
         for x,y in coords(dx, dy, len(data[0]), len(data)) 
-        if data[y][x]=='#' 
     )
 
 def try2():

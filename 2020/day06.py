@@ -25,12 +25,7 @@ if 'test' in sys.argv:
 else:
     data = open('day06.txt').read().split('\n\n')
 
-sumx = 0
-for line in data:
-    s = set(line.replace('\n',''))
-    if DEBUG:
-        print(len(master), master)
-    sumx += len(s)
+sumx = sum( len(set(line.replace('\n',''))) for line in data )
 
 print("Part 1:", sumx)
 

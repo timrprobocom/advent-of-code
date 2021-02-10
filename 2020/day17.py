@@ -35,7 +35,7 @@ def translate(data):
 
 def countneighbors( cell, state ):
     x,y,z,w = cell
-    return sum(1 for dx,dy,dz,dw in adjacent if (x+dx,y+dy,z+dz,w+dw) in state)
+    return sum( (x+dx,y+dy,z+dz,w+dw) in state for dx,dy,dz,dw in adjacent )
 
 def printgrid( state ):
     minx,miny,minz,minw,maxx,maxy,maxz,maxw = minmax(state)
@@ -64,12 +64,8 @@ def nextstate(state,part=1):
                 for x in range(minx-1,maxx+2):
                     cell = (x,y,z,w)
                     neighbors = countneighbors(cell,state)
-                    if cell in state:
-                        if neighbors in (2,3):
-                            new.add( cell )
-                    else:
-                        if neighbors == 3:
-                            new.add( cell )
+                    if neighbors == 3 or (cell in state and neighbors == 2):
+                        new.add( cell )
     return new
 
 state = translate( data )
