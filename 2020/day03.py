@@ -41,15 +41,18 @@ def try1():
     print( "Part 1:", counts[1] )
     print( "Part 2:", counts[0] * counts[1] * counts[2] * counts[3] * counts[4] )
 
-def counttrees( dx, dy ):
+def coords(dx,dy,limx,limy):
     x,y = 0,0
-    count = 0
-    while y < len(data):
-        if data[y][x] == '#':
-            count += 1
-        x = (x + dx) % len(data[0])
+    while y < limy:
+        yield x,y
+        x = (x + dx) % limx
         y += dy
-    return count
+
+def counttrees( dx, dy ):
+    return sum( 1 
+        for x,y in coords(dx, dy, len(data[0]), len(data)) 
+        if data[y][x]=='#' 
+    )
 
 def try2():
     return [counttrees(*s) for s in ((1,1),(3,1),(5,1),(7,1),(1,2))]
