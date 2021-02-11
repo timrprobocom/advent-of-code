@@ -27,25 +27,20 @@ elif 'test2' in sys.argv:
 else:
     data = open('day14.txt').read().split('\n')[:-1]
 
+
 def xlatemask1(mask):
-    mask0 = value = 0
-    for c in mask:
-        mask0 <<= 1
-        value <<= 1
-        if c == 'X':
-            mask0 += 1
-        else:
-            value += int(c)
+    mask0 = int( mask.replace('1','0').replace('X','1'), 2 )
+    value = int( mask.replace('X','0'), 2 )
     return mask0, value
-        
+
+
+
 def part1(data):
     memory = {}
     for ln in data:
         left,_,right = ln.split()
         if left == 'mask':
             mask0, value = xlatemask1(right)
-            if DEBUG:
-                print( hex(mask0), value )
         else:
             i = left.find('[')
             j = left.find(']')
