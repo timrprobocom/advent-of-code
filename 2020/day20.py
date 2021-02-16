@@ -2,6 +2,8 @@ import os
 import re
 import sys
 import math
+import functools
+import operator
 from pprint import pprint
 
 test = """\
@@ -91,8 +93,11 @@ gridsize = int(math.sqrt(len(data)))
 # Test is 3x3, count is 303
 # Live is 12x12, count is 2806 - 15 * 12
 
+def prod(it):
+    return functools.reduce( operator.mul, it, 1 )
+
 def part1():
-    return math.prod( t for t, tlist in matches.items() if len(tlist) == 2 )
+    return prod( t for t, tlist in matches.items() if len(tlist) == 2 )
 
 # How do we stitch this together?
 # The 2s have to be corners.  The 3s are edges.  The 4s are centers.
@@ -315,6 +320,26 @@ monster = (
 
 msize = (3,20)
 
+def search1( biggrid ):
+    pattern = r"(?=#..{76}#....##....##....###.{76}.#..#..#..#..#..#)"
+    bg = ''.join(r_rot90cw(r_vflip(biggrid)))
+    return len(re.findall(pattern, bg))
+
+def search1( biggrid ):
+    pattern = r"(?=#\S.{77}#\S\S\S\S##\S\S\S\S##\S\S\S\S###.{77}\S#\S\S#\S\S#\S\S#\S\S#\S\S#)"
+    bg = ' '.join(r_rot90cw(r_vflip(biggrid)))
+    return len(re.findall(pattern, bg))
+
+def search2( biggrid ):
+    count = 0
+    bglen = len(biggrid)
+    for row in range(0,bglen-3):
+        for col in range(0,bglen-20):
+            if all( biggrid[col+dx][row+dy] == '#' for dy,dx in monster ):
+                count += 1
+    return count
+
+
 def search( biggrid ):
     count = 0
     bglen = len(biggrid)
@@ -366,6 +391,18 @@ biggrid = stitchgrid( tiles, grid )
 
 if DEBUG:
     pprint( biggrid )
+
+import time
+t1 = time.time()
+print( search1(biggrid))
+print( search2(biggrid))
+for i in range(100):
+    search1(biggrid)
+t2 = time.time()
+for i in range(100):
+    search2(biggrid)
+t3 = time.time()
+print( t2-t1, t3-t2 )
 
 ogres = search(biggrid)
 
