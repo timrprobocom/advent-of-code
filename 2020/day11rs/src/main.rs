@@ -35,69 +35,78 @@ fn translate(data : &Vec<String>) -> Grid {
     grid
 }
 
-fn countneighbors( cell : Cell, seats: &Grid, occupied: &Grid ) -> i32 {
-    let deltas = iproduct!( -1..2, -1..2 ).filter(|x| *x != (0,0) );
-    let (x,y) = cell;
-    deltas
-        .filter(|(dx,dy)| occupied.contains(&(x+dx,y+dy)))
-        .count() as i32
+struct NeighborCounter1 {
+    maxx: i32,
+    maxy: i32
 }
 
-fn countneighbors2( cell : Cell, maxima : (i32,i32), seats: &Grid, occupied: &Grid ) -> i32 {
-    let (xlen,ylen) = maxima;
-    let deltas = iproduct!( -1..2, -1..2 ).filter(|x| *x != (0,0) );
+struct NeighborCounter2 {
+    maxx: i32,
+    maxy: i32
+}
 
-    let mut neighbors = 0;
-    for (dx,dy) in deltas {
-        let mut x = cell.0+dx;
-        let mut y = cell.1+dy;
-        while 0 <= x && x <= xlen && 0 <= y && y <= ylen {
-            if seats.contains(&(x,y)) {
-                if occupied.contains(&(x,y)) {
-                    neighbors += 1
-                }
-                break
-            }
-            x = x + dx;
-            y = y + dy;
-        }
+trait NeighborCounter {
+    fn count( &self, cell : Cell, seats: &Grid, occupied: &Grid ) -> i32;
+}
+
+impl NeighborCounter1 {
+    fn new( maxima : (i32,i32) ) -> Self {
+        NeighborCounter1 { maxx: maxima.0, maxy: maxima.1 }
     }
-
-    neighbors
 }
 
+impl NeighborCounter for NeighborCounter1 {
+    fn count( &self, cell : Cell, _seats: &Grid, occupied: &Grid ) -> i32 {
+        let deltas = iproduct!( -1..2, -1..2 ).filter(|x| *x != (0,0) );
+        let (x,y) = cell;
+        deltas
+            .filter(|(dx,dy)| occupied.contains(&(x+dx,y+dy)))
+            .count() as i32
+    }
+}
 
-fn pass1step(_maxima : (i32,i32), seats : &Grid, occupied : &Grid, criteria: i32) -> Grid {
+impl NeighborCounter2 {
+    fn new( maxima : (i32,i32) ) -> Self {
+        NeighborCounter2 { maxx: maxima.0, maxy: maxima.1 }
+    }
+}
 
-/*
-    let mut result = Grid::new();
-    for cell in seats {
-        let n = countneighbors( *cell, &seats, &occupied );
-        if n == 0 || (occupied.contains(&cell) && n < criteria)  {
-            result.insert( *cell );
+impl NeighborCounter for NeighborCounter2 {
+    fn count( &self, cell : Cell, seats: &Grid, occupied: &Grid ) -> i32 {
+        let deltas = iproduct!( -1..2, -1..2 ).filter(|x| *x != (0,0) );
+
+        let mut neighbors = 0;
+        for (dx,dy) in deltas {
+            let mut x = cell.0+dx;
+            let mut y = cell.1+dy;
+            while 0 <= x && x <= self.maxx && 0 <= y && y <= self.maxy {
+                if seats.contains(&(x,y)) {
+                    if occupied.contains(&(x,y)) {
+                        neighbors += 1
+                    }
+                    break
+                }
+                x = x + dx;
+                y = y + dy;
+            }
         }
-    };
-    result
-*/
+
+        neighbors
+    }
+}
+
+
+fn passstep(counter: &dyn NeighborCounter, seats : &Grid, occupied : &Grid, criteria: i32) -> Grid {
+
     Grid::from_iter(
         seats
             .iter()
-            .map(      |cell| (cell, countneighbors( *cell, &seats, &occupied )) )
+            .map(      |cell| (cell, counter.count( *cell, &seats, &occupied )) )
             .filter(   |&(cell,count)| (count == 0 || (occupied.contains(&cell) && count < criteria)) )
             .map(      |(cell,_)| *cell )
     )
 }
 
-fn pass2step(maxima : (i32,i32), seats : &Grid, occupied : &Grid, criteria: i32) -> Grid {
-
-    Grid::from_iter(
-        seats
-            .iter()
-            .map(      |cell| (cell, countneighbors2( *cell, maxima, &seats, &occupied )) )
-            .filter(   |&(cell,count)| (count == 0 || (occupied.contains(&cell) && count < criteria)) )
-            .map(      |(cell,_)| *cell )
-    )
-}
 
 fn main() {
     let data : Vec<String> = if env::args().any(|x| x=="test")  {
@@ -114,11 +123,13 @@ fn main() {
 
     let xlen = data[0].len() as i32;
     let ylen = data.len() as i32;
+    let counter1 = NeighborCounter1::new( (xlen, ylen) );
+    let counter2 = NeighborCounter2::new( (xlen, ylen) );
 
     let seats = translate( &data );
     let mut occupied = Grid::new();
     loop {
-        let occ2 = pass1step( (xlen,ylen), &seats, &occupied, 4 );
+        let occ2 = passstep( &counter1, &seats, &occupied, 4 );
         if occupied == occ2 {
             break;
         };
@@ -130,7 +141,7 @@ fn main() {
 
     let mut occupied = Grid::new();
     loop {
-        let occ2 = pass2step( (xlen,ylen), &seats, &occupied, 5 );
+        let occ2 = passstep( &counter2, &seats, &occupied, 5 );
         if occupied == occ2 {
             break;
         };
