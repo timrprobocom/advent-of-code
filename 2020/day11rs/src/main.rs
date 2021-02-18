@@ -36,13 +36,11 @@ fn translate(data : &Vec<String>) -> Grid {
 }
 
 struct NeighborCounter1 {
-    maxx: i32,
-    maxy: i32
 }
 
 struct NeighborCounter2 {
     maxx: i32,
-    maxy: i32
+    maxy: i32,
 }
 
 trait NeighborCounter {
@@ -50,8 +48,8 @@ trait NeighborCounter {
 }
 
 impl NeighborCounter1 {
-    fn new( maxima : (i32,i32) ) -> Self {
-        NeighborCounter1 { maxx: maxima.0, maxy: maxima.1 }
+    fn new( ) -> Self {
+        NeighborCounter1 { }
     }
 }
 
@@ -109,6 +107,8 @@ fn passstep(counter: &dyn NeighborCounter, seats : &Grid, occupied : &Grid, crit
 
 
 fn main() {
+    let debug : bool = env::args().any(|x| x=="debug");
+
     let data : Vec<String> = if env::args().any(|x| x=="test")  {
         TEST
             .iter()
@@ -123,7 +123,7 @@ fn main() {
 
     let xlen = data[0].len() as i32;
     let ylen = data.len() as i32;
-    let counter1 = NeighborCounter1::new( (xlen, ylen) );
+    let counter1 = NeighborCounter1::new( );
     let counter2 = NeighborCounter2::new( (xlen, ylen) );
 
     let seats = translate( &data );
@@ -134,7 +134,9 @@ fn main() {
             break;
         };
         occupied = occ2.clone();
-//        println!( "{}", occ2.len() )
+        if debug {
+            println!( "{}", occ2.len() )
+        }
     }
 
     println!( "Part 1: {}", occupied.len() );
@@ -146,7 +148,9 @@ fn main() {
             break;
         };
         occupied = occ2.clone();
-//        println!( "{}", occ2.len() )
+        if debug {
+            println!( "{}", occ2.len() )
+        }
     }
 
     println!( "Part 2: {}", occupied.len() );
