@@ -101,12 +101,11 @@ fn eval1 ((position, waypt, direction): State, instruction: Instruction) -> Stat
 // Direction is ignored.
 
 fn eval2 ((position, waypt, direction): State, instruction: Instruction) -> State {
-    let i =
     match instruction {
         Instruction::Advance(steps) => (movewaypt( steps, &waypt, position ), waypt, direction),
         Instruction::AdvanceIn(steps, thisdirection) => (position, movepos( steps, &thisdirection, waypt ), direction),
         Instruction::Rotate => (position, rotate_pt(waypt), direction)
-    }; println!( "{:?} {:?}", i.0, i.1 ); i
+    }
 }
 
 // Manhattan distance.  Should be an impl of Position.
