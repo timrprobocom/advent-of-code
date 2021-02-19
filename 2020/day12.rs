@@ -25,7 +25,7 @@ enum Instruction {
   Advance( i32 ),
   // Rotate 90 degrees clockwise
   Rotate,
-  /// Advance steps in this direction
+  // Advance steps in this direction
   AdvanceIn( i32, Direction )
 }
 
@@ -42,7 +42,7 @@ fn parse_instruction (instruction: String) -> Vec<Instruction> {
         'E' => vec![Instruction::AdvanceIn ( count, Direction::East )],
         'W' => vec![Instruction::AdvanceIn ( count, Direction::West )],
         'S' => vec![Instruction::AdvanceIn ( count, Direction::South )],
-        _  => vec![]
+        _  => panic!()
     }
 }
 
@@ -58,7 +58,7 @@ fn movepos (n: i32, direction: &Direction, pos: Position) -> Position {
     }
 }
 
-// Retrieve a new direction by rotating 90 degrees clockwise from a given direction
+// Create a new direction by rotating 90 degrees clockwise from a given direction.
 fn rotate (direction: Direction) -> Direction {
     match direction {
         Direction::North => Direction::East,
@@ -69,13 +69,18 @@ fn rotate (direction: Direction) -> Direction {
 }
 
 // Rotate the position clockwise 90 degrees.
+
 fn rotate_pt(point: Position) -> Position {
     (-point.1, point.0)
 }
 
+// Move the ship through the waypoint N times.
+
 fn movewaypt(steps: i32, waypt: &Position, point: Position) -> Position {
     (point.0 + waypt.0 * steps, point.1 + waypt.1 * steps)
 }
+
+// Ship position, waypoint position, facing direction.
 
 type State = (Position, Position, Direction);
 
@@ -103,6 +108,8 @@ fn eval2 ((position, waypt, direction): State, instruction: Instruction) -> Stat
         Instruction::Rotate => (position, rotate_pt(waypt), direction)
     }; println!( "{:?} {:?}", i.0, i.1 ); i
 }
+
+// Manhattan distance.  Should be an impl of Position.
 
 fn mandist (state: State) -> i32 {
     let (x,y) = state.0;
