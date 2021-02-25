@@ -118,6 +118,6 @@ pub fn main() {
     };
     println!( "Part 1: {}", ans );
 
-    let val = twopass(&data);
-    println!( "Part 2: {}", val )
+    let ans = twopass(&data);
+    println!( "Part 2: {}", ans )
 }
