@@ -29,7 +29,7 @@ static TEST2 : [&str; 9] =
 
 type Program = Vec<(String,i32)>;
 
-fn onepass( data : Program ) -> Result<i32,i32> {
+fn onepass( data : &Program ) -> Result<i32,i32> {
     let mut pc = 0_usize;
     let mut accum = 0;
     let mut seen = HashSet::<usize>::new();
@@ -37,7 +37,7 @@ fn onepass( data : Program ) -> Result<i32,i32> {
     loop {
         if seen.contains( &pc )
         {
-            return Ok(accum)
+            return Err(accum)
         }
         seen.insert(pc);
         if pc == data.len()
@@ -57,24 +57,28 @@ fn onepass( data : Program ) -> Result<i32,i32> {
         pc += 1
     }
 }
-/*
 
-def cycle(base):
-    for i in range(len(base)):
-        data = base[:]
-        if data[i][0] == 'acc':
-            continue
-        if DEBUG:
-            print( "Trying", i )
-        if data[i][0] == 'nop':
-            data[i] = ('jmp',data[i][1])
-        elif data[i][0] == 'jmp':
-            data[i] = ('nop',data[i][1])
-        (res,val) = onepass(data)
-        if res:
-            print( "SUCCESS", val )
-            return val
-*/
+fn twopass( base : &Program ) -> i32 {
+    for i in 0..base.len() {
+        let mut data = base.clone();
+
+        let (opc,delta) = &data[i];
+
+        match &opc[..] {
+            "acc" => continue,
+            "nop" => data[i] = ("jmp".to_string(),*delta),
+            "jmp" => data[i] = ("nop".to_string(),*delta),
+            _ => panic!()
+        }
+
+        let result = onepass(&data);
+
+        if let Ok(val) = result {
+            return val;
+        }
+    }
+    0
+}
 
 
 fn import( s : String ) -> (String,i32) {
@@ -106,23 +110,14 @@ pub fn main() {
             .collect()
     };
 
-    println!("{:?}", data );
+    let val = onepass(&data);
 
-    let val = onepass(data);
-    println!( "Part 1: {}", val.unwrap() )
+    let ans = match val {
+        Ok(v) => v,
+        Err(v) => v
+    };
+    println!( "Part 1: {}", ans );
 
-    /*
-    let mut program = Vec::<Instruction>::new();
-    for line in data {
-        program.extend( parse_instruction(line) );
-    }
-
-    let final1 = program.iter().fold(initial_state, |pos,instr| eval1(pos,*instr));
-
-    println!("Part 1: {:?}", mandist(final1) );
-
-    let final2 = program.iter().fold(initial_state, |pos,instr| eval2(pos,*instr));
-
-    println!("Part 2: {:?}", mandist(final2) );
-    */
+    let val = twopass(&data);
+    println!( "Part 2: {}", val )
 }
