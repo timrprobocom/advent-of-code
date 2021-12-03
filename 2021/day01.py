@@ -25,8 +25,7 @@ def part1(data):
     return sum((data[1:] - data[:-1]) > 0)
 
 def part2(data):
-    data = data[:-2]+data[1:-1]+data[2:]
-    return part1(data)
+    return sum((data[3:] - data[:-3]) > 0)
 
 print("Part 1:", part1(vals) )
 print("Part 2:", part2(vals) )
