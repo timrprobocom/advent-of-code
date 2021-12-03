@@ -1,33 +1,33 @@
 import sys
+import numpy as np
+
+test = [
+199,
+200,
+208,
+210,
+200,
+207,
+240,
+269,
+260,
+263
+]
+
 if 'test' in sys.argv:
-    fn = 'test01.txt'
+    vals = test
 else:
-    fn = 'day01.txt'
+    vals = [int(i) for i in open('day01.txt')]
 
-vals = [int(i) for i in open(fn)]
+vals = np.array(vals)
 
+def part1(data):
+    return sum((data[1:] - data[:-1]) > 0)
 
-def pass1(data):
-    ups = 0
-    last = 999
-    for i in data:
-        if i > last:
-            ups += 1
-        last = i
-    return ups
+def part2(data):
+    data = data[:-2]+data[1:-1]+data[2:]
+    return part1(data)
 
-
-def pass2(data):
-    last3 = [999,999,999]
-    last = 2999
-    ups = 0
-    for i in data:
-        last3 = last3[1:]+[i]
-        if sum(last3) > last:
-            ups += 1
-        last = sum(last3)
-    return ups
-
-print("Part 1:", pass1(vals) )
-print("Part 2:", pass2(vals) )
+print("Part 1:", part1(vals) )
+print("Part 2:", part2(vals) )
 
