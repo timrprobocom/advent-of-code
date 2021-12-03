@@ -1,4 +1,5 @@
 import sys
+from dataclasses import dataclass
 
 test = """\
 forward 5
@@ -8,11 +9,21 @@ up 3
 down 8
 forward 2"""
 
-
 if 'test' in sys.argv:
     idata = test.splitlines()
 else:
     idata = open('day02.txt').readlines()
+
+@dataclass
+class Position:
+    pos : int = 0
+    depth : int = 0
+    aim : int = 0
+
+    def __repr__(self):
+        return f"<Position {self.pos} {self.depth} {self.aim}>"
+
+# Parse the directions.
 
 data = []
 for row in idata:
@@ -20,34 +31,32 @@ for row in idata:
     data.append( (parts[0], int(parts[1])) )
 
 
-def pass1(data):
-    pos = [0,0]
+def part1(data):
+    pos = Position()
     for verb,cnt in data:
         if verb == 'forward':
-            pos = [pos[0]+cnt, pos[1]]
+            pos.pos += cnt
         elif verb == 'up':
-            pos = [pos[0], pos[1]-cnt]
+            pos.depth -= cnt
         elif verb == 'down':
-            pos = [pos[0], pos[1]+cnt]
+            pos.depth += cnt
 
-    return pos, pos[0]*pos[1]
+    return pos.pos * pos.depth
 
 
-def pass2(data):
-    # surface, depth, aim
-    pos = [0,0,0]
+def part2(data):
+    pos = Position()
     for verb,cnt in data:
-        print(pos)
         if verb == 'forward':
-            pos = [pos[0]+cnt, pos[1]+pos[2]*cnt, pos[2]]
+            pos.pos += cnt
+            pos.depth += pos.aim * cnt
         elif verb == 'up':
-            pos = [pos[0], pos[1], pos[2]-cnt]
+            pos.aim -= cnt
         elif verb == 'down':
-            pos = [pos[0], pos[1], pos[2]+cnt]
+            pos.aim += cnt
 
-    return pos, pos[0]*pos[1]
+    return pos.pos * pos.depth
 
-
-print("Part 1:", pass1(data) )
-print("Part 2:", pass2(data) )
+print("Part 1:", part1(data) )
+print("Part 2:", part2(data) )
 
