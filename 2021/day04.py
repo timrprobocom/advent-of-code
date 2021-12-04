@@ -46,30 +46,16 @@ boards.append(board)
 print(len(boards))
 
 def check(board):
-    n = 5
-    for row in range(n):
-        if sum(board[row*5:row*5+n]) == -5:
+    for row in range(5):
+        if sum(board[row*5:row*5+5]) == -5:
             return True
-        if sum(board[i*n+row] for i in range(n)) == -5:
+        if all(board[i*5+row] < 0 for i in range(5)):
             return True
     return False
 
-def part1(calls,boards):
+def part(part,calls,boards):
     boards = [row[:] for row in boards]
-    for call in calls:
-        for board in boards:
-            if call in board:
-                i = board.index(call)
-                board[i] = -1
-                if check(board):
-                    sumx = sum(x for x in board if x >= 0)
-                    if DEBUG:
-                        print("WINNER", call, board)
-                    return sumx * call
-
-def part2(calls,boards):
-    boards = [row[:] for row in boards]
-    done = [False for _ in boards]
+    done = [False]*len(boards)
     for call in calls:
         for bno,board in enumerate(boards):
             if done[bno]:
@@ -81,10 +67,10 @@ def part2(calls,boards):
                     if DEBUG:
                         print("WINNER", call, bno, board)
                     done[bno] = True
-                    if all(done):
+                    if part == 1 or all(done):
                         sumx = sum(x for x in board if x >= 0)
                         return sumx * call
 
-print("Part 1:", part1(calls, boards) )
-print("Part 2:", part2(calls, boards) )
+print("Part 1:", part(1, calls, boards) )
+print("Part 2:", part(2, calls, boards) )
 
