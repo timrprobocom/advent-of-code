@@ -33,13 +33,15 @@ elif 'test2' in sys.argv:
 else:
     data = open('day08.txt').read().split('\n')[:-1]
 
-d2 = []
-for ln in data:
-    parts = ln.split()
-    d2.append((parts[0],int(parts[1])))
+#d2 = []
+#for ln in data:
+#    parts = ln.split()
+#    d2.append((parts[0],int(parts[1])))
 
-data = d2
-del d2
+data = [(parts[0],int(parts[1])) for parts in (ln.split() for ln in data)]
+
+#data = d2
+#del d2
 
 def onepass(data):
     pc = 0

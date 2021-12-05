@@ -26,7 +26,7 @@ live = open('day02.txt').readlines()
 def evaluate( lines, passx ):
     return sum( passx(line) for line in lines )
 
-print( "2:", evaluate( test, pass1 ) )
+print( "1:", evaluate( test, pass1 ) )
 print( "Part 1:", evaluate( live, pass1 ) )
-print( "1:", evaluate( test, pass2 ) )
+print( "2:", evaluate( test, pass2 ) )
 print( "Part 2:", evaluate( live, pass2 ) )
