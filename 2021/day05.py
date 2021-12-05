@@ -30,21 +30,22 @@ data = [parse(line) for line in data]
 def part(part, data):
     grid = Counter()
     for x0,y0,x1,y1 in data:
-        dx = ddx = x1-x0
-        dy = ddy = y1-y0
+        dx = x1-x0
+        dy = y1-y0
+        cnt = max( abs(dx), abs(dy) ) + 1
 
-        if ddx < 0:
+        if dx < 0:
             dx = -1
-        elif ddx > 0:
+        elif dx > 0:
             dx = 1
-        if ddy < 0:
+        if dy < 0:
             dy = -1
-        elif ddy > 0:
+        elif dy > 0:
             dy = 1
 
         if part == 1 and dx and dy:
             continue
-        cnt = max( abs(ddx), abs(ddy) ) + 1
+
         for _ in range(cnt):
             grid[(x0,y0)] += 1
             x0 += dx
