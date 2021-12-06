@@ -32,11 +32,8 @@ def part1(n,data):
 # for i in 0 .. 1+t/7
 #   for k in 0 .. 1+(t-7i)/9
 #     So you count the combos if there's enough time?
-
-def descendants(t, v):
-    for i in range(1 + t // 7):
-        for k in range(1 + (t - i * 7) // 9):
-            print(i, k, comb(i + k, i), ((v + i * 7 + k * 9) < t))
+#
+# I don't understand this solution.
 
 def descendants(t, v):
     return 1 + sum(comb(i + k, i) * ((v + i * 7 + k * 9) < t) for i in range(1 + t // 7) for k in range(1 + (t - i * 7) // 9))
@@ -44,11 +41,29 @@ def descendants(t, v):
 def part2(n,data):
     return sum(descendants(n,d) for d in data)
 
-for n in (80,256):
-    for z in range(6):
-        print(n, z, descendants(n,z) )
+def test2():
+    for n in (80,256):
+        for z in range(6):
+            print(n, z, descendants(n,z) )
+
+def oneday(lanternfisch):
+    new_lanternfish = [0] * 9
+    for index in range(len(lanternfisch)):
+        if index == 0:
+            new_lanternfish[6] += lanternfisch[0]
+            new_lanternfish[8] += lanternfisch[0]
+        else:
+            new_lanternfish[index - 1] += lanternfisch[index]
+    return new_lanternfish
+
+def part2(n,data):
+    counts = [0]*9
+    for i in data:
+        counts[i] += 1
+    for i in range(n):
+        counts = oneday(counts)
+    return sum(counts)
 
 print("Part 1:", part1(80,data))
 print("Part 1:", part2(80,data))
 print("Part 2:", part2(256,data))
-
