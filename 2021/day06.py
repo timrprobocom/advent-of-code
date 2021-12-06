@@ -14,17 +14,6 @@ if 'test' in sys.argv:
 else:
     data = live
 
-def part1(n,data):
-    data = data[:]
-    for _ in range(n):
-        for i in range(len(data)):
-            if data[i] == 0:
-                data[i] = 6
-                data.append( 8 )
-            else:
-                data[i] -= 1
-    return len(data)
-
 # Combinations would not have occurred to me.
 #
 # 1 (the original)
@@ -46,24 +35,14 @@ def test2():
         for z in range(6):
             print(n, z, descendants(n,z) )
 
-def oneday(lanternfisch):
-    new_lanternfish = [0] * 9
-    for index in range(len(lanternfisch)):
-        if index == 0:
-            new_lanternfish[6] += lanternfisch[0]
-            new_lanternfish[8] += lanternfisch[0]
-        else:
-            new_lanternfish[index - 1] += lanternfisch[index]
-    return new_lanternfish
-
-def part2(n,data):
+def part(n,data):
     counts = [0]*9
     for i in data:
         counts[i] += 1
     for i in range(n):
-        counts = oneday(counts)
+        counts = counts[1:]+counts[0:1]
+        counts[6] += counts[8]
     return sum(counts)
 
-print("Part 1:", part1(80,data))
-print("Part 1:", part2(80,data))
-print("Part 2:", part2(256,data))
+print("Part 1:", part(80,data))
+print("Part 2:", part(256,data))
