@@ -49,41 +49,31 @@ def part1(data):
     return risk
 
 def part2(data):
-    region = [[-1]*WIDTH for _ in range(HEIGHT)]
-    reg_no = 0
+    region = 0
+    counts = Counter()
 
     # Find all regions surrounded by 9s.
 
     for y0 in range(HEIGHT):
         for x0 in range(WIDTH):
-            if region[y0][x0] >= 0 or data[y0][x0] == 9:
+            if data[y0][x0] == 9:
                 continue
 
-            # This cell is not part of a region.  Spread to its neighbors.
-            # We could do this by counting the cells and setting data to 9,
-            # instead of doing a post-processing step.
+            # This cell is not part of a region.  Spread to its neighbors
+            # and count them.
 
+            counts[region] = 1
+            data[y0][x0] = 9
             unchecked = [(x0,y0)]
-            region[y0][x0] = reg_no
             while unchecked:
                 x1,y1 = unchecked.pop(0)
                 for dir in dirs:
                     x,y = x1+dir[0],y1+dir[1]
-                    if 0 <= x < WIDTH and 0 <= y < HEIGHT and data[y][x] < 9 and region[y][x] < 0:
-                        region[y][x] = reg_no
+                    if 0 <= x < WIDTH and 0 <= y < HEIGHT and data[y][x] < 9:
+                        counts[region] += 1
+                        data[y][x] = 9
                         unchecked.append( (x,y) )
-            reg_no += 1
-    if DEBUG:
-        printgrid(data)
-        print()
-        printgrid(region)
-
-    # Count the region sizes.
-
-    counts = Counter()
-    for y0 in range(HEIGHT):
-        for x0 in range(WIDTH):
-            counts[region[y0][x0]] += 1
+            region += 1
 
     # Grab the top three.
 
