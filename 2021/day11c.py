@@ -97,17 +97,18 @@ def generation(data):
     printgrid(data)
     return flashes
 
-# How many flashes in the first 100 generations?
-
-def part1(data):
-    return sum( generation(data) for _ in range(100) )
-
 # How many generations until they all flash at once?
 
 def part2(data):
+    flash = 0
     for gen in itertools.count(1):
-        if generation(data) == WIDTH*HEIGHT:
+        stdscr.addstr( 33, 13, "%d" % gen )
+        n = generation(data)
+        if n == WIDTH*HEIGHT:
             return gen
+        flash += n
+        if gen == 100: 
+            stdscr.addstr( 32, 5, "Part 1: %d" % flash )
 
 def main(_stdscr):
     global stdscr
@@ -121,11 +122,6 @@ def main(_stdscr):
     WIDTH = len(data[0])
     HEIGHT = len(data)
 
-    printgrid(data)
-    stdscr.addstr( 32, 5, "Part 1: %d" % part1(data))  #  1717
-    stdscr.getkey()
-
-    data = makegrid(ndata)
     printgrid(data)
     stdscr.addstr( 33, 5, "Part 2: %d" % part2(data))  #  1717
     stdscr.getkey()
