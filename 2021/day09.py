@@ -25,6 +25,24 @@ HEIGHT = len(data)
 
 dirs = ( (-1,0), (1,0), (0,1), (0,-1) )
 
+class Neighbors:
+#    dirs = (   # For diagonals too
+#        (-1,-1), (0,-1), (1,-1),
+#        (-1,0),          (1,0),
+#        (-1,1),  (0,1),  (1,1)
+#    )
+    dirs = ( (-1,0), (1,0), (0,1), (0,-1) )
+
+    def __init__( self, w, h ):
+        self.w = w
+        self.h = h
+
+    def nextto( self, x, y ):
+        for dx,dy in self.dirs:
+            x0,y0 = x+dx,y+dy
+            if 0 <= x0 < WIDTH and 0 <= y0 < HEIGHT:
+                yield x0,y0
+
 def printgrid(grid):
     for row in grid:
         for cell in row:
@@ -32,14 +50,14 @@ def printgrid(grid):
         print()
 
 def part1(data):
+    adj = Neighbors(WIDTH,HEIGHT)
     risk = 0
     for y0 in range(HEIGHT):
         for x0 in range(WIDTH):
             fail = False
             this = data[y0][x0]
-            for dir in dirs:
-                x,y = x0+dir[0],y0+dir[1]
-                if 0 <= x < WIDTH and 0 <= y < HEIGHT and data[y][x] <= this:
+            for x,y in adj.nextto(x0,y0):
+                if data[y][x] <= this:
                     fail = True
                     break
             if not fail:
@@ -51,6 +69,7 @@ def part1(data):
 def part2(data):
     region = 0
     counts = Counter()
+    adj = Neighbors(WIDTH,HEIGHT)
 
     # Find all regions surrounded by 9s.
 
@@ -67,9 +86,8 @@ def part2(data):
             unchecked = [(x0,y0)]
             while unchecked:
                 x1,y1 = unchecked.pop(0)
-                for dir in dirs:
-                    x,y = x1+dir[0],y1+dir[1]
-                    if 0 <= x < WIDTH and 0 <= y < HEIGHT and data[y][x] < 9:
+                for x,y in adj.nextto(x1,y1):
+                    if data[y][x] < 9:
                         counts[region] += 1
                         data[y][x] = 9
                         unchecked.append( (x,y) )
@@ -83,5 +101,5 @@ def part2(data):
     best = counts.most_common(3)
     return best[0][1]*best[1][1]*best[2][1]
 
-print("Part 1:", part1(data) )
-print("Part 2:", part2(data) )
+print("Part 1:", part1(data) ) # 600
+print("Part 2:", part2(data) ) # 987840
