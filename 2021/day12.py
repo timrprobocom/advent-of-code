@@ -56,7 +56,7 @@ def part(part,data):
                 if DEBUG:
                     print(path+[n])
                 paths += 1
-            elif n == n.lower() and n in path:
+            elif n.islower() and n in path:
                 if not twice:
                     untried.append( (n, path+[n], True) )
             else:
