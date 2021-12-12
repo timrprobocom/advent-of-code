@@ -49,7 +49,7 @@ def part(part,data):
     untried = [('start', ['start'], part==1)]
 
     while untried:
-        node, path, twice = untried.pop()
+        node, path, twice = untried.pop(0)
 
         for n in data[node]:
             if n == 'end':
