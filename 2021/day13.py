@@ -41,9 +41,6 @@ for row in data:
     if row.startswith('fold'):
         i = row.find('=')
         folds.append( (row[i-1], int(row[i+1:])) )
-#        _,_,z = row.split()
-#        a,b = z.split('=')
-#        folds.append((a,int(b)))
     else:
         dots.add( tuple(int(a) for a in row.split(',')) )
 
@@ -73,17 +70,17 @@ def part1(dots):
     return len(grid)
 
 def render(dots):
-    w = max( k[0] for k in dots )
-    h = max( k[1] for k in dots )
-    layout = [ [' ' for _ in range(w+1)] for _ in range(h+1)]
+    w = max( k[0] for k in dots )+1
+    h = max( k[1] for k in dots )+1
+    layout = [ [' ' for _ in range(w)] for _ in range(h)]
     for pt in dots:
-        layout[pt[1]][pt[0]] = '*'
-    return '\n' + ('\n'.join( ''.join(k) for k in layout ))
+        layout[pt[1]][pt[0]] = '#'
+    return '\n'.join( ''.join(k) for k in layout )
 
 def part2(grid):
     for f in folds:
         grid = fold( grid, *f )
-    return render(grid)
+    return '\n'+render(grid)
 
 print("Part 1:", part1(dots))  #  724
 print("Part 2:", part2(dots))  #  CPJBERUL
