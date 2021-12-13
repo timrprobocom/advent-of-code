@@ -49,16 +49,12 @@ def fold(grid, axis, coord):
     # x=6 becomes x=4
     new = set()
     for pt in grid:
-        if axis == 'x':
-            if pt[0] > coord:
-                new.add( (coord+coord-pt[0], pt[1] ))
-            else:
-                new.add( pt )
+        if axis == 'x' and pt[0] > coord:
+            new.add( (coord+coord-pt[0], pt[1]) )
+        elif axis == 'y' and pt[1] > coord:
+            new.add( (pt[0], coord+coord-pt[1]) )
         else:
-            if pt[1] > coord:
-                new.add( (pt[0], coord+coord-pt[1] ) )
-            else:
-                new.add( pt )
+            new.add( pt )
     return new
 
 if DEBUG:
@@ -66,8 +62,7 @@ if DEBUG:
     print(folds)
 
 def part1(dots):
-    grid = fold( dots, *folds[0] )
-    return len(grid)
+    return len(fold(dots, *folds[0]))
 
 def render(dots):
     w = max( k[0] for k in dots )+1
