@@ -99,8 +99,12 @@ def generation(data):
                             data[y0][x0] += 1
     return flashes
 
+# How many flashes in the first 100 generations?
+
 def part1(data):
     return sum( generation(data) for _ in range(100) )
+
+# How many generations until they all flash at once?
 
 def part2(data):
     for gen in itertools.count(1):
