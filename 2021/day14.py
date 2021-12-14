@@ -52,6 +52,7 @@ def part(polymer, xform, gens):
         counts = generation(counts, xform)
 
     counter = Counter()
+    counter[polymer[0]] = 1
     counter[polymer[-1]] = 1
     for k,v in counts.items():
         counter[k[0]] += v
