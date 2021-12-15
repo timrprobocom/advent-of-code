@@ -23,7 +23,22 @@ else:
 
 grid = [ [int(k) for k in row.strip()] for row in data]
 
-dirs = ( (-1,0), (1,0), (0,1), (0,-1) )
+class Neighbors:
+    dirs = (
+                 (0,-1),
+        (-1,0),          (1,0),
+                 (0,1),
+    )
+
+    def __init__( self, w, h ):
+        self.w = w
+        self.h = h
+
+    def nextto( self, x, y ):
+        for dx,dy in self.dirs:
+            x0,y0 = x+dx,y+dy
+            if x0 in range(self.w) and y0 in range(self.h):
+                yield x0,y0
 
 def expandgrid(grid):
     newgrid = []
@@ -46,6 +61,7 @@ def expandgrid(grid):
 def part1(grid):
     MAXX = len(grid[0])-1
     MAXY = len(grid)-1
+    adj = Neighbors(MAXX+1, MAXY+1)
 
     untried = []
     heappush( untried, (0,0,0) )
@@ -54,14 +70,12 @@ def part1(grid):
         cost,x,y = heappop(untried)
         if x==MAXX and y==MAXY:
             break
-        for dx, dy in dirs:
-            xx,yy = x+dx, y+dy
-            if xx in range(MAXX+1) and yy in range(MAXY+1):
-                nc = cost + grid[yy][xx]
-                if (xx,yy) in costs and costs[(xx,yy)]<=nc:
-                    continue
-                costs[(xx,yy)]=nc
-                heappush(untried, (nc,xx,yy))
+        for xx, yy in adj.nextto(x,y):
+            nc = cost + grid[yy][xx]
+            if (xx,yy) in costs and costs[(xx,yy)]<=nc:
+                continue
+            costs[(xx,yy)]=nc
+            heappush(untried, (nc,xx,yy))
     return cost
 
 print("Part 1:", part1(grid))                   # 702
