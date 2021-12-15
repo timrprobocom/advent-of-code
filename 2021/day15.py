@@ -1,5 +1,5 @@
 import sys
-from collections import Counter
+from heapq import heappush, heappop
 import itertools
 
 test = """\
@@ -40,15 +40,18 @@ def expandgrid(grid):
     return newgrid
 
 # This is Dijkstra's algorithm.  I should remember this.
+#
+# We use heapq so the lowest cost path is always on top.
 
 def part1(grid):
     MAXX = len(grid[0])-1
     MAXY = len(grid)-1
 
-    untried = [(0, 0, 0)]
+    untried = []
+    heappush( untried, (0,0,0) )
     costs = {}
     while True:
-        cost,x,y = untried.pop(0)
+        cost,x,y = heappop(untried)
         if x==MAXX and y==MAXY:
             break
         for dx, dy in dirs:
@@ -58,10 +61,8 @@ def part1(grid):
                 if (xx,yy) in costs and costs[(xx,yy)]<=nc:
                     continue
                 costs[(xx,yy)]=nc
-                untried.append((nc,xx,yy))
-        # Always look at the lowest cost path first.
-        untried.sort()
+                heappush(untried, (nc,xx,yy))
     return cost
 
-print("Part 1:", part1(grid))
-print("Part 2:", part1(expandgrid(grid)))
+print("Part 1:", part1(grid))                   # 702
+print("Part 2:", part1(expandgrid(grid)))       # 2955
