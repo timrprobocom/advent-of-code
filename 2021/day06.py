@@ -1,6 +1,5 @@
 import sys
 from collections import Counter
-from math import comb
 
 test = [3,4,3,1,2]
 live = [
@@ -13,27 +12,6 @@ if 'test' in sys.argv:
     data = test
 else:
     data = live
-
-# Combinations would not have occurred to me.
-#
-# 1 (the original)
-#
-# for i in 0 .. 1+t/7
-#   for k in 0 .. 1+(t-7i)/9
-#     So you count the combos if there's enough time?
-#
-# I don't understand this solution.
-
-def descendants(t, v):
-    return 1 + sum(comb(i + k, i) * ((v + i * 7 + k * 9) < t) for i in range(1 + t // 7) for k in range(1 + (t - i * 7) // 9))
-
-def part2(n,data):
-    return sum(descendants(n,d) for d in data)
-
-def test2():
-    for n in (80,256):
-        for z in range(6):
-            print(n, z, descendants(n,z) )
 
 def part(n,data):
     counts = [0]*9
