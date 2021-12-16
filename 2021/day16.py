@@ -49,6 +49,24 @@ elif 'test2' in sys.argv:
 else:
     data = [open('day16.txt').read()]
 
+class Bitstream:
+    def __init__( self, stream, inhex=True ):
+        if inhex:
+            self.bits = ''.join( hex2bin[k] for k in stream )
+        else:
+            self.bits = stream
+        self.pos = 0
+
+    def get( self, nbits ):
+        p = self.bits[ self.pos : self.pos + nbits ]
+        self.pos += nbits
+        return p
+
+    def consume( self, nbits ):
+        self.pos += nbits
+
+    def rest( self, limit = 99999 ):
+        return Bitstream(self.bits[self.pos:self.pos+limit], False)
 
 # 3 bits version
 # 3 bits type
@@ -60,21 +78,14 @@ else:
 #      type 0 followed by 15 bit length of subpackets to follow
 #      type 1 followed by 11 bit number of subpackets to follow
 
-def tobits(hexx):
-    return ''.join( hex2bin[k] for k in hexx)
 
 # We return bits consumed AND packet value.
 
-def part2(bits):
+def part2(bits : Bitstream) -> (int,int):
     global vertot
 
-    i = 0
-
-    vertot += int(bits[i:i+3],2)
-    i += 3
-
-    tid = int(bits[i:i+3],2)
-    i += 3
+    vertot += int(bits.get(3),2)
+    tid = int(bits.get(3),2)
 
     if tid == 4:
 
@@ -82,36 +93,34 @@ def part2(bits):
 
         val = 0
         while True:
-            tag = bits[i]
-            i += 1
-            val = val << 4 | (int(bits[i:i+4],2))
-            i += 4
+            tag = bits.get(1)
+            val = val << 4 | (int(bits.get(4),2))
             if tag == '0':
                 break
 
     else:
 
-        # This is an operator packet.  Let's gather up the value of all the subpackets.
+        # This is an operator packet.  Let's gather up the value of all 
+        # the subpackets.
 
         subs = []
 
-        if bits[i] == '0':
-            i += 1
-            pktlen = int(bits[i:i+15],2)
-            i += 15
-            j = i + pktlen
-            while i < j-6:
-                bc, val = part2(bits[i:j])
-                i += bc
+        tag = bits.get(1)
+        if tag == '0':
+            pktlen = int(bits.get(15),2)
+            j = bits.pos + pktlen
+            while bits.pos < j:
+                bc, val = part2(bits.rest(pktlen))
+                bits.consume( bc )
                 subs.append(val)
         else:
-            i += 1
-            pktcnt = int(bits[i:i+11],2)
-            i += 11
+            pktcnt = int(bits.get(11),2)
             for _ in range(pktcnt):
-                bc, val = part2(bits[i:])
-                i += bc
+                bc, val = part2(bits.rest())
+                bits.consume( bc )
                 subs.append(val)
+
+        # Now operate on those subpacket values.
 
         if tid == 0:                # sum
             val = sum(subs)
@@ -130,12 +139,13 @@ def part2(bits):
         elif tid == 7:              # equal
             val = int(subs[0] == subs[1])
 
-    return i, val
+    return bits.pos, val
 
 for n in data:
     vertot = 0
-    print(n)
-    eaten, value = part2(tobits(n))
+    if DEBUG:
+        print(n)
+    eaten, value = part2(Bitstream(n))
     print( "Part 1:", vertot )
     print( "Part 2:", value )  # 299227020491
 

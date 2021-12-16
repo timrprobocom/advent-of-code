@@ -34,6 +34,8 @@ calls = [int(x) for x in data[0].split(',')]
 data.pop(0)
 data.pop(0)
 
+# We'll just create a set of boards, each board is a 9-element list.
+
 boards = []
 board = []
 for line in data:
@@ -71,6 +73,6 @@ def part(part,calls,boards):
                         sumx = sum(x for x in board if x >= 0)
                         return sumx * call
 
-print("Part 1:", part(1, calls, boards) )
-print("Part 2:", part(2, calls, boards) )
+print("Part 1:", part(1, calls, boards) ) # 34506
+print("Part 2:", part(2, calls, boards) ) # 7686
 

@@ -22,26 +22,19 @@ else:
     data = [line.rstrip() for line in open('day05.txt')]
 
 def parse(line):
-    p1,_,p2 = line.partition(' -> ')
-    return eval(p1)+eval(p2)
+    return eval(line.replace(' -> ',','))
 
 data = [parse(line) for line in data]
+
+def cmp(a,b):
+    return (a>b)-(a<b)
 
 def part(part, data):
     grid = Counter()
     for x0,y0,x1,y1 in data:
-        dx = x1-x0
-        dy = y1-y0
-        cnt = max( abs(dx), abs(dy) ) + 1
-
-        if dx < 0:
-            dx = -1
-        elif dx > 0:
-            dx = 1
-        if dy < 0:
-            dy = -1
-        elif dy > 0:
-            dy = 1
+        cnt = max( abs(x1-x0), abs(y1-y0) ) + 1
+        dx = cmp(x1,x0)
+        dy = cmp(y1,y0)
 
         if part == 1 and dx and dy:
             continue
@@ -50,9 +43,9 @@ def part(part, data):
             grid[(x0,y0)] += 1
             x0 += dx
             y0 += dy
-    return sum(1 for k in grid.values() if k > 1)
+    return sum(k > 1 for k in grid.values())
 
 
-print("Part 1:", part(1, data) )
-print("Part 2:", part(2, data) )
+print("Part 1:", part(1, data) ) # 6564
+print("Part 2:", part(2, data) ) # 19172
 
