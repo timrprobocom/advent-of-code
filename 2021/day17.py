@@ -67,8 +67,14 @@ def part1():
     print(maxdata, count)
     return maxdata[1], count
 
-info = part1()
+# Part 1 with math.  When aiming up, you will always come back to x=0
+# with vy = -vy0, and the max will hit the bottom of the zone at the
+# next step.  So, if bottom of the box is -10, you need initial
+# velocity 9, and the highest is sum(1..9), which is y1(y1+1)/2.
 
+print( "Math 1:", data[2]*(data[2]+1)//2)
+
+info = part1()
 print( "Part 1:", info[0] )
 print( "Part 2:", info[1] )
 
