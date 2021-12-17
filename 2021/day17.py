@@ -33,12 +33,12 @@ def sgn(x):
 #x velocity step by 1 towards 0
 #y velocity decreases by 1
 
-def launch( vel ):
+def launch( vx, vy ):
     pos = [0,0]
     maxy = 0
     while True:
-        pos[0] += vel[0]
-        pos[1] += vel[1]
+        pos[0] += vx
+        pos[1] += vy
         if DEBUG:
             print(pos)
         if pos[0] in datax and pos[1] in datay:
@@ -46,25 +46,25 @@ def launch( vel ):
         if pos[0] > data[1] or pos[1] < data[2]:
             return None
         maxy = max(maxy, pos[1])
-        vel = (vel[0]-sgn(vel[0]),vel[1]-1)
+        vx = vx-sgn(vx)
+        vy -= 1
 
 def part1():
-    maxdata = (0,0,0)
+    maxdata = 0
     count = 0
-    for y in range(data[2],-data[2]):
-        for x in range(minx, data[1]+1):
-            vel = (x,y)
+    for vy in range(data[2],-data[2]):
+        for vx in range(minx, data[1]+1):
+            vel = (vx,vy)
             if DEBUG:
                 print("*****", vel )
-            v = launch( vel )
-            if v is not None:
+            mx = launch( vx, vy )
+            if mx is not None:
                 count += 1
-                if v > maxdata[1]:
+                if mx > maxdata:
                     if DEBUG:
-                        print(vel,v)
-                    maxdata = (vel,v)
-    print(maxdata, count)
-    return maxdata[1], count
+                        print(vx, vy, mx)
+                    maxdata = mx
+    return maxdata, count
 
 # Part 1 with math.  When aiming up, you will always come back to x=0
 # with vy = -vy0, and the max will hit the bottom of the zone at the
