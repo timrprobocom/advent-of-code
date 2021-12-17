@@ -18,7 +18,6 @@ else:
 datax = range(data[0],data[1]+1)
 datay = range(data[2],data[3]+1)
 
-
 # What's the minimum X velocity?
 
 minx = 0
@@ -52,7 +51,7 @@ def launch( vel ):
 def part1():
     maxdata = (0,0,0)
     count = 0
-    for y in range(-150,150):
+    for y in range(data[2],-data[2]):
         for x in range(minx, data[1]+1):
             vel = (x,y)
             if DEBUG:
