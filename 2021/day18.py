@@ -33,6 +33,7 @@ def out(lst):
 # Add two structures.
 
 def add( a, b ):
+    if not a: return b
     return ['['] + a + [','] + b + [']']
 
 # Is this entry a number?
@@ -159,8 +160,8 @@ def testing():
 # Sum all of the shellfish and print the magnitude.
 
 def part1(data):
-    base = data[0]
-    for expr in data[1:]:
+    base = []
+    for expr in data:
         base = add( base, expr )
         base = actions( base )
     return magnitude(base)
