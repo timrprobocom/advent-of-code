@@ -46,17 +46,21 @@ def isdigit(k):
 def explode( a, n ):
     if DEBUG:
         print("explode at", n, a[n:n+5])
-    # Explode the pair starting at n.
+
     left = a[n+1]
     right = a[n+3]
+
     # Search backwards for a digit.
+
     for nn in range(n-1, -1, -1):
         if isdigit(a[nn]):
             if DEBUG:
                 print("l adding",left,"to",a[nn])
             a[nn] += left
             break
+
     # Search forwards for a digit.
+
     for nn in range(n+5, len(a)):
         if isdigit(a[nn]):
             if DEBUG:
@@ -64,8 +68,7 @@ def explode( a, n ):
             a[nn] += right
             break
     # Remove the pair.
-    a = a[:n] + [0] + a[n+5:]
-    return a
+    return a[:n] + [0] + a[n+5:]
 
 def testexplode():
     testdata = [
