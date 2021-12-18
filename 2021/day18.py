@@ -2,17 +2,6 @@ import sys
 import itertools
 
 test = """\
-[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
-[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]
-[[2,[[0,8],[3,4]]],[[[6,7],1],[7,[1,6]]]]
-[[[[2,4],7],[6,[0,5]]],[[[6,8],[2,8]],[[2,1],[4,5]]]]
-[7,[5,[[3,8],[1,4]]]]
-[[2,[2,2]],[8,[8,1]]]
-[2,9]
-[1,[[[9,3],9],[[9,0],[0,7]]]]
-[[[5,[7,4]],7],1]
-[[[[4,2],2],6],[8,7]]"""
-test = """\
 [[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
 [[[5,[2,8]],4],[5,[[9,9],0]]]
 [6,[[[6,2],[5,6]],[[7,6],[4,7]]]]
@@ -31,21 +20,27 @@ if 'test' in sys.argv:
 else:
     data = open('day18.txt').readlines()
 
+# Convert a string to our mixed list structure.
+
 def convert(ln):
     return [int(s) if s.isdigit() else s for s in ln.rstrip()]
+
+# Convert back to a string for printing.
 
 def out(lst):
     return ''.join(str(t) for t in lst)
 
-
-# This has to be a binary tree, right?  Or do we keep it as a 
-# string?
+# Add two structures.
 
 def add( a, b ):
     return ['['] + a + [','] + b + [']']
 
+# Is this entry a number?
+
 def isdigit(k):
     return isinstance(k,int)
+
+# Explode the pair starting at n.
 
 def explode( a, n ):
     if DEBUG:
@@ -84,12 +79,16 @@ def testexplode():
         t = convert(a)
         print(a, "==>", out(explode(t,b)))
 
+# Split the number at n.
 
 def split( a, n ):
     val = a[n]
     if DEBUG:
         print("splitting", val, "at", n )
     return a[:n] + ["[", (val)//2, ",", (val+1)//2, "]"] + a[n+1:]
+
+# Take all actions.  Not sure it's documented, but we must do all
+# explodes before we do a split.
 
 def actions( a ):
     changed = True
@@ -128,6 +127,8 @@ def testactions():
     s3 = actions( s3 )
     print(out(s3))
 
+# Return the magnitude of a structure.
+
 def magnitude(a):
     while len(a) > 1:
         for i in range(len(a)):
@@ -136,15 +137,15 @@ def magnitude(a):
                 break
     return a[0]
 
-testmag = [
-("[[1,2],[[3,4],5]]", 143),
-("[[[[0,7],4],[[7,8],[6,0]]],[8,1]]", 1384),
-("[[[[1,1],[2,2]],[3,3]],[4,4]]", 445),
-("[[[[3,0],[5,3]],[4,4]],[5,5]]", 791),
-("[[[[5,0],[7,4]],[5,5]],[6,6]]", 1137),
-("[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]", 3488),
-]
 def testmagnitude():
+    testmag = [
+        ("[[1,2],[[3,4],5]]", 143),
+        ("[[[[0,7],4],[[7,8],[6,0]]],[8,1]]", 1384),
+        ("[[[[1,1],[2,2]],[3,3]],[4,4]]", 445),
+        ("[[[[3,0],[5,3]],[4,4]],[5,5]]", 791),
+        ("[[[[5,0],[7,4]],[5,5]],[6,6]]", 1137),
+        ("[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]", 3488),
+        ]
     for a,b in testmag:
         chk = magnitude(convert(a))
         print(a, chk, b )
@@ -155,7 +156,7 @@ def testing():
     testactions()
     testmagnitude()
 
-# Convert them all;
+# Sum all of the shellfish and print the magnitude.
 
 def part1(data):
     base = data[0]
@@ -164,6 +165,7 @@ def part1(data):
         base = actions( base )
     return magnitude(base)
 
+# Find the best combo.
 # I think we have to do this exhaustively.
 
 def part2(data):
