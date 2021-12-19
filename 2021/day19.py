@@ -4,6 +4,11 @@ from collections import defaultdict
 
 DEBUG = 'debug' in sys.argv
 
+if 'test' in sys.argv:
+    name = 'test19.txt'
+else:
+    name = 'day19.txt'
+
 
 # This returns all 24 possible rotations of this point.
 
@@ -15,27 +20,23 @@ def rot(v):
 
     # 2 x 4 x 3. 
 
-    a = []
     for _ in range(2):
         for _ in range(3):
             v = rotx(*v)
-            a.append(v)
+            yield v
             for _ in range(3):
                 v = rotz(*v)
-                a.append(v)
+                yield v
         v = rotx(*rotz(*rotx(*v)))
-    return a
 
 
 def find_matches(aa, bb):
     ptsa = set(aa)
     # For all pairs of points in the two sets...
     for (a, b, c), (d, e, f) in itertools.product(aa, bb):
-        # If we assume these points line up, how many other points line up? 
-        # If there are at least 12. then these two overlap and we know the 
-        # delta between them.
-        #
-        # Why == 12?  It didn't say ONLY 12.  It said AT LEAST 12.
+        # If we assume these 2 points line up, how many other points line up? 
+        # If there are at least 12. then these two overlap, and we know the 
+        # offset we need to apply to the second set.
 
         if len(ptsa.intersection((x - d + a, y - e + b, z - f + c) for x, y, z in bb)) >= 12:
             return d - a, e - b, f - c
@@ -116,6 +117,7 @@ def crunch(f):
 def part1(data):
     return len(data[2])
 
+
 def part2(data):
     offsets = data[1]
     return max(
@@ -123,11 +125,6 @@ def part2(data):
         for a, b in itertools.product(range(len(offsets)), repeat=2)
     )
 
-
-if 'test' in sys.argv:
-    name = 'test19.txt'
-else:
-    name = 'day19.txt'
 
 data = crunch(open(name))
 print("Part 1:", part1(data))
