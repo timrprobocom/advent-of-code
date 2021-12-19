@@ -19,145 +19,120 @@ for ln in data:
     else:
         scanners[-1].append( eval(ln) )
 
-#print( scanners )
-#print(len(scanners))
-#print(len(scanners[0]))
-#sys.exit(0)
 
 def sub( pta, ptb ):
     return pta[0]-ptb[0], pta[1]-ptb[1], pta[2]-ptb[2]
 
-# So.  Compute all deltas and sort them?
+def add( pta, ptb ):
+    return pta[0]+ptb[0], pta[1]+ptb[1], pta[2]+ptb[2]
 
-def deltas( points ):
-    delta = []
-    delta = [sub(pa,pb) for pa,pb in itertools.combinations(points, 2)]
-    return set(delta)
 
-#    |cos θ   −sin θ   0| |x|   |x cos θ − y sin θ|   |x'|
-#    |sin θ    cos θ   0| |y| = |x sin θ + y cos θ| = |y'|
-#    |  0       0      1| |z|   |        z        |   |z'|
-#around the Y-axis would be
-#
-#    | cos θ    0   sin θ| |x|   | x cos θ + z sin θ|   |x'|
-#    |   0      1       0| |y| = |         y        | = |y'|
-#    |−sin θ    0   cos θ| |z|   |−x sin θ + z cos θ|   |z'|
-#around the X-axis would be
-#
-#    |1     0           0| |x|   |        x        |   |x'|
-#    |0   cos θ    −sin θ| |y| = |y cos θ − z sin θ| = |y'|
-#    |0   sin θ     cos θ| |z|   |y sin θ + z cos θ|   |z'|
+def rotatex( point ):
+    x,y,z = point
+    return x, z, -y
 
-# We will need a "rotate".
-# There are 24 rotations?
-# We can rotate around any of the 3 axes, up to 4 times.
-#
-# Rotate on Y axis:
-# 0   [ +x, +y, +z ]
-# 1   [ +z, +y, -x ]
-# 2   { -x, +y, -z ]
-# 3   [ -z, +y, +x ]
-# Rotate on X axis:
-# 0   [ +x, +y, +z ]
-# 1   [ +x, -z, +y ]
-# 2   [ +x, -y, -z ]
-# 3   [ +x, +z, -y ]
-# Rotate on Z axis:
-# 0   [ +x, +y, +z ]
-# 1   [ -y, +x, +z ]
-# 2   [ -x, -y, +z ]
-# 3   [ +y, -x, +z ]
+def rotatey( point ):
+    x,y,z = point
+    return z, y, -x
 
-# And then there are combinations of those. 4*4*4 = 64 rotations, many are duplicates.
+def rotatez( point ):
+    x,y,z = point
+    return -y, x, z
 
-def rotatex( points, steps):
-    x,y,z = points
-    for i in range(steps):
-        x,y,z = z,y,-x
-    return (x,y,z)
+def flip( point ):
+    return rotatex(rotatez(rotatex(point)))
 
-def rotatey( points, steps ):
-    x,y,z = points
-    for i in range(steps):
-        x,y,z = x,-z,y
-    return (x,y,z)
+# This returns a vector of the 24 possible rotations of this point.
+# I still don't understand why this works.  Why these 24 out of the 64 possibles?
 
-def rotatez( points, steps ):
-    x,y,z = points
-    for i in range(steps):
-        x,y,z = -y, x, z
-    return (x,y,z)
+def allrotate( point ):
+    for _ in range(2):
+        for _ in range(3):
+            point = rotatex(point)
+            yield point
+            for _ in range(3):
+                point = rotatez(point)
+                yield point
+        point = flip(point)
 
-def dorotate( pt, guide ):
-    posn = [abs(i)-1 for i in guide]
-    sign = [-1 if i < 0 else 1 for i in guide]
-    return (sign[0]*pt[posn[0]], sign[1]*pt[posn[1]], sign[2]*pt[posn[2]])
+# THis function answers the musical question, for each pair of points
+# in the two scan lists, if they lined up, how many other points would
+# line up?
 
-def get_all_rotations():
-    pt = (1,2,3)
-    accum = set([pt])
-    for dx in range(0,4):
-        pt = rotatex(pt,dx)
-        for dy in range(0,4):
-            pt = rotatex(pt,dy)
-            for dz in range(0,4):
-                pt = rotatez(pt,dz)
-                accum.add( pt )
-    return accum
-
-allrot = get_all_rotations()
+def find_matches( scan1, scan2 ):
+    set1 = set(scan1)
+    for pt1 in scan1:
+        for pt2 in scan2:
+            # Why is this reversed from what I think?
+            delta = sub(pt2,pt1)
+            if len(set1.intersection((sub(pt2x,delta) for pt2x in scan2))) >= 12:
+                return delta
 
 # Make rotations of all scanners .
+# This is a 25x24 array.
 
-rotations = []
-for scanner in scanners:
-    rotations = [[dorotate(point,rot) for point in scanner] for rot in allrot]
-print(rotations)
+def process(scanners):
+    rotations = [
+        list(zip(*list((list(allrotate(pt)) for pt in scanner)))) for scanner in scanners
+    ]
 
-print( "Total", sum(len(s) for s in scanners))
+# This is the set of known beacons.
 
-def choices(n):
-    ch = [0]*n
-    while True:
-        yield ch[:]
-        carry = 1
-        for i in range(len(ch)):
-            ch[i] += carry
-            carry = 0
-            if ch[i] > 15:
-                ch[i] = 0
-                carry = 1
-        if carry:
-            break
+    beacons = set(rotations[0][0])
 
-# For each scanner > 1
-#  For each rotation
-#   combine rotation(scanner][rotation]
+    placed = { 0: (0, (0,0,0)) }
+    while len(placed) < len(rotations):
+        for i, scan1 in enumerate(rotations):
+            if i in placed:
+                continue
+            escape = False
 
+            # scan1 is our candidate scanner.
 
-minx = 999999
-print(len(rotations[0][0]))
-for pick in choices(len(scanners)-1):
-    delta1 = deltas(scanners[0])
-    for i,p in enumerate(pick):
-        delta1 = delta1.union( rotations[i+1][p] )
-        print(i,p,len(delta1))
-        if len(delta1) >= minx:
-            continue
-    if len(delta1) < minx:
-        minx = len(delta1)
-        print(0, pick, len(delta1))
-sys.exit(0)
+            for j, (rot2,pt2) in placed.items():
+                scan2 = rotations[j][rot2]
 
+                # scan2 is a scanner whose position and rotation is now known.
 
+                for possrot in range(24): 
 
+                    # Does this rotation of scan1 line up with scan2?
 
+                    result = find_matches( scan2, scan1[possrot] )
+                    if not result:
+                        continue
+                    if DEBUG:
+                        print( "Matched", i, "rot", possrot, "vs", j )
 
+                    # We have a winner.  Add this to the set of knowns.
 
+                    beacons |= {*(
+                        sub(sub(pt,result),pt2) for pt in scan1[possrot] 
+                    )}
 
+                    placed[i] = ( possrot, add(result,pt2) )
+                    escape = True
+                    break
 
+                if escape:
+                    break
 
+    return beacons, placed
 
-#print( "Part 1:", part1(data) )
-#print( "Part 2:", part2(data) )
+info = process(scanners)
+
+def part1(info):
+    return len(info[0])
+
+def part2(info):
+    placed = info[1].values()
+    # Find the largest distance between any two scanners (not beacons).
+    maxx = 0
+    for pt0 in placed:
+        for pt1 in placed:
+            maxx = max( maxx, sum(abs(i) for i in sub(pt0[1],pt1[1])))
+    return maxx
+
+print( "Part 1:", part1(info))
+print( "Part 2:", part2(info))
 
