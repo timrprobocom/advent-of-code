@@ -39,23 +39,22 @@ def rotatez( point ):
     x,y,z = point
     return -y, x, z
 
-def flip( point ):
-    return rotatex(rotatez(rotatex(point)))
-
 # This returns a vector of the 24 possible rotations of this point.
-# I still don't understand why this works.  Why these 24 out of the 64 possibles?
+# Move the "facing" direction through all 6 points, then rotate around
+# that axis four times.
 
 def allrotate( point ):
     for _ in range(2):
-        for _ in range(3):
-            point = rotatex(point)
+        for direction in (
+            rotatex, rotatex, rotatex, rotatez, # now pointing up / down
+            rotatey, rotatey, rotatey, rotatex, # now pointing back / front
+            rotatez, rotatez, rotatez, rotatey # now pointing left / right
+        ):
             yield point
-            for _ in range(3):
-                point = rotatez(point)
-                yield point
-        point = flip(point)
+            point = direction(point)
 
-# THis function answers the musical question, for each pair of points
+
+# This function answers the musical question, for each pair of points
 # in the two scan lists, if they lined up, how many other points would
 # line up?
 
@@ -68,15 +67,15 @@ def find_matches( scan1, scan2 ):
             if len(set1.intersection((sub(pt2x,delta) for pt2x in scan2))) >= 12:
                 return delta
 
-# Make rotations of all scanners .
-# This is a 25x24 array.
-
 def process(scanners):
+    # Make rotations of all scanners .
+    # This is a 25x24 array.
+
     rotations = [
         list(zip(*list((list(allrotate(pt)) for pt in scanner)))) for scanner in scanners
     ]
 
-# This is the set of known beacons.
+    # This is the set of known beacons.
 
     beacons = set(rotations[0][0])
 
@@ -119,8 +118,6 @@ def process(scanners):
 
     return beacons, placed
 
-info = process(scanners)
-
 def part1(info):
     return len(info[0])
 
@@ -133,6 +130,6 @@ def part2(info):
             maxx = max( maxx, sum(abs(i) for i in sub(pt0[1],pt1[1])))
     return maxx
 
+info = process(scanners)
 print( "Part 1:", part1(info))
 print( "Part 2:", part2(info))
-
