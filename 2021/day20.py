@@ -44,28 +44,24 @@ class Mapper:
         return num
 
     def find_extrema(self):
-        self.minx = min(k[0] for k in self.coords)
-        self.maxx = max(k[0] for k in self.coords)
-        self.miny = min(k[1] for k in self.coords)
-        self.maxy = max(k[1] for k in self.coords)
-
-    def rangex(self):
-        return range(self.minx,self.maxx+1)
-
-    def rangey(self):
-        return range(self.miny,self.maxy+1)
+        self.minx = min(x for x,y in self.coords)
+        self.maxx = max(x for x,y in self.coords)
+        self.miny = min(y for x,y in self.coords)
+        self.maxy = max(y for x,y in self.coords)
+        self.rangex = range(self.minx,self.maxx+1)
+        self.rangey = range(self.miny,self.maxy+1)
 
     # In an evil twist, I (like many) did not realize that the entire infinite
     # background blinks with the live data, because algo[0] == '#' and algo[511] == '.'.
     # So, if a cell is out of bounds, return the state of the void.
 
     def outside(self,x,y):
-        return self.infinite and (x not in self.rangex() or y not in self.rangey())
+        return self.infinite and (x not in self.rangex or y not in self.rangey)
 
     def printit(self):
         print("Grid:")
-        for y in self.rangey():
-            row = ['.#'[(x,y) in self.coords] for x in self.rangex()]
+        for y in self.rangey:
+            row = ['.#'[(x,y) in self.coords] for x in self.rangex]
             print(f"{y:3d}", ''.join(row))
 
     def generation(self):

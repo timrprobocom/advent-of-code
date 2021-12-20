@@ -44,14 +44,13 @@ def rotatez( point ):
 # that axis four times.
 
 def allrotate( point ):
-    for _ in range(2):
-        for direction in (
-            rotatex, rotatex, rotatex, rotatez, # now pointing up / down
-            rotatey, rotatey, rotatey, rotatex, # now pointing back / front
-            rotatez, rotatez, rotatez, rotatey # now pointing left / right
-        ):
-            yield point
-            point = direction(point)
+    for direction in (
+        rotatex, rotatex, rotatex, rotatez, # now pointing up / down
+        rotatey, rotatey, rotatey, rotatex, # now pointing back / front
+        rotatez, rotatez, rotatez, rotatey  # now pointing left / right
+    ) * 2:
+        yield point
+        point = direction(point)
 
 
 # This function answers the musical question, for each pair of points
@@ -62,13 +61,12 @@ def find_matches( scan1, scan2 ):
     set1 = set(scan1)
     for pt1 in scan1:
         for pt2 in scan2:
-            # Why is this reversed from what I think?
             delta = sub(pt2,pt1)
             if len(set1.intersection((sub(pt2x,delta) for pt2x in scan2))) >= 12:
                 return delta
 
 def process(scanners):
-    # Make rotations of all scanners .
+    # Make all rotations of all scanner readings.
     # This is a 25x24 array.
 
     rotations = [
@@ -104,6 +102,8 @@ def process(scanners):
                         print( "Matched", i, "rot", possrot, "vs", j )
 
                     # We have a winner.  Add this to the set of knowns.
+                    # We shift scan1 to match the coords of scan2, then
+                    # shift that to our master coords.
 
                     beacons |= {*(
                         sub(sub(pt,result),pt2) for pt in scan1[possrot] 
