@@ -17,8 +17,6 @@ if 'test' in sys.argv:
 else:
     data = open('day20.txt').readlines()
 
-algo = data[0]
-
 # Convert to a set of coordinates.
 
 def convert(data):
@@ -31,6 +29,7 @@ def convert(data):
 
 class Mapper:
     def __init__(self, data):
+        self.algo = data[0]
         self.coords = convert(data)
         self.find_extrema()
         self.infinite = False
@@ -57,8 +56,8 @@ class Mapper:
         return range(self.miny,self.maxy+1)
 
     # In an evil twist, I (like many) did not realize that the entire infinite
-    # background blinks with the live data, because algo[0] == '#'.  So, if a
-    # cell is out of bounds, return the toggled value.
+    # background blinks with the live data, because algo[0] == '#' and algo[511] == '.'.
+    # So, if a cell is out of bounds, return the state of the void.
 
     def outside(self,x,y):
         return self.infinite and (x not in self.rangex() or y not in self.rangey())
@@ -73,10 +72,9 @@ class Mapper:
         newcoords = set()
         for y in range(self.miny-1,self.maxy+2):
             for x in range(self.minx-1,self.maxx+2):
-                if algo[self.getval(x,y)] == '#':
+                if self.algo[self.getval(x,y)] == '#':
                     newcoords.add( (x,y) )
-        if algo[0] == '#':
-            self.infinite = not self.infinite
+        self.infinite = self.algo[self.infinite*511] == '#'
         self.coords = newcoords
         self.find_extrema()
 
