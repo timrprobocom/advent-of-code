@@ -19,6 +19,8 @@ else:
 
 algo = data[0]
 
+# Convert to a set of coordinates.
+
 def convert(data):
     coords = set()
     for y,row in enumerate(data[2:]):
@@ -30,8 +32,8 @@ def convert(data):
 class Mapper:
     def __init__(self, data):
         self.coords = convert(data)
-        self.edge = False
         self.find_extrema()
+        self.infinite = False
 
     def getval( self, x, y ):
         num = 0
@@ -50,6 +52,7 @@ class Mapper:
 
     def rangex(self):
         return range(self.minx,self.maxx+1)
+
     def rangey(self):
         return range(self.miny,self.maxy+1)
 
@@ -58,33 +61,29 @@ class Mapper:
     # cell is out of bounds, return the toggled value.
 
     def outside(self,x,y):
-        return self.edge and not (x in self.rangex() and y in self.rangey())
+        return self.infinite and (x not in self.rangex() or y not in self.rangey())
 
     def printit(self):
         print("Grid:")
         for y in self.rangey():
-            row = ''
-            for x in self.rangex():
-                row += '#' if (x,y) in self.coords else '.'
-            print(f"{y:3d}", row)
+            row = ['.#'[(x,y) in self.coords] for x in self.rangex()]
+            print(f"{y:3d}", ''.join(row))
 
     def generation(self):
         newcoords = set()
         for y in range(self.miny-1,self.maxy+2):
             for x in range(self.minx-1,self.maxx+2):
-                if DEBUG:
-                    print(x,y,self.getval(x,y))
                 if algo[self.getval(x,y)] == '#':
                     newcoords.add( (x,y) )
         if algo[0] == '#':
-            self.edge = not self.edge
+            self.infinite = not self.infinite
         self.coords = newcoords
         self.find_extrema()
 
     def __len__(self):
         return len(self.coords)
             
-def part1(coords,n=2):
+def process(coords,n=2):
     if DEBUG:
         coords.printit()
 
@@ -95,6 +94,6 @@ def part1(coords,n=2):
     return len(coords)
 
 coords = Mapper(data)
-print( "Part 1:", part1(coords,2) )
-print( "Part 2:", part1(coords,48) )
+print( "Part 1:", process(coords,2) )
+print( "Part 2:", process(coords,48) )
 
