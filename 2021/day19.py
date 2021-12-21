@@ -130,6 +130,25 @@ def part2(info):
             maxx = max( maxx, sum(abs(i) for i in sub(pt0[1],pt1[1])))
     return maxx
 
+def visoalize(beacons, placed):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from mpl_toolkits import mplot3d
+
+    beacons = np.array(list(beacons))
+
+    scanners = -np.array( [k[1] for k in placed.values()] )
+
+    ax = plt.axes(projection='3d')
+    ax.scatter3D( beacons[:,0], beacons[:,1], beacons[:,2], c='blue', marker='o' )
+    ax.scatter3D( scanners[:,0], scanners[:,1], scanners[:,2], c='red', marker='^' )
+    plt.show()
+
 info = process(scanners)
+
+if 'vis' in sys.argv:
+    visoalize(*info)
+    sys.exit(0)
+
 print( "Part 1:", part1(info))
 print( "Part 2:", part2(info))
