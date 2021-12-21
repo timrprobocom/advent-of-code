@@ -61,31 +61,11 @@ void allrotate( PointList & out, const Point in )
     out.clear();
 
     for( int i = 0; i < 2; i++ )
-    {
-        for( int j = 0; j < 3; j++ )
+        for( char * axis = "xxxzyyyxzzzy"; *axis; axis++ )
         {
             out.push_back( pt );
-            pt = pt.rotatex();
+            pt.rotate(*axis);
         }
-        out.push_back( pt );
-        pt = pt.rotatez();
-
-        for( int j = 0; j < 3; j++ )
-        {
-            out.push_back( pt );
-            pt = pt.rotatey();
-        }
-        out.push_back( pt );
-        pt = pt.rotatex();
-
-        for( int j = 0; j < 3; j++ )
-        {
-            out.push_back( pt );
-            pt = pt.rotatez();
-        }
-        out.push_back( pt );
-        pt = pt.rotatey();
-    }
 }
 
 

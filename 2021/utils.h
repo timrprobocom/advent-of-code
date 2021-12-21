@@ -62,6 +62,7 @@ struct Point {
         y = -tmp;
     }
 
+    // This is the same as rotatez.
     void right()
     {
         int tmp = x;
@@ -82,6 +83,26 @@ struct Point {
     Point rotatez() const
     {
         return Point(-y,x,z);
+    }
+
+    void rotate(char axis)
+    {
+        Point copy(*this);
+        if( axis == 'x' )
+        {
+            y = copy.z;
+            z = -copy.y;
+        }
+        else if( axis == 'y' )
+        {
+            x = copy.z;
+            z = -copy.x;
+        }
+        else if( axis == 'z' )
+        {
+            x = -copy.y;
+            y = copy.x;
+        }
     }
 };
 
