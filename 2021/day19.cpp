@@ -16,7 +16,7 @@ typedef map<int,int> Rotations;
 typedef map<int,Point> Offsets;
 typedef vector<PointList> ScannerSet;
 
-bool DEBUG = true;
+bool DEBUG = false;
 
 struct Information {
     PointSet beacons;
@@ -62,13 +62,12 @@ void allrotate( PointList & out, const Point in )
 
     for( int i = 0; i < 2; i++ )
     {
-        out.push_back( pt );
         for( int j = 0; j < 3; j++ )
         {
-            pt = pt.rotatex();
             out.push_back( pt );
+            pt = pt.rotatex();
         }
-        out.push_back( in );
+        out.push_back( pt );
         pt = pt.rotatez();
 
         for( int j = 0; j < 3; j++ )
@@ -76,7 +75,7 @@ void allrotate( PointList & out, const Point in )
             out.push_back( pt );
             pt = pt.rotatey();
         }
-        out.push_back( in );
+        out.push_back( pt );
         pt = pt.rotatex();
 
         for( int j = 0; j < 3; j++ )
@@ -84,6 +83,7 @@ void allrotate( PointList & out, const Point in )
             out.push_back( pt );
             pt = pt.rotatez();
         }
+        out.push_back( pt );
         pt = pt.rotatey();
     }
 }
@@ -104,7 +104,7 @@ bool find_matches( PointList scan1, PointList scan2, Point & delta )
             for( auto && pt2x : scan2 )
                 if( set1.find( pt2x - delta ) != set1.end() )
                     matches += 1;
-            if( matches  >= 12 )
+            if( matches >= 12 )
                 return true;
         }
     return false;
@@ -165,12 +165,12 @@ bool process( ScannerSet scanners, /*out*/ Information & info )
 
                 // scan2 is a scanner whose position and rotation is now known.
 
-                for( int possrot = 0; i < 24; i++ )
+                for( int possrot = 0; possrot < 24; possrot++ )
                 {
                     // Does this rotation of scan1 line up with scan2?
 
                     Point potential;
-                    if(  find_matches( scan2, scan1[possrot], potential ) )
+                    if( !find_matches( scan2, scan1[possrot], potential ) )
                         continue;
 
                     if( DEBUG )
@@ -184,11 +184,11 @@ bool process( ScannerSet scanners, /*out*/ Information & info )
 
                     for( auto && pt : scan1[possrot] )
                     {
-                        beacons.insert( pt - potential - pt2 );
+                        beacons.insert( (pt - potential) - pt2 );
                     }
 
                     known_r[i] = possrot;
-                    known_o[i] = potential - pt2;
+                    known_o[i] = potential + pt2;
                     escape = true;
                     break;
                 }
@@ -220,14 +220,24 @@ int part2( const Information & info )
     return maxx;
 }
 
-void main()
+int main( int argc, char ** argv )
 {
+    const char * filename = "day19.txt";
+    while( *++argv )
+    {
+        if( strcmp(*argv, "debug") == 0 )
+            DEBUG = true;
+        else if( strcmp(*argv, "test") == 0 )
+            filename = "test19.txt";
+    }
+
     vector<PointList> scanners;
-    read( cin, scanners );
+    read( ifstream(filename), scanners );
 
     Information info;
     process(scanners, info);
 
     cout << "Part 1: " << part1(info) << "\n";
     cout << "Part 2: " << part2(info) << "\n";
+    return 0;
 }
