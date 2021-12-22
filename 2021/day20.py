@@ -76,7 +76,7 @@ class Mapper:
 
     def __len__(self):
         return len(self.coords)
-            
+
 def process(coords,n=2):
     if DEBUG:
         coords.printit()
