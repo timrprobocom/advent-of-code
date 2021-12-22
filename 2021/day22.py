@@ -104,11 +104,11 @@ def convert(data):
     orders = []
     for line in data:
         m = re.match(pattern,line)
-        orders.append( [m.group(1) == 'on'] + [int(m.group(i)) for i in range(2,8)] )
+        orders.append( (m.group(1) == 'on', [int(m.group(i)) for i in range(2,8)]))
         # Make the ends exclusive.
-        orders[-1][2] += 1
-        orders[-1][4] += 1
-        orders[-1][6] += 1
+        orders[-1][1][1] += 1
+        orders[-1][1][3] += 1
+        orders[-1][1][5] += 1
     if DEBUG:
         print(orders)
     return orders
@@ -117,34 +117,34 @@ def convert(data):
 
 def part1(orders):
     world = np.zeros((101,101,101), dtype=np.uint8)
-    for cube in orders:
-        xlo = max(-50,cube[1])+50
-        xhi = min( 51,cube[2])+50
-        ylo = max(-50,cube[3])+50
-        yhi = min( 51,cube[4])+50
-        zlo = max(-50,cube[5])+50
-        zhi = min( 51,cube[6])+50
+    for lit,cube in orders:
+        xlo = max(-50,cube[0])+50
+        xhi = min( 51,cube[1])+50
+        ylo = max(-50,cube[2])+50
+        yhi = min( 51,cube[3])+50
+        zlo = max(-50,cube[4])+50
+        zhi = min( 51,cube[5])+50
         if xlo > 101 or xhi < 0 or ylo > 101 or yhi < 0 or zlo > 101 or zhi < 0:
             continue
 
         dx = xhi - xlo
         dy = yhi - ylo
         dz = zhi - zlo
-        if cube[0]:
+        if lit:
             world[xlo:xhi,ylo:yhi,zlo:zhi] = np.ones((dx,dy,dz), dtype=np.uint8)
         else:
             world[xlo:xhi,ylo:yhi,zlo:zhi] = np.zeros((dx,dy,dz), dtype=np.uint8)
 
     return world.sum()
 
-# For part 2 we need to track regions, not cells.  For each new cube coming,
+# For part 2 we need to track lit regions, not cells.  For each new cube coming,
 # we scan the whole list of existing cubes.  If there is an intersect, we
 # create as many as 6 new subcubes that prepresent the sections that do not
 # intersect.
 
 def intersects( cube1, cube2 ):
-    astate,ax0,ax9,ay0,ay9,az0,az9 = cube1
-    bstate,bx0,bx9,by0,by9,bz0,bz9 = cube2
+    ax0,ax9,ay0,ay9,az0,az9 = cube1
+    bx0,bx9,by0,by9,bz0,bz9 = cube2
     return (
         bx9 > ax0 and bx0 < ax9 and 
         by9 > ay0 and by0 < ay9 and 
@@ -155,45 +155,40 @@ def intersects( cube1, cube2 ):
 
 def cubeintersect( allcubes, cube1 ):
     newcubes = []
-    bstate,bx0,bx9,by0,by9,bz0,bz9 = cube1
+    bx0,bx9,by0,by9,bz0,bz9 = cube1
 
-    # Is the ax0/ax9/bx0/bx9 thing better than cube1[1] etc?
+    # Is the ax0/ax9/bx0/bx9 thing better than cube1[0] etc?
 
     for cube in allcubes:
-        if intersects( cube, cube1 ):
-            astate,ax0,ax9,ay0,ay9,az0,az9 = cube
+        if not intersects( cube, cube1 ):
+            newcubes.append( cube )
+        else:
+            ax0,ax9,ay0,ay9,az0,az9 = cube
 
             # We basically cut off any slices on the end that don't 
             # intersect and add them.
 
             if ax0 < bx0:
-                newcubes.append( (astate, ax0, bx0, ay0, ay9, az0, az9) )
+                newcubes.append( (ax0, bx0, ay0, ay9, az0, az9) )
                 ax0 = bx0
             if ax9 > bx9:
-                newcubes.append( (astate, bx9, ax9, ay0, ay9, az0, az9) )
+                newcubes.append( (bx9, ax9, ay0, ay9, az0, az9) )
                 ax9 = bx9
 
             if ay0 < by0:
-                newcubes.append( (astate, ax0, ax9, ay0, by0, az0, az9) )
+                newcubes.append( (ax0, ax9, ay0, by0, az0, az9) )
                 ay0 = by0
             if ay9 > by9:
-                newcubes.append( (astate, ax0, ax9, by9, ay9, az0, az9) )
+                newcubes.append( (ax0, ax9, by9, ay9, az0, az9) )
                 ay9 = by9
 
             if az0 < bz0:
-                newcubes.append( (astate, ax0, ax9, ay0, ay9, az0, bz0) )
+                newcubes.append( (ax0, ax9, ay0, ay9, az0, bz0) )
                 az0 = bz0
             if az9 > bz9:
-                newcubes.append( (astate, ax0, ax9, ay0, ay9, bz9, az9) )
+                newcubes.append( (ax0, ax9, ay0, ay9, bz9, az9) )
                 az9 = bz9
 
-        else:
-            # If this doesn't intersect, just keep it.
-            newcubes.append( cube )
-
-    # Add this new cube.
-
-    newcubes.append( cube1 )
     return newcubes
 
 # Compute the number of lit cells.
@@ -201,15 +196,16 @@ def cubeintersect( allcubes, cube1 ):
 def sumall( cubes ):
     sumx = 0
     for cube in cubes:
-        astate,ax0,ax9,ay0,ay9,az0,az9 = cube
-        if astate:
-            sumx += (ax9-ax0)*(ay9-ay0)*(az9-az0)
+        ax0,ax9,ay0,ay9,az0,az9 = cube
+        sumx += (ax9-ax0)*(ay9-ay0)*(az9-az0)
     return sumx
 
 def part2( orders ):
     cubes = []
-    for cube in orders:
+    for lit, cube in orders:
         cubes = cubeintersect( cubes, cube )
+        if lit:
+            cubes.append( cube )
 
     return sumall(cubes)
 
