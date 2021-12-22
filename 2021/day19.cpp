@@ -26,7 +26,7 @@ struct Information {
 
 
 void read( 
-    istream & ifs,
+    istream && ifs,
     ScannerSet & scanners
 )
 {
@@ -61,7 +61,7 @@ void allrotate( PointList & out, const Point in )
     out.clear();
 
     for( int i = 0; i < 2; i++ )
-        for( char * axis = "xxxzyyyxzzzy"; *axis; axis++ )
+        for( const char * axis = "xxxzyyyxzzzy"; *axis; axis++ )
         {
             out.push_back( pt );
             pt.rotate(*axis);
