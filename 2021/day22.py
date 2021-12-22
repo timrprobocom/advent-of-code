@@ -209,6 +209,25 @@ def part2( orders ):
 
     return sumall(cubes)
 
+# Do part 1 using part 2's scheme.
+
+def part12( orders ):
+    cubes = []
+    for lit, cube in orders:
+        if cube[0] > 51 or cube[1] < -50 or cube[2] > 51 or cube[3] < -50 or cube[4] > 51 or cube[5] < -50:
+            continue
+        cube[0] = max(-50,cube[0])
+        cube[1] = min( 51,cube[1])
+        cube[2] = max(-50,cube[2])
+        cube[3] = min( 51,cube[3])
+        cube[4] = max(-50,cube[4])
+        cube[5] = min( 51,cube[5])
+        cubes = cubeintersect( cubes, cube )
+        if lit:
+            cubes.append( cube )
+    return sumall(cubes)
+
 print( "Part 1:", part1(convert(data1)) )
+print( "Part 1:", part12(convert(data1)) )
 print( "Part 2:", part2(convert(data2)) )
 
