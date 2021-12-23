@@ -42,6 +42,13 @@ COST = { "A": 1, "B": 10, "C": 100, "D": 1000 }
 
 FINAL_NODE = tuple()
 
+def render(waiting, rooms=None):
+    def e(s):
+        return s or '.'
+    print( "(%s%s %s %s %s %s%s)" % tuple(map(e,waiting)) )
+    for row in zip(*rooms):
+        print( "   " + ' '.join(map(e,row)))
+
 def path_from_parents(parents, end):
     out = [end]
     while out[-1] in parents:
@@ -52,21 +59,24 @@ def path_from_parents(parents, end):
 def psub(x, y):
     return [a-b for a, b in zip(x, y)]
 
-def pdist1(x, y=None):
-    if y is not None: x = psub(x, y)
+def mandist1(x, y=None):
+    if y: 
+        x = psub(x, y)
     return sum(map(abs, x))
 
-def dijkstra( from_node, expand, to_node, heuristic = None ):
+# Adding a cost heuristic turns this from dijkstra to A*.
+
+def dijkstra( from_node, expand, to_node, heuristic=None ):
     """
-    expand should return an iterable of (dist, successor node) tuples.
+    expand should return an iterable of (cost, successor node) tuples.
     Returns (distances, parents).
     Use path_from_parents(parents, node) to get a path.
     """
-    if heuristic is None:
+    if not heuristic:
         heuristic = lambda _: 0
-    seen = set()  # type: typing.Set[T]
-    g_values = {from_node: 0}  # type: typing.Dict[T, int]
-    parents = {}  # type: typing.Dict[T, T]
+    seen = set()
+    g_values = {from_node: 0}
+    parents = {}
 
     # (f, g, n)
     todo = [(0 + heuristic(from_node), 0, from_node)]
@@ -94,12 +104,13 @@ def dijkstra( from_node, expand, to_node, heuristic = None ):
     
     return (g_values, parents)
 
-def a_star( from_node, expand, to_node, heuristic=None ):
+def get_path( from_node, expand, to_node, heuristic=None ):
     """
-    expand should return an iterable of (dist, successor node) tuples.
+    expand accepts a node and returns an iterable of (dist, successor node) 
+    tuples.
     Returns (distance, path).
     """
-    g_values, parents = dijkstra(from_node, to_node=to_node, expand=expand, heuristic=heuristic)
+    g_values, parents = dijkstra(from_node, expand, to_node, heuristic)
     if to_node not in g_values:
         raise Exception("couldn't reach to_node")
     return (g_values[to_node], path_from_parents(parents, to_node))
@@ -112,99 +123,7 @@ def expand(node):
     cur_waitings, cur_rooms = node
 
     # waitings is a list of None or string
-    if cur_rooms == (("A", "A"), ("B", "B"), ("C", "C"), ("D", "D")):
-        return [(0, FINAL_NODE)]
-    
-    for i, room in enumerate(cur_rooms):
-        # find the thing to move
-        # sprint(room)
-        first, second = room
-        if first == "":
-            if second == "":
-                continue
-            else:
-                to_move = second
-                to_move_coord = (3, ROOM_COLS[i])
-                room_idx = 1
-        else:
-            to_move = first
-            to_move_coord = (2, ROOM_COLS[i])
-            room_idx = 0
-        for j, waiting_area in enumerate(WAITING_AREAS):
-            if cur_waitings[j] == "":
-                # CHECK IF BLOCKED OFF.
-                c1, c2 = waiting_area[1], to_move_coord[1]
-                if c1 > c2:
-                    c1, c2 = c2, c1
-                bad = False
-                for col in range(c1+1, c2):
-                    if col in WTF and cur_waitings[WTF.index(col)] != "":
-                        bad = True
-                        break
-                if bad:
-                    continue
-
-                # have this person move over there
-                new_waitings = list(cur_waitings)
-                new_rooms = list(map(list, cur_rooms))
-
-                cost = pdist1(to_move_coord, waiting_area) * COST[to_move]
-                new_waitings[j] = to_move
-                new_rooms[i][room_idx] = ""
-                out.append((cost, (tuple(new_waitings), tuple(map(tuple, new_rooms)))))
-    
-    # move from waiting to room
-    for j, waiting_area in enumerate(WAITING_AREAS):
-        to_move = cur_waitings[j]
-        if to_move == "":
-            continue
-        target_room = ord(to_move) - ord('A')
-        target_room_actual = cur_rooms[target_room]
-        # first, then second
-        if target_room_actual[0] == "" and (target_room_actual[1] == "" or target_room_actual[1] == to_move):
-            # move in
-            col = ROOM_COLS[target_room]
-            if target_room_actual[1] == "":
-                # move to second
-                row = 3
-                room_idx = 1
-            else:
-                row = 2
-                room_idx = 0
-
-            # CHECK IF BLOCKED OFF.
-            c1, c2 = waiting_area[1], col
-            if c1 > c2:
-                c1, c2 = c2, c1
-            bad = False
-            for col2 in range(c1+1, c2):
-                if col2 in WTF and cur_waitings[WTF.index(col2)] != "":
-                    bad = True
-                    break
-            if bad:
-                continue
-            
-            cost = pdist1((row, col), waiting_area) * COST[to_move]
-
-            new_waitings = list(cur_waitings)
-            new_rooms = list(map(list, cur_rooms))
-
-            new_waitings[j] = ""
-            new_rooms[target_room][room_idx] = to_move
-            out.append((cost, (tuple(new_waitings), tuple(map(tuple, new_rooms)))))
-
-    return out
-
-def expand2(node):
-    # (weight, node)
-    out = []
-
-    # node should store waiting areas + rooms
-    cur_waitings, cur_rooms = node
-
-    # waitings is a list of None or string
     if all(all(chr(ord('A')+i) == x for x in room) for i, room in enumerate(cur_rooms)):
-    # if cur_rooms == (("A", "A"), ("B", "B"), ("C", "C"), ("D", "D")):
         return [(0, FINAL_NODE)]
     
     for i, room in enumerate(cur_rooms):
@@ -236,12 +155,12 @@ def expand2(node):
                 new_waitings = list(cur_waitings)
                 new_rooms = list(map(list, cur_rooms))
 
-                cost = pdist1(to_move_coord, waiting_area) * COST[to_move]
+                cost = mandist1(to_move_coord, waiting_area) * COST[to_move]
                 new_waitings[j] = to_move
                 new_rooms[i][room_idx] = ""
                 out.append((cost, (tuple(new_waitings), tuple(map(tuple, new_rooms)))))
     
-    # move from waiting to room
+    # Move from waiting to room
     for j, waiting_area in enumerate(WAITING_AREAS):
         to_move = cur_waitings[j]
         if to_move == "":
@@ -273,7 +192,7 @@ def expand2(node):
             if bad:
                 continue
             
-            cost = pdist1((row, col), waiting_area) * COST[to_move]
+            cost = mandist1((row, col), waiting_area) * COST[to_move]
 
             new_waitings = list(cur_waitings)
             new_rooms = list(map(list, cur_rooms))
@@ -284,35 +203,23 @@ def expand2(node):
 
     return out
 
-def part1(data):
+def process(part,data):
+    extra = ['']*4 if part == 1 else ["DD", "CB", "BA", "AC"]
+
     rooms = []
-    for room_col in ROOM_COLS:
-        rooms.append(tuple(data[row][room_col] for row in [2, 3]))
-    rooms = tuple(rooms)
-    print(rooms)
-    waitings = ("",)*len(WAITING_AREAS)
-
-    out, path=a_star((waitings, rooms), expand, FINAL_NODE)
-    for p in path:
-        pprint(p)
-
-    return out
-
-def part2(data):
-    rooms = []
-    PART2 = ["DD", "CB", "BA", "AC"]
     for i,room_col in enumerate(ROOM_COLS):
         a, b = [data[row][room_col] for row in [2, 3]]
-        rooms.append(tuple(a+PART2[i]+b))
-    rooms = tuple(rooms)
-    print(rooms)
-    waitings = ("",)*len(WAITING_AREAS)
+        rooms.append(tuple(a+extra[i]+b))
 
-    out, path=a_star((waitings, rooms), expand2, FINAL_NODE)
-    for p in path:
-        pprint(p)
+    rooms = tuple(rooms)
+    waitings = ("",)*len(WAITING_AREAS)
+    render(waitings, rooms)
+
+    out, path = get_path((waitings, rooms), expand, FINAL_NODE)
+    if DEBUG:
+        [render(*p) for p in path if p]
 
     return out
 
-print( "Part 1:", part1(data) )
-print( "Part 2:", part2(data) )
+print( "Part 1:", process(1,data) )
+print( "Part 2:", process(2,data) )
