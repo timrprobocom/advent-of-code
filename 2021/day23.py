@@ -29,13 +29,12 @@ else:
     def sprint(*a,**k):
         pass
 
-# These are the waiting area columns.  Why start at 1?
+# These are the assigned columns in the diagram.
 WAIT_COLS = [1, 2, 4, 6, 8, 10, 11]
+ROOM_COLS = [3, 5, 7, 9]
 
 # These are the x,y coordinates of the waiting areas.
 WAITING_AREAS = [ (1, x) for x in WAIT_COLS ]
-
-ROOM_COLS = [3,5,7,9]
 
 PODS = 'ABCD'
 COST = { "A": 1, "B": 10, "C": 100, "D": 1000 }
