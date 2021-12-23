@@ -29,15 +29,15 @@ else:
     def sprint(*a,**k):
         pass
 
-WAITING_AREAS = [
-    (1, x)
-    for x in [1, 2, 4, 6, 8, 10, 11]
-]
+# These are the waiting area columns.  Why start at 1?
+WAIT_COLS = [1, 2, 4, 6, 8, 10, 11]
 
-WTF = [1, 2, 4, 6, 8, 10, 11]
+# These are the x,y coordinates of the waiting areas.
+WAITING_AREAS = [ (1, x) for x in WAIT_COLS ]
 
 ROOM_COLS = [3,5,7,9]
 
+PODS = 'ABCD'
 COST = { "A": 1, "B": 10, "C": 100, "D": 1000 }
 
 FINAL_NODE = tuple()
@@ -115,90 +115,97 @@ def get_path( from_node, expand, to_node, heuristic=None ):
         raise Exception("couldn't reach to_node")
     return (g_values[to_node], path_from_parents(parents, to_node))
 
+# Is this path blocks?
+
+def is_blocked( waits, c1, c2 ):
+    if c1 > c2:
+        c1, c2 = c2, c1
+    for col in range(c1+1, c2):
+        if col in WAIT_COLS and waits[WAIT_COLS.index(col)]:
+            return True
+    return False
+
+# Given a node, this function returns the set of possible successor nodes
+# and their incremental cost.
+
 def expand(node):
-    # (weight, node)
+    # (cost, node)
     out = []
 
-    # node should store waiting areas + rooms
+    # Node should store waiting areas + rooms
+    # waitings is a list of None or string
     cur_waitings, cur_rooms = node
 
-    # waitings is a list of None or string
-    if all(all(chr(ord('A')+i) == x for x in room) for i, room in enumerate(cur_rooms)):
+    # If each room is filled with its pod, then we are done.
+
+    if all(all(pod == x for x in room) for pod, room in zip(PODS,cur_rooms)):
         return [(0, FINAL_NODE)]
     
+    # First, see if we can move someone out of a room.
+
     for i, room in enumerate(cur_rooms):
-        # find the thing to move
-        # sprint(room)
+        to_move_coord = None
         for room_idx, to_move in enumerate(room):
-            if to_move == "":
-                continue
-            to_move_coord = (2+room_idx, ROOM_COLS[i])
-            break
-        else:
+            if to_move:
+                to_move_coord = (2+room_idx, ROOM_COLS[i])
+                break
+        if not to_move_coord:
             continue
+
+        # Now find an empty spot.
 
         for j, waiting_area in enumerate(WAITING_AREAS):
-            if cur_waitings[j] == "":
-                # CHECK IF BLOCKED OFF.
-                c1, c2 = waiting_area[1], to_move_coord[1]
-                if c1 > c2:
-                    c1, c2 = c2, c1
-                bad = False
-                for col in range(c1+1, c2):
-                    if col in WTF and cur_waitings[WTF.index(col)] != "":
-                        bad = True
-                        break
-                if bad:
-                    continue
+            # Make sure spot is empty and path is not blocked.
+            if cur_waitings[j] or is_blocked(cur_waitings, waiting_area[1], to_move_coord[1]):
+                continue
 
-                # have this person move over there
-                new_waitings = list(cur_waitings)
-                new_rooms = list(map(list, cur_rooms))
+            # Have this person move over there.
 
-                cost = mandist1(to_move_coord, waiting_area) * COST[to_move]
-                new_waitings[j] = to_move
-                new_rooms[i][room_idx] = ""
-                out.append((cost, (tuple(new_waitings), tuple(map(tuple, new_rooms)))))
-    
-    # Move from waiting to room
+            # list/map/list makes it writable.  tuple/map/tuple makes it hashable.
+            new_waitings = list(cur_waitings)
+            new_rooms = list(map(list, cur_rooms))
+
+            new_waitings[j] = to_move
+            new_rooms[i][room_idx] = ""
+
+            cost = mandist1(to_move_coord, waiting_area) * COST[to_move]
+            out.append((cost, (tuple(new_waitings), tuple(map(tuple, new_rooms)))))
+
+
+    # Now see if we can move someone INTO a room.
+
     for j, waiting_area in enumerate(WAITING_AREAS):
         to_move = cur_waitings[j]
-        if to_move == "":
+        if not to_move:
             continue
-        target_room = ord(to_move) - ord('A')
-        target_room_actual = cur_rooms[target_room]
-        # first, then second
-        if target_room_actual[0] == "" and all(x == "" or x == to_move for x in target_room_actual[1:]):
-            # move in
-            col = ROOM_COLS[target_room]
-            # go back
-            for room_idx in range(len(target_room_actual))[::-1]:
-                if target_room_actual[room_idx] != "":
-                    continue
-                row = room_idx + 2
-                break
-            else:
-                assert False
 
-            # CHECK IF BLOCKED OFF.
-            c1, c2 = waiting_area[1], col
-            if c1 > c2:
-                c1, c2 = c2, c1
-            bad = False
-            for col2 in range(c1+1, c2):
-                if col2 in WTF and cur_waitings[WTF.index(col2)] != "":
-                    bad = True
+        target_room = ord(to_move) - ord('A')
+        target_room_contents = cur_rooms[target_room]
+
+        # If their room has an empty row and is only filled by like things, use it.
+
+        if target_room_contents[0] == "" and all(x == "" or x == to_move for x in target_room_contents[1:]):
+            # Which column is this?
+            col = ROOM_COLS[target_room]
+
+            # Find the empty row.
+            row = None
+            for room_idx in range(len(target_room_contents))[::-1]:
+                if target_room_contents[room_idx] == "":
+                    row = room_idx + 2
                     break
-            if bad:
+            assert row
+
+            if is_blocked(cur_waitings, waiting_area[1], col):
                 continue
             
-            cost = mandist1((row, col), waiting_area) * COST[to_move]
-
             new_waitings = list(cur_waitings)
             new_rooms = list(map(list, cur_rooms))
 
             new_waitings[j] = ""
             new_rooms[target_room][room_idx] = to_move
+
+            cost = mandist1((row, col), waiting_area) * COST[to_move]
             out.append((cost, (tuple(new_waitings), tuple(map(tuple, new_rooms)))))
 
     return out
