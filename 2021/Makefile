@@ -5,7 +5,7 @@ O = .o
 EXE =
 CPPFLAGS = --std=c++11
 CXX = g++
-LIBS = -lgmpxx -lgmp
+#LIBS = -lgmpxx -lgmp
 else
 O = .obj
 EXE = .exe

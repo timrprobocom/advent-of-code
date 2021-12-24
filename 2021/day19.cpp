@@ -205,9 +205,10 @@ int main( int argc, char ** argv )
     const char * filename = "day19.txt";
     while( *++argv )
     {
-        if( strcmp(*argv, "debug") == 0 )
+        string arg(*argv);
+        if( arg == "debug")
             DEBUG = true;
-        else if( strcmp(*argv, "test") == 0 )
+        else if( arg == "test")
             filename = "test19.txt";
     }
 

@@ -354,9 +354,10 @@ int main( int argc, char ** argv )
     istringstream data2;
     while( *++argv )
     {
-        if( strcmp(*argv, "debug") == 0 )
+        string arg(*argv);
+        if( arg == "debug")
             DEBUG = true;
-        else if( strcmp(*argv, "test") == 0 )
+        else if( arg =="test")
         {
             data1.str( test1 );
             data2.str( test2 );
