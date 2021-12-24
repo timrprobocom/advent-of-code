@@ -44,77 +44,36 @@ class Machine:
 
 data = open('day24.txt').readlines()
 
-# This is what each phase of the program does.  It's building a 
-# number in base 26.  We need to make sure the last phase cancels
-# out the last remaining digit.
+# We get these constraints from the code itself.
+#So dig[0]+14- 7 == dig[13]  +7 0 is 1,2
+#So dig[1]+ 2-10 == dig[12]  -8 1 is 9
+#So dig[2]+ 1- 5 == dig[11]  -4 2 is 5-9
+#So dig[3]+13-12 == dig[6]   +1 3 is 1-8
+#So dig[4]+ 5-12 == dig[5]   -7 4 is 8 9
+#So dig[7]+ 9- 7 == dig[8]   +2 7 is 1-7
+#So dig[9]+13- 8 == dig[10]  +5 9 is 1-4
 
-def run(ch, z, w):
-    x = AX[ch] + (z % 26)
-    z = z // DZ[ch]
-    if x != w:
-        z *= 26
-        z += w + AY[ch]
-    return z
+valid = []
+machine = Machine()
+d1 = 9
+d12 = 1
+for d0 in (1,2):
+    for d2 in (5,6,7,8,9):
+        for d3 in range(1,9):
+            for d4 in (8,9):
+                for d7 in range(1,8):
+                    for d9 in (1,2,3,4):
+                        d13 = d0+7
+                        d11 = d2-4
+                        d6 = d3+1
+                        d5 = d4-7
+                        d8 = d7+2
+                        d10 = d9+5
+                        code = [d0,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11,d12,d13]
+                        machine.run(data, code)
+                        if machine.regs['z'] == 0:
+                            valid.append( code )
+print(len(valid), "keys")
+print( "Part 1:", ''.join(str(s) for s in valid[-1]))
+print( "Part 2:", ''.join(str(s) for s in valid[0]))
 
-# Extract the key constants from the code.
-
-AX = []
-DZ = []
-AY = []
-for lineno, line in enumerate(data):
-    if "add x " in line and "add x z" not in line:
-        AX.append(int(line.split()[2]))
-    if "div z " in line:
-        DZ.append(int(line.split()[2]))
-    if "add y " in line and lineno%19 == 15:
-        AY.append(int(line.split()[2]))
-
-if DEBUG:
-    print("Extracted from input")
-    print("AX", AX)
-    print("DZ", DZ)
-    print("AY", AY)
-
-assert len(AX) == 14
-assert len(DZ) == 14
-assert len(AY) == 14
-
-# At each stage, if z is beyond a certain value, it's  hopeless and we can 
-# early exit.  Determine these thresholds.
-
-z_too_big = [26**DZ[i:].count(26) for i in range(len(DZ))]
-
-CANDIDATES = list(range(1, 10))
-
-# This is a depth-first search.  We start trying numbers at each stage
-# until we exceed the threshhold for that stage.  When we get to the final
-# stage, we add that digit to the possibles and back up.
-
-@functools.lru_cache(maxsize=None)
-def search(ch, zsofar):
-    if ch == 14:
-        if zsofar == 0:
-            return [""]
-        return []
-    if zsofar > z_too_big[ch]:
-        return []
-
-    # Here's what x needs to be.
-
-    xwillbe = AX[ch] + zsofar % 26
-    wopts = CANDIDATES
-    if xwillbe in range(1, 10):
-        wopts = [xwillbe]
-
-    ret = []
-    for w in wopts:
-        znext = run(ch, zsofar, w)
-        for x in search(ch + 1, znext):
-            ret.append(str(w) + x)
-    return ret
-
-solns = search(0, 0)
-solns = list(map(int,solns))
-print("Total solutions:", len(solns))
-print("Part 1:", max(solns))
-print("Part 2:", min(solns))
