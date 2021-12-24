@@ -1,48 +1,60 @@
 import sys
+import math
 import functools
 
 DEBUG = 'debug' in sys.argv
 
-class Machine:
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.regs = { 'w': 0, 'x': 0, 'y': 0, 'z': 0 }
-
-    def fetch(self,c):
-        if c in 'wxyz':
-            return self.regs[c]
-        else:
-            return int(c)
-
-    def store(self,c,v):
-        self.regs[c] = v
-
-    def run(self, program, inp):
-        self.reset()
-        inputs = inp[:]
-        for line in program:
-            if len(line) < 2:
-                continue
-            parts = line.rstrip().split()
-            opc = parts[0]
-            res = parts[1]
-            if opc == 'inp':
-                self.regs[res] = inputs.pop(0)
-            elif opc == 'add':
-                self.regs[res] += self.fetch(parts[2])
-            elif opc == 'mul':
-                self.regs[res] *= self.fetch(parts[2])
-            elif opc == 'div':
-                self.regs[res] //= self.fetch(parts[2])
-            elif opc == 'mod':
-                self.regs[res] %= self.fetch(parts[2])
-            elif opc == 'eql':
-                self.regs[res] = int(self.regs[res] == self.fetch(parts[2]))
-        return len(inp)-len(inputs)
-
 data = open('day24.txt').readlines()
+
+AX = []
+DZ = []
+AY = []
+for lineno, line in enumerate(data):
+    if "add x " in line and "add x z" not in line:
+        AX.append(int(line.split()[2]))
+    if "div z " in line:
+        DZ.append(int(line.split()[2]))
+    if "add y " in line and lineno%19 == 15:
+        AY.append(int(line.split()[2]))
+
+if DEBUG:
+    print("Extracted from input")
+    print("AX", AX)
+    print("DZ", DZ)
+    print("AY", AY)
+
+assert len(AX) == 14
+assert len(DZ) == 14
+assert len(AY) == 14
+
+stk = []
+keys = []
+for i,(ax,ay,dz) in enumerate(zip(AX,AY,DZ)):
+    # if DZ is 1, then we push an element on the stack.
+    if dz == 1:
+        stk.append( (i,ay) )
+    else:
+        j,ayj = stk.pop()
+        top = min(9, 9-ayj-ax)
+        bot = max(1, 1-ayj-ax)
+        keys.append( (j,bot,top) )
+        keys.append( (i,10-top,10-bot) )
+        
+keys.sort()
+
+xmin = 0
+xmax = 0
+for i,b,t in keys:
+    xmin = xmin * 10 + b
+    xmax = xmax * 10 + t
+
+print( "Part 1:", xmax )
+print( "Part 2:", xmin )
+
+
+# -8 -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6 7 8
+#  9  9  9  9  9  9  9  9 9 8 7 6 5 4 3 2 1
+#  9  8  7  6  5  4  3  2 1 1 1 1 1 1 1 1 1
 
 # We get these constraints from the code itself.
 #So dig[0]+14- 7 == dig[13]  +7 0 is 1,2
@@ -52,28 +64,3 @@ data = open('day24.txt').readlines()
 #So dig[4]+ 5-12 == dig[5]   -7 4 is 8 9
 #So dig[7]+ 9- 7 == dig[8]   +2 7 is 1-7
 #So dig[9]+13- 8 == dig[10]  +5 9 is 1-4
-
-valid = []
-machine = Machine()
-d1 = 9
-d12 = 1
-for d0 in (1,2):
-    for d2 in (5,6,7,8,9):
-        for d3 in range(1,9):
-            for d4 in (8,9):
-                for d7 in range(1,8):
-                    for d9 in (1,2,3,4):
-                        d13 = d0+7
-                        d11 = d2-4
-                        d6 = d3+1
-                        d5 = d4-7
-                        d8 = d7+2
-                        d10 = d9+5
-                        code = [d0,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11,d12,d13]
-                        machine.run(data, code)
-                        if machine.regs['z'] == 0:
-                            valid.append( code )
-print(len(valid), "keys")
-print( "Part 1:", ''.join(str(s) for s in valid[-1]))
-print( "Part 2:", ''.join(str(s) for s in valid[0]))
-
