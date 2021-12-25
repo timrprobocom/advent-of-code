@@ -16,7 +16,6 @@ add y w    # 9 1 9 0
 add y 14   # 9 1 23 0
 mul y x    # 9 1 23 0
 add z y    # 9 1 23 23   z is always input+14
-
 inp w           # Digit 1
 mul x 0
 add x z
@@ -35,7 +34,6 @@ add y w
 add y 2     # y = n[1]+2
 mul y x     # x = 1
 add z y     # z = (n[0]+14)*26+n[1]+2
-
 inp w           # Digit 2
 mul x 0
 add x z
@@ -54,7 +52,6 @@ add y w
 add y 1
 mul y x
 add z y
-
 inp w           # Digit 3
 mul x 0
 add x z
@@ -73,7 +70,6 @@ add y w
 add y 13
 mul y x
 add z y
-
 inp w           # Digit 4
 mul x 0
 add x z
@@ -92,7 +88,6 @@ add y w
 add y 5
 mul y x
 add z y         # At this point, z is a base26 number of our digits + 14/2/1/13/5.
-
 inp w           # Digit 5
 mul x 0
 add x z
@@ -111,7 +106,6 @@ add y w
 add y 5
 mul y x
 add z y
-
 inp w           # Digit 6
 mul x 0
 add x z
@@ -130,7 +124,6 @@ add y w
 add y 5
 mul y x
 add z y
-
 inp w           # Digit 7
 mul x 0
 add x z
@@ -149,7 +142,6 @@ add y w
 add y 9
 mul y x
 add z y
-
 inp w           # digit 8
 mul x 0
 add x z
@@ -168,7 +160,6 @@ add y w
 add y 3
 mul y x
 add z y
-
 inp w           # digit 9
 mul x 0
 add x z
@@ -187,7 +178,6 @@ add y w
 add y 13
 mul y x
 add z y
-
 inp w           # digit 10
 mul x 0
 add x z
@@ -206,7 +196,6 @@ add y w
 add y 2
 mul y x
 add z y
-
 inp w           # digit 11
 mul x 0
 add x z
@@ -225,7 +214,6 @@ add y w
 add y 1
 mul y x
 add z y
-
 inp w
 mul x 0
 add x z
@@ -244,7 +232,6 @@ add y w
 add y 11
 mul y x
 add z y
-
 inp w
 mul x 0     # x=0 
 add x z     # x=z 

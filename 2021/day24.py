@@ -14,7 +14,7 @@ for lineno, line in enumerate(data):
         AX.append(int(line.split()[2]))
     if "div z " in line:
         DZ.append(int(line.split()[2]))
-    if "add y " in line and lineno%19 == 15:
+    if "add y " in line and lineno%18 == 15:
         AY.append(int(line.split()[2]))
 
 if DEBUG:
@@ -26,6 +26,11 @@ if DEBUG:
 assert len(AX) == 14
 assert len(DZ) == 14
 assert len(AY) == 14
+
+# We don't need to run the app.  We don't even need to search.
+# Once we know the digit filters, every combination we produce
+# is valid (4480).  The high range is the max, the low range
+# is the min.
 
 stk = []
 keys = []

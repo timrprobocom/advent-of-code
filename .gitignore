@@ -2,3 +2,6 @@ day??
 __pycache__
 *.swp
 *.map
+*.dSYM
+Cargo.lock
+target/
