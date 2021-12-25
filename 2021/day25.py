@@ -1,7 +1,4 @@
-import re
 import sys
-import itertools
-import numpy as np
 
 test = """\
 v...>>.vv>
