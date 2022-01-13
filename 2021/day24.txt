@@ -105,13 +105,13 @@ mul y 0
 add y w
 add y 5
 mul y x
-add z y
+add z y         # z will be 0 if z came in as 1 digit and x is 0
 inp w           # Digit 6
 mul x 0
 add x z
 mod x 26
 div z 26
-add x -12      # Here's the first possible
+add x -12      # Here's the next possible
 eql x w
 eql x 0
 mul y 0
