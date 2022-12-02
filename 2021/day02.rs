@@ -6,6 +6,7 @@ struct Position {
     aim : i32,
 }
 
+#[allow(dead_code)]
 impl Position {
     fn repr(&self) -> String {
         return format!("<Position {} {} {}", self.pos, self.depth, self.aim)

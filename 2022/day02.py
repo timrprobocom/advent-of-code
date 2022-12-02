@@ -48,10 +48,18 @@ def part2(vals):
     for game in vals:
         choice = ord(game[2]) - ord('X')
         mypick = need[game[0]][choice]
-        print(game,mypick)
         count += score[game[0]+mypick] + ord(mypick)-ord('W')
     return count
 
+def part(vals):
+    count1 = 0
+    count2 = 0
+    for game in vals:
+        mypick = game[2]
+        count1 += score[game[0]+mypick] + ord(mypick)-ord('W')
+        choice = ord(game[2]) - ord('X')
+        mypick = need[game[0]][choice]
+        count2 += score[game[0]+mypick] + ord(mypick)-ord('W')
+    return count1,count2
 
-print(part1(vals))
-print(part2(vals))
+print(part(vals))
