@@ -10,9 +10,9 @@ CrZsJsPPZsGzwwsLwLmpwMDw"""
 
 
 if 'test' in sys.argv:
-    vals = test.splitlines()
+    data = test.splitlines()
 else:
-    vals = [s.rstrip() for s in open('day03.txt').readlines()]
+    data = [s.rstrip() for s in open('day03.txt').readlines()]
 
 def score(setx):
     char = setx.pop()
@@ -21,19 +21,19 @@ def score(setx):
     else:
         return ord(char)-ord('A')+27
 
-def part1(vals):
+def part1(data):
     prior = 0
-    for row in vals:
+    for row in data:
         h = len(row)//2
         s1 = set(row[:h]).intersection( set(row[h:]) )
         prior += score(s1)
     return prior
 
-def part2(vals):
+def part2(data):
     prior = 0
     counter = 2
     sect = None
-    for row in vals:
+    for row in data:
         if sect:
             sect.intersection_update(set(row))
         else:
@@ -46,5 +46,5 @@ def part2(vals):
         counter -= 1
     return prior
 
-print(part1(vals))
-print(part2(vals))
+print("Part 1:", part1(data))
+print("Part 2:", part2(data))

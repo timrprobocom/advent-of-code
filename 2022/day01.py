@@ -18,14 +18,14 @@ test = """\
 
 
 if 'test' in sys.argv:
-    vals = test.splitlines()
+    data = test.splitlines()
 else:
-    vals = open('day01.txt').readlines()
+    data = open('day01.txt').readlines()
 
-def part1(vals):
+def part1(data):
     accum = 0
     maxx = 0
-    for line in vals:
+    for line in data:
         line = line.strip()
         if not line:
             maxx = max(maxx,accum)
@@ -34,9 +34,9 @@ def part1(vals):
             accum += int(line)
     return maxx
 
-def part2(vals):
+def part2(data):
     accum = [0]
-    for line in vals:
+    for line in data:
         line = line.strip()
         if not line:
             accum.append(0)
@@ -44,5 +44,5 @@ def part2(vals):
             accum[-1] += int(line)
     return sum(sorted(accum)[-3:])
 
-print(part1(vals))
-print(part2(vals))
+print("Part 1:", part1(data))
+print("Part 2:", part2(data))

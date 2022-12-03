@@ -33,28 +33,28 @@ need = {
 
 
 if 'test' in sys.argv:
-    vals = test.splitlines()
+    data = test.splitlines()
 else:
-    vals = open('day02.txt').readlines()
+    data = open('day02.txt').readlines()
 
-def part1(vals):
+def part1(data):
     count = 0
-    for game in vals:
+    for game in data:
         count += score[game[0]+game[2]] + ord(game[2])-ord('W')
     return count
 
-def part2(vals):
+def part2(data):
     count = 0
-    for game in vals:
+    for game in data:
         choice = ord(game[2]) - ord('X')
         mypick = need[game[0]][choice]
         count += score[game[0]+mypick] + ord(mypick)-ord('W')
     return count
 
-def part(vals):
+def part(data):
     count1 = 0
     count2 = 0
-    for game in vals:
+    for game in data:
         mypick = game[2]
         count1 += score[game[0]+mypick] + ord(mypick)-ord('W')
         choice = ord(game[2]) - ord('X')
@@ -62,4 +62,6 @@ def part(vals):
         count2 += score[game[0]+mypick] + ord(mypick)-ord('W')
     return count1,count2
 
-print(part(vals))
+results = part(data)
+print("Part 1:", results[0])
+print("Part 1:", results[1])
