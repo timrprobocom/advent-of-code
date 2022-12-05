@@ -22,18 +22,18 @@ DEBUG = 'debug' in sys.argv
 columns = [[] for _ in range(9)]
 commands = []
 for row in data:
-    row = row.rstrip()
-    if not row:
-        continue
-    if row[0:3] == ' 1 ':
-        continue
-    if row[:4] == 'move':
+    # Parse the columns.
+    if '[' in row:
+        for col in range((len(row)+1)//4):
+            if row[4*col+1] != ' ':
+                columns[col].insert(0, row[4*col+1])
+    # Parse the commands.
+    elif len(row) > 4 and row[:4] == 'move':
         parts = row.split()
         commands.append( tuple(int(parts[k]) for k in (1,3,5)) )
-        continue
-    for col in range((len(row)+1)//4):
-        if row[4*col+1] != ' ':
-            columns[col].insert(0, row[4*col+1])
+
+if DEBUG:
+    print(columns)
 
 def part1(cols,commands):
     for cnt,frm,to in commands:
