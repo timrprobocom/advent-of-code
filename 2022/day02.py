@@ -64,4 +64,4 @@ def part(data):
 
 results = part(data)
 print("Part 1:", results[0])
-print("Part 1:", results[1])
+print("Part 2:", results[1])
