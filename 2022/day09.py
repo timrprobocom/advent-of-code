@@ -44,6 +44,7 @@ def move(h,t):
     elif h[1] == t[1]:
         tail = ((h[0]+t[0])//2, t[1])
     # So one of them is off by 2.
+    # For part 2, both can be off by 2.
     elif abs(h[0]-t[0]) == 2:
         if abs(h[1]-t[1]) == 2:
             tail = ((h[0]+t[0])//2, (h[1]+t[1])//2)
