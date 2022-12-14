@@ -13,7 +13,12 @@ else:
 
 DEBUG = 'debug' in sys.argv
 
-maxy = 0
+def cmp(l,r):
+    if l < r:
+        return 1
+    if l > r:
+        return -1
+    return 0
 
 def fill(xmap,line):
     segment = []
@@ -23,56 +28,59 @@ def fill(xmap,line):
     fillsegment(xmap,segment)
 
 def fillsegment(xmap,segment):
-    global maxy
     x,y = segment[0]
-    xmap[y][x] = 1
+    xmap.add( (x,y) )
     for x0,y0 in segment[1:]:
-        if x0 == x:
-            dx = 0
-        elif x0 < x:
-            dx = -1
-        else:
-            dx = 1
-        if y0 < y:
-            dy = -1
-        elif y0 == y:
-            dy = 0
-        else:
-            dy = 1
+        dx = cmp(x,x0)
+        dy = cmp(y,y0)
         while x0 != x or y0 != y:
             x += dx
             y += dy
-            xmap[y][x] = 1
-            maxy = max(maxy,y)
+            xmap.add((x,y))
+
+def plot(xmap):
+    minx = min(pt[0] for pt in xmap)
+    maxx = max(pt[0] for pt in xmap)
+    miny = min(pt[1] for pt in xmap)
+    maxy = max(pt[1] for pt in xmap)
+    themap = [['.']*(maxx-minx+1) for _ in range(maxy-miny+1)]
+    for x,y in xmap:
+        themap[y-miny][x-minx] = '#'
+    for row in themap:
+        print(''.join(row))
 
 dirs = ((0,1),(-1,1),(1,1))
 
 def part1(part,data):
-    xmap = [[0]*700 for _ in range(200)]
+    xmap = set()
     for line in data:
         fill(xmap,line)
+    maxy = max(pt[1] for pt in xmap)
     if part == 2:
-        fillsegment(xmap,[[0,maxy+2],[699,maxy+2]])
+        maxy += 2
+        fillsegment(xmap,[[0,maxy],[699,maxy]])
 
     sand = 0
-    while xmap[0][500] == 0:
+    while (500,0) not in xmap:
         sx = 500
         sy = 0
         while sy <= maxy:
             for dx,dy in dirs:
                 sx0=sx+dx
                 sy0=sy+dy
-                if xmap[sy0][sx0] == 0:
+                if (sx0,sy0) not in xmap:
                     sx,sy = sx0,sy0
                     break
             else:
                 if DEBUG:
                     print("placed",sx,sy)
                 sand += 1
-                xmap[sy][sx] = 1
+                xmap.add( (sx,sy) )
                 break
         else:
             break
+    if DEBUG:
+        plot(xmap)
     return sand
     
 print("Part 1:", part1(1,data))
