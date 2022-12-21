@@ -58,10 +58,8 @@ def part2(data):
     R = lookup(right)
     
     base = 10000
-    incr = 10000
     while True:
         known['humn'] = base
-        print(base)
         L = lookup(left)
         if L == R:
             return base
@@ -82,6 +80,12 @@ def part2(data):
         else:
             base -= incr
             incr //= 10
+
+    # The answer is not unique.  The next two values also work.
+
+    for i in range(3):
+        known['humn'] = base+i
+        assert lookup(left) == R
 
     return base
 
