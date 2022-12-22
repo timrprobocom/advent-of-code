@@ -51,6 +51,9 @@ def instruct(codes):
     if accum:
         yield accum
 
+R,D,L,U = range(4)
+direcs = (1,0),(0,1),(-1,0),(0,-1)
+
 def part1(data):
     mymap, codes = parse(data)
 
@@ -60,13 +63,10 @@ def part1(data):
         if len(mymap[y]) < maxw:
             mymap[y] += ' '*(maxw-len(mymap[y]))
 
-    direcs = (1,0),(0,1),(-1,0),(0,-1)
     direc = 0
 
     # Find the start.
-    x,y = (0, 0)
-    while mymap[y][x] == ' ':
-        x += 1
+    x,y = boxes[0]
 
     for code in instruct(codes):
         if DEBUG:
@@ -80,45 +80,44 @@ def part1(data):
             for i in range(code):
                 x0 = x+dx
                 y0 = y+dy
-                if dx:
-                    if dx > 0 and (x0 >= len(mymap[y0]) or mymap[y0][x0] == ' '):
-                        x0 = 0
-                        while mymap[y0][x0] == ' ':
-                            x0 += 1
-                    if dx < 0 and (x0 < 0 or mymap[y0][x0] == ' '):
-                        x0 = len(mymap[y0])-1
-                        while mymap[y0][x0] == ' ':
-                            x0 -= 1
-                else:
-                    if dy > 0 and (y0 >= len(mymap) or mymap[y0][x0] == ' '):
-                        y0 = 0
-                        while mymap[y0][x0] == ' ':
-                            y0 += 1
-                    if dy < 0 and (y0 < 0 or mymap[y0][x0] == ' '):
-                        y0 = len(mymap)-1
-                        while mymap[y0][x0] == ' ':
-                            y0 -= 1
+
+                # Handle wraps.
+
+                if dx > 0 and (x0 >= len(mymap[y0]) or mymap[y0][x0] == ' '):
+                    x0 = 0
+                if dx < 0 and (x0 < 0 or mymap[y0][x0] == ' '):
+                    x0 = len(mymap[y0])-1
+                if dy > 0 and (y0 >= len(mymap) or mymap[y0][x0] == ' '):
+                    y0 = 0
+                if dy < 0 and (y0 < 0 or mymap[y0][x0] == ' '):
+                    y0 = len(mymap)-1
+
+                while mymap[y0][x0] == ' ':
+                    x0 += dx
+                    y0 += dy
+
+                # Check for a wall.
                 if mymap[y0][x0] == '#':
                     break
+
                 x,y = x0,y0
                 if DEBUG:
                     print(x,y)
-                # R D L U
-                    
 
-    print(x,y)
+    if DEBUG:
+        print("final",x,y)
     return 1000*(y+1)+4*(x+1)+direc
 
 # This is relatively tacky, because we have built these transitions by hand,
 # after looking at a physical cube with printed sides.
 #
 # There should be a way to come up with the cube face transitions automatically.
+# But that's hard...
 
 # For TEST map, 
 #      1
 #  2 3 4
 #      5 6 
-#
 
 # For DATA map:
 #    1 2
@@ -126,29 +125,33 @@ def part1(data):
 #  4 5
 #  6
 
-# Dirs are R D L U,  > v < ^
-
 tboxes = [ (2,0), (0,1), (1,1), (2,1), (2,2), (3,2)]
 dboxes = [ (1,0), (2,0), (1,1), (0,2), (1,2), (0,3)]
 
 # These cube numbers start counting at 1.
 
+# The first row tells about the transitions at each edge of box #1.
+# The columns are as labeled.  So, the first entry says, if we leave 
+# box #1 while moving right, that transitions to box #6 moving left.
+# This is a comfusing way to look at it, because "moving left" means 
+# we're entering at the RIGHT edge.
+
 #      R     D     L     U
 ttrans = [
-    [(6,2),(4,1),(3,1),(2,1)], # 1
-    [(3,0),(5,3),(6,3),(1,1)], # 2
-    [(4,0),(5,0),(2,2),(1,0)], # 3
-    [(6,1),(5,1),(3,2),(1,3)], # 4
-    [(6,0),(2,3),(3,3),(4,3)], # 5
-    [(1,2),(2,0),(5,2),(4,2)]  # 6
+    [(6,L),(4,D),(3,D),(2,D)], # 1
+    [(3,R),(5,U),(6,U),(1,D)], # 2
+    [(4,R),(5,R),(2,L),(1,R)], # 3
+    [(6,D),(5,D),(3,L),(1,U)], # 4
+    [(6,R),(2,U),(3,U),(4,U)], # 5
+    [(1,L),(2,R),(5,L),(4,L)]  # 6
 ]
 dtrans = [
-    [(2,0),(3,1),(4,0),(6,0)],
-    [(5,2),(3,2),(1,2),(6,3)],
-    [(2,3),(5,1),(4,1),(1,3)],
-    [(5,0),(6,1),(1,0),(3,0)],
-    [(2,2),(6,2),(4,2),(3,3)],
-    [(5,3),(2,1),(1,1),(4,3)]
+    [(2,R),(3,D),(4,R),(6,R)],
+    [(5,L),(3,L),(1,L),(6,U)],
+    [(2,U),(5,D),(4,D),(1,U)],
+    [(5,R),(6,D),(1,R),(3,R)],
+    [(2,L),(6,L),(4,L),(3,U)],
+    [(5,U),(2,D),(1,D),(4,U)]
 ]
 
 
@@ -170,35 +173,33 @@ def findbox(x,y):
 # Left to down
 # Down to left
 
+# \ d2 
+#  \        R       D       L       U
+#d1 \ sets  y       x       y       x
+#-------------------------------------------
+# R  |      y      N-y     N-y      y
+#    |
+# D  |     N-x      x       x      N-x
+#    |
+# L  |     N-y      y       y      N-y
+#    |
+# U  |      x      N-x     N-x      x
+
+# This implements the truth table, but I don't think this is either
+# easier to read nor more efficient than the if/elif chain.
+
 def edgeover(d1,d2,x,y):
-    if d1 == 0:         # RIGHT
-        if d2 == 1:
-            x = BOX - 1 - y
-        elif d2 == 2:
-            y = BOX - 1 - y
-        elif d2 == 3:
-            x = y
-    elif d1 == 1:       # DOWN
-        if d2 == 0:
-            y = BOX - 1 - x
-        elif d2 == 2:
-            y = x
-        elif d2 == 3:
-            x = BOX - 1 - x
-    elif d1 == 2:       # LEFT
-        if d2 == 0:
-            y = BOX - 1 - y
-        elif d2 == 1:
-            x = y
-        elif d2 == 3:
-            x = BOX - 1 - y
-    elif d1 == 3:       # UP
-        if d2 == 0:
-            y = x
-        elif d2 == 1:
-            x = BOX - 1 - x
-        elif d2 == 2:
-            y = BOX - 1 - x
+    if d1 in (R,L):
+        xy = y
+    else:
+        xy = x
+    if d1 ^ d2 in (1,2):
+        xy = BOX - 1 - xy
+
+    if d2 in (R,L):
+        y = xy
+    else:
+        x = xy
 
     if d2 == 0:
         x = 0
@@ -210,13 +211,46 @@ def edgeover(d1,d2,x,y):
         y = BOX - 1
     return x, y
 
-            
-# For MY map,
-#      1 2
-#      3
-#    4 5
-#    6
 
+def edgeover1(d1,d2,x,y):
+    if d1 == R:         # RIGHT
+        if d2 == D:
+            x = BOX - 1 - y
+        elif d2 == L:
+            y = BOX - 1 - y
+        elif d2 == U:
+            x = y
+    elif d1 == D:       # DOWN
+        if d2 == R:
+            y = BOX - 1 - x
+        elif d2 == L:
+            y = x
+        elif d2 == U:
+            x = BOX - 1 - x
+    elif d1 == L:       # LEFT
+        if d2 == R:
+            y = BOX - 1 - y
+        elif d2 == D:
+            x = y
+        elif d2 == U:
+            x = BOX - 1 - y
+    elif d1 == U:       # UP
+        if d2 == R:
+            y = x
+        elif d2 == D:
+            x = BOX - 1 - x
+        elif d2 == L:
+            y = BOX - 1 - x
+
+    if d2 == R:
+        x = 0
+    elif d2 == D:
+        y = 0
+    elif d2 == L:
+        x = BOX - 1
+    elif d2 == U:
+        y = BOX - 1
+    return x, y
 
 
 def part2(data):
@@ -228,7 +262,6 @@ def part2(data):
         if len(mymap[y]) < maxw:
             mymap[y] += ' '*(maxw-len(mymap[y]))
 
-    direcs = (1,0),(0,1),(-1,0),(0,-1)
     direc = 0
 
     # Find the start.
@@ -271,7 +304,8 @@ def part2(data):
                 if DEBUG:
                     print(x,y)
 
-    print(x,y)
+    if DEBUG:
+        print("final",x,y)
     return 1000*(y+1)+4*(x+1)+direc
 
 
