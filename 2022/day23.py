@@ -1,5 +1,7 @@
 import sys
 from collections import defaultdict
+import numpy as np
+from PIL import Image
 
 test = """\
 ....#..
@@ -105,6 +107,22 @@ def plot(xmap):
         plt[y-ymin][x-xmin] = '#'
     for row in plt:
         print(''.join(row) )
+    print(xmin,xmax,ymin,ymax)
+
+
+ctr = 0
+def bitmap(xmap):
+    global ctr
+    xmin = -15
+    xmax = 125
+    ymin = -15
+    ymax = 125
+    plt = np.zeros( (ymax-ymin+1, xmax-xmin+1), dtype=np.uint8)
+    for x,y in xmap:
+        plt[y-ymin][x-xmin] = '255'
+    img = Image.fromarray(plt, mode='L')
+    img.save('elves%03d.png' % ctr)
+    ctr += 1
 
 
 
@@ -113,6 +131,7 @@ def part2(data):
     if DEBUG:
         plot(xmap)
     for rnd in range(1,10000):
+        print(rnd,end='\r')
         moved = False
         proposed = defaultdict(list)
         newmap = set()
@@ -142,6 +161,7 @@ def part2(data):
         if not moved:
             break
         xmap = newmap
+        bitmap(xmap)
         direcs.append(direcs.pop(0))
 
     if DEBUG:
