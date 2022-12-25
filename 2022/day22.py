@@ -1,5 +1,5 @@
 import sys
-from collections import deque
+from collections import defaultdict
 
 test = """\
         ...#
@@ -21,7 +21,7 @@ if 'test' in sys.argv:
     data = test.splitlines()
     BOX = 4 
 else:
-    data = open('day22.txt').readlines()
+    data = [l.rstrip() for l in open('day22.txt').readlines()]
     BOX = 50
 
 DEBUG = 'debug' in sys.argv
@@ -29,7 +29,6 @@ DEBUG = 'debug' in sys.argv
 def parse(data):
     mymap = []
     for row in data:
-        row = row.rstrip()
         if not row:
             continue
         if row[0] == '1':
@@ -53,6 +52,128 @@ def instruct(codes):
 
 R,D,L,U = range(4)
 direcs = (1,0),(0,1),(-1,0),(0,-1)
+
+# Discover the layout,
+
+boxes = []
+for y in range(0,len(data)-2,BOX):
+    for x in range(0,len(data[y]),BOX):
+        if data[y][x] != ' ':
+            boxes.append( (x,y) )
+
+# For TEST map, 
+#      0
+#  1 2 3
+#      4 5 
+
+# For DATA map:
+#    0 1
+#    2
+#  3 4
+#  5
+
+# Apply rules to find the other connections.  This table says that,
+# from a cube at x,y, we can get to cube at x-1,x+1 from our left,
+# entering going down.  We can also get to it from our down, 
+# entering going left.
+
+rules = [
+    (-1, +1, L, D),
+    (-1, +1, D, L),
+    (-2, +1, U, D),
+    (-2, +1, D, U),
+    (+1, +1, R, D),
+    (+1, +1, D, R),
+    (+2, +1, D, U),
+    (+3, +1, L, U),
+    (+1, +2, R, L),
+    (-1, +2, L, R),
+    (-1, +2, R, L),
+    (-1, +3, U, R),
+    (-2, +3, U, U),
+]
+
+# Find the cube structure.
+
+def find_cube(data):
+    trans = {}
+    boxint = [(x//BOX,y//BOX) for x,y in boxes]
+
+    # This finds all the direct connections, both directions.
+
+    for n,(x,y) in enumerate(boxint):
+        for c,(dx,dy) in enumerate(direcs):
+            if (x+dx,y+dy) in boxint:
+                bi = boxint.index((x+dx,y+dy))
+                trans[(n,c)] = (bi,c)
+                trans[(bi,c^2)] = (n,c^2)
+
+
+    for b in range(6):
+        for d in range(4):
+            if (b,d) in trans:
+                continue
+            x,y = boxint[b]
+            for dx,dy,md,od in rules:
+                if (b,md) in trans:
+                    continue
+                x0 = x+dx
+                y0 = y+dy
+                if (x0,y0) not in boxint:
+                    continue
+                b0 = boxint.index((x0,y0))
+                if (b,md) not in trans:
+                    trans[b,md] = (b0,od)
+                if (b0,od^2) not in trans:
+                    trans[b0,od^2] = (b,md^2)
+
+    return trans
+
+# Find the box ordinal that contains the point x,y.
+
+def findbox(x,y):
+    for bn,(bx,by) in enumerate(boxes):
+        if x in range(bx,bx+BOX) and y in range(by,by+BOX):
+            return bn
+    return -1
+
+# Right to up: y becomes x
+# Up to right
+# Left to down
+# Down to left
+
+# \ d2 
+#  \        R       D       L       U
+#d1 \ sets  y       x       y       x
+#-------------------------------------------
+# R  |      y      N-y     N-y      y
+#    |
+# D  |     N-x      x       x      N-x
+#    |
+# L  |     N-y      y       y      N-y
+#    |
+# U  |      x      N-x     N-x      x
+
+# This implements the truth table, but I don't think this is either
+# easier to read nor more efficient than an if/elif chain.
+
+def edgeover(d1,d2,x,y):
+    if d1 in (R,L):
+        xy = y
+    else:
+        xy = x
+    if d1 ^ d2 in (1,2):
+        xy = BOX - 1 - xy
+
+    if d2 in (R,L):
+        x = 0 if d2==R else BOX-1
+        y = xy
+    else:
+        x = xy
+        y = 0 if d2==D else BOX-1
+
+    return x, y
+
 
 def part1(data):
     mymap, codes = parse(data)
@@ -108,153 +229,9 @@ def part1(data):
         print("final",x,y)
     return 1000*(y+1)+4*(x+1)+direc
 
-# This is relatively tacky, because we have built these transitions by hand,
-# after looking at a physical cube with printed sides.
-#
-# There should be a way to come up with the cube face transitions automatically.
-# But that's hard...
-
-# For TEST map, 
-#      1
-#  2 3 4
-#      5 6 
-
-# For DATA map:
-#    1 2
-#    3
-#  4 5
-#  6
-
-tboxes = [ (2,0), (0,1), (1,1), (2,1), (2,2), (3,2)]
-dboxes = [ (1,0), (2,0), (1,1), (0,2), (1,2), (0,3)]
-
-# These cube numbers start counting at 1.
-
-# The first row tells about the transitions at each edge of box #1.
-# The columns are as labeled.  So, the first entry says, if we leave 
-# box #1 while moving right, that transitions to box #6 moving left.
-# This is a comfusing way to look at it, because "moving left" means 
-# we're entering at the RIGHT edge.
-
-#      R     D     L     U
-ttrans = [
-    [(6,L),(4,D),(3,D),(2,D)], # 1
-    [(3,R),(5,U),(6,U),(1,D)], # 2
-    [(4,R),(5,R),(2,L),(1,R)], # 3
-    [(6,D),(5,D),(3,L),(1,U)], # 4
-    [(6,R),(2,U),(3,U),(4,U)], # 5
-    [(1,L),(2,R),(5,L),(4,L)]  # 6
-]
-dtrans = [
-    [(2,R),(3,D),(4,R),(6,R)],
-    [(5,L),(3,L),(1,L),(6,U)],
-    [(2,U),(5,D),(4,D),(1,U)],
-    [(5,R),(6,D),(1,R),(3,R)],
-    [(2,L),(6,L),(4,L),(3,U)],
-    [(5,U),(2,D),(1,D),(4,U)]
-]
-
-
-if "test" in sys.argv:
-    boxes = [(BOX*x,BOX*y) for x,y in tboxes]
-    trans = ttrans
-else:
-    boxes = [(BOX*x,BOX*y) for x,y in dboxes]
-    trans = dtrans
-
-def findbox(x,y):
-    for bn,(bx,by) in enumerate(boxes):
-        if x in range(bx,bx+BOX) and y in range(by,by+BOX):
-            return bn
-    return -1
-
-# Right to up: y becomes x
-# Up to right
-# Left to down
-# Down to left
-
-# \ d2 
-#  \        R       D       L       U
-#d1 \ sets  y       x       y       x
-#-------------------------------------------
-# R  |      y      N-y     N-y      y
-#    |
-# D  |     N-x      x       x      N-x
-#    |
-# L  |     N-y      y       y      N-y
-#    |
-# U  |      x      N-x     N-x      x
-
-# This implements the truth table, but I don't think this is either
-# easier to read nor more efficient than the if/elif chain.
-
-def edgeover(d1,d2,x,y):
-    if d1 in (R,L):
-        xy = y
-    else:
-        xy = x
-    if d1 ^ d2 in (1,2):
-        xy = BOX - 1 - xy
-
-    if d2 in (R,L):
-        y = xy
-    else:
-        x = xy
-
-    if d2 == 0:
-        x = 0
-    elif d2 == 1:
-        y = 0
-    elif d2 == 2:
-        x = BOX - 1
-    elif d2 == 3:
-        y = BOX - 1
-    return x, y
-
-
-def edgeover1(d1,d2,x,y):
-    if d1 == R:         # RIGHT
-        if d2 == D:
-            x = BOX - 1 - y
-        elif d2 == L:
-            y = BOX - 1 - y
-        elif d2 == U:
-            x = y
-    elif d1 == D:       # DOWN
-        if d2 == R:
-            y = BOX - 1 - x
-        elif d2 == L:
-            y = x
-        elif d2 == U:
-            x = BOX - 1 - x
-    elif d1 == L:       # LEFT
-        if d2 == R:
-            y = BOX - 1 - y
-        elif d2 == D:
-            x = y
-        elif d2 == U:
-            x = BOX - 1 - y
-    elif d1 == U:       # UP
-        if d2 == R:
-            y = x
-        elif d2 == D:
-            x = BOX - 1 - x
-        elif d2 == L:
-            y = BOX - 1 - x
-
-    if d2 == R:
-        x = 0
-    elif d2 == D:
-        y = 0
-    elif d2 == L:
-        x = BOX - 1
-    elif d2 == U:
-        y = BOX - 1
-    return x, y
-
-
 def part2(data):
     mymap, codes = parse(data)
+    trans = find_cube(data)
 
     # Pad the rows.
     maxw = max(len(row) for row in mymap)
@@ -286,8 +263,7 @@ def part2(data):
                     x,y = x0,y0
                     continue
 
-                newbox,newdir = trans[box][direc]
-                newbox -= 1
+                newbox,newdir = trans[box,direc]
                 xoff = x0 - boxes[box][0]
                 yoff = y0 - boxes[box][1]
                 if DEBUG:
@@ -307,7 +283,6 @@ def part2(data):
     if DEBUG:
         print("final",x,y)
     return 1000*(y+1)+4*(x+1)+direc
-
 
 print("Part 1:", part1(data))
 print("Part 2:", part2(data))
