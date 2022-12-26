@@ -1,6 +1,5 @@
 import sys
 from collections import defaultdict, deque
-import math
 
 test = """\
 #.######
@@ -17,11 +16,24 @@ else:
 
 DEBUG = 'debug' in sys.argv
 
+try:
+    from math import lcm
+except ImportError:
+    def lcm(a,b):
+        aa, bb = a, b
+        while aa != bb:
+            if aa < bb:
+                aa += a
+            else:
+                bb += b
+        return aa
+
+
 WID = len(data[0])-2
 HGT = len(data)-2
 IN = (0,-1)
 OUT = (WID-1,HGT)
-CYCLE = math.lcm(WID,HGT)
+CYCLE = lcm(WID,HGT)
 
 def parse(data):
     new = defaultdict(list)

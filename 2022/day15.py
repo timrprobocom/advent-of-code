@@ -1,6 +1,6 @@
 import re
 import sys
-from functools import cmp_to_key
+import time
 
 test = """\
 Sensor at x=2, y=18: closest beacon is at x=-2, y=15
@@ -71,10 +71,13 @@ def part1(data):
     filled -= beacons
     return len(filled)
 
-def part2(data):
+# This one handles each sensor, then each scanline within the sensor.
+
+def findrows1(data):
     rows = [[] for _ in range(target+target+2)]
+
     for x0,y0,x1,y1 in data:
-        print(x0,y0,x1,y1)
+        print('.',end='',flush=True)
         dist = abs(x1-x0)+abs(y1-y0)
         for dy in range(-dist,dist+1):
             if y0+dy not in range(target+target+1):
@@ -82,6 +85,33 @@ def part2(data):
             x0t = max( 0, min( target+target, x0 - (dist-abs(dy))))
             x1t = max( 0, min( target+target, x0 + (dist-abs(dy))))
             rows[y0+dy].append( (x0t, x1t) )
+    print('',end='\r')
+    return rows
+    
+# This one loops for each possible line, then scans the sensors for that line.
+# I thought this would be faster.  It is about 5% slower.
+
+def findrows2(data):
+    rows = []
+    data = [(x0,y0,x1,y1,abs(x1-x0)+abs(y1-y0)) for x0,y0,x1,y1 in data]
+
+    for y in range(target+target):
+        row = []
+        for x0,y0,x1,y1,dist in data:
+            dy = abs(y-y0)
+            # Does this sensor impact this row?
+            if dy < dist:
+                x0t = max( 0, min( target+target, x0 - (dist-dy)))
+                x1t = max( 0, min( target+target, x0 + (dist-dy)))
+                row.append((x0t,x1t))
+        rows.append(row)
+    return rows
+
+def part2(data):
+    if "2" in sys.argv:
+        rows = findrows2(data)
+    else:
+        rows = findrows1(data)
 
     # Now combine the ranges.
 
@@ -102,4 +132,7 @@ def part2(data):
             return (combine[0][1]+1) * 4000000 + y
 
 print("Part 1:", part1(data))
+t1 = time.perf_counter()
 print("Part 2:", part2(data))
+t2 = time.perf_counter()
+print(f"Execution time: {t2 - t1:0.4f} seconds")
