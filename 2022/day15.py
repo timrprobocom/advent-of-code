@@ -1,6 +1,7 @@
 import re
 import sys
 import time
+from collections import Counter
 
 test = """\
 Sensor at x=2, y=18: closest beacon is at x=-2, y=15
@@ -136,7 +137,7 @@ def part2(data):
 
 def part2(data):
 
-    lines = {}
+    lines = Counter()
     for x0,y0,x1,y1,dist in data:
 
         # The tuple here is m and b for y=mx+b.
@@ -146,11 +147,12 @@ def part2(data):
         se = ( 1, y0 + dist + 1 - x0 )
         sw = (-1, y0 + dist + 1 + x0 )
 
-        for line in (nw,ne,se,sw):
-            if line in lines:
-                lines[line] += 1
-            else:
-                lines[line] = 1
+        lines.update ((nw,ne,se,sw))
+#        for line in (nw,ne,se,sw):
+#            if line in lines:
+#                lines[line] += 1
+#            else:
+#                lines[line] = 1
 
     # To be the spot, we need 4 lines to intersect.  Thus, there
     # will be two with +1 slope and two with -1 slope.
