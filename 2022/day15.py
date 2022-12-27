@@ -34,6 +34,7 @@ def convert(line):
     return [int(k) for k in res.groups()]
 
 data = [convert(line) for line in data]
+data = [(x0,y0,x1,y1,abs(x1-x0)+abs(y1-y0)) for x0,y0,x1,y1 in data]
 
 #miny = min( min(k[1],k[3]) for k in data)
 #maxy = max( max(k[1],k[3]) for k in data)
@@ -44,7 +45,7 @@ data = [convert(line) for line in data]
 def part1(data):
     filled = set()
     beacons = set()
-    for x0,y0,x1,y1 in data:
+    for x0,y0,x1,y1,dx in data:
         if y0 == target:
             beacons.add(x0)
         if y1 == target:
@@ -58,7 +59,6 @@ def part1(data):
         #  11: 3 to 13  11
         #  12: 4 to 12  9
 
-        dx = abs(x1-x0)+abs(y1-y0)
         if dx < fromtgt:
             continue
         
@@ -76,9 +76,8 @@ def part1(data):
 def findrows1(data):
     rows = [[] for _ in range(target+target+2)]
 
-    for x0,y0,x1,y1 in data:
+    for x0,y0,x1,y1,dist in data:
         print('.',end='',flush=True)
-        dist = abs(x1-x0)+abs(y1-y0)
         for dy in range(-dist,dist+1):
             if y0+dy not in range(target+target+1):
                 continue
@@ -93,7 +92,6 @@ def findrows1(data):
 
 def findrows2(data):
     rows = []
-    data = [(x0,y0,x1,y1,abs(x1-x0)+abs(y1-y0)) for x0,y0,x1,y1 in data]
 
     for y in range(target+target):
         row = []
@@ -130,6 +128,57 @@ def part2(data):
             assert len(combine) == 2
             assert combine[0][1]+2 == combine[1][0]
             return (combine[0][1]+1) * 4000000 + y
+
+# This one runs instantaneously.  If we draw a line parallel to each
+# surface of the diamonds but one pixel out, then the unseen beacon 
+# will be at an intersection of four of those lines.  Handline these
+# lines is each, because the slope is either +1 or -1.
+
+def part2(data):
+
+    lines = {}
+    for x0,y0,x1,y1,dist in data:
+
+        # The tuple here is m and b for y=mx+b.
+
+        nw = ( 1, y0 - dist - 1 - x0 )
+        ne = (-1, y0 - dist - 1 + x0 )
+        se = ( 1, y0 + dist + 1 - x0 )
+        sw = (-1, y0 + dist + 1 + x0 )
+
+        for line in (nw,ne,se,sw):
+            if line in lines:
+                lines[line] += 1
+            else:
+                lines[line] = 1
+
+    # To be the spot, we need 4 lines to intersect.  Thus, there
+    # will be two with +1 slope and two with -1 slope.
+
+    slopes = { 1: [], -1: [] }
+    for line,count in lines.items():
+        if count > 1:
+            slopes[line[0]].append(line[1])
+
+    def inside( x, y, data ):
+        return any( (abs(x-x0)+abs(y-y0)) <= dist for x0, y0, _, _, dist in data)
+
+    # All the lines have slope of 1 or -1 so intersection is easy.
+    # +x + b0 == -x + b1 so 2x = b1 - b0.
+
+    points = []
+    for up in slopes[1]:
+        for dn in slopes[-1]:
+            x = (dn - up) // 2
+            y = x + up
+            if x in range(0, target+target) and \
+               y in range(0, target+target) and \
+               not inside(x, y, data):
+                return x * 4000000 + y
+
+    return -1
+
+
 
 print("Part 1:", part1(data))
 t1 = time.perf_counter()
