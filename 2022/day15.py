@@ -30,28 +30,33 @@ DEBUG = 'debug' in sys.argv
 
 pattern = re.compile("Sensor at x=([\d-]*), y=([\d-]*): closest beacon is at x=([\d-]*), y=([\d-]*)")
 
-def convert(line):
-    res = pattern.match(line)
-    return [int(k) for k in res.groups()]
+class Sensor:
+    def __init__( self, line ):
+        res = pattern.match(line)
+        self.x0, self.y0, self.x1, self.y1 = [int(k) for k in res.groups()]
+        self.dist = abs(self.x1-self.x0)+abs(self.y1-self.y0)
 
-data = [convert(line) for line in data]
-data = [(x0,y0,x1,y1,abs(x1-x0)+abs(y1-y0)) for x0,y0,x1,y1 in data]
+    def within(self, x, y):
+        return (abs(x-self.x0)+abs(y-self.y0)) <= self.dist
 
-#miny = min( min(k[1],k[3]) for k in data)
-#maxy = max( max(k[1],k[3]) for k in data)
-#minx = min( min(k[0],k[2]) for k in data)
-#maxx = max( max(k[0],k[2]) for k in data)
+data = [Sensor(line) for line in data]
 
+def get_limits(data):
+    miny = min( min(k.y0,k.y1) for k in data)
+    maxy = max( max(k.y0,k.y1) for k in data)
+    minx = min( min(k.x0,k.x1) for k in data)
+    maxx = max( max(k.x0,k.x1) for k in data)
+    return minx, miny, maxx, maxy
 
 def part1(data):
     filled = set()
     beacons = set()
-    for x0,y0,x1,y1,dx in data:
-        if y0 == target:
-            beacons.add(x0)
-        if y1 == target:
-            beacons.add(x1)
-        fromtgt = abs(target-y0)
+    for s in data:
+        if s.y0 == target:
+            beacons.add(s.x0)
+        if s.y1 == target:
+            beacons.add(s.x1)
+        fromtgt = abs(target-s.y0)
         # So, from 8,7 to 2,10 distance is 9
         #   7:-1 to 17  19
         #   8: 0 to 16  17
@@ -60,13 +65,13 @@ def part1(data):
         #  11: 3 to 13  11
         #  12: 4 to 12  9
 
-        if dx < fromtgt:
+        if s.dist < fromtgt:
             continue
         
-        x00 = x0 - dx + fromtgt
-        x99 = x0 + dx - fromtgt
+        x00 = s.x0 - s.dist + fromtgt
+        x99 = s.x0 + s.dist - fromtgt
         if DEBUG:
-            print(x0,y0,x1,y1,dx,x00,x99)
+            print(s.x0,s.y0,s.x1,s.y1,s.dist,x00,x99)
         for i in range(x00,x99+1):
             filled.add(i)
     filled -= beacons
@@ -77,14 +82,14 @@ def part1(data):
 def findrows1(data):
     rows = [[] for _ in range(target+target+2)]
 
-    for x0,y0,x1,y1,dist in data:
+    for s in data:
         print('.',end='',flush=True)
-        for dy in range(-dist,dist+1):
-            if y0+dy not in range(target+target+1):
+        for dy in range(-s.dist,s.dist+1):
+            if s.y0+dy not in range(target+target+1):
                 continue
-            x0t = max( 0, min( target+target, x0 - (dist-abs(dy))))
-            x1t = max( 0, min( target+target, x0 + (dist-abs(dy))))
-            rows[y0+dy].append( (x0t, x1t) )
+            x0t = max( 0, min( target+target, s.x0 - (dist-abs(dy))))
+            x1t = max( 0, min( target+target, s.x0 + (dist-abs(dy))))
+            rows[s.y0+dy].append( (x0t, x1t) )
     print('',end='\r')
     return rows
     
@@ -96,12 +101,12 @@ def findrows2(data):
 
     for y in range(target+target):
         row = []
-        for x0,y0,x1,y1,dist in data:
-            dy = abs(y-y0)
+        for s in data:
+            dy = abs(s.y-s.y0)
             # Does this sensor impact this row?
             if dy < dist:
-                x0t = max( 0, min( target+target, x0 - (dist-dy)))
-                x1t = max( 0, min( target+target, x0 + (dist-dy)))
+                x0t = max( 0, min( target+target, s.x0 - (s.dist-dy)))
+                x1t = max( 0, min( target+target, s.x0 + (s.dist-dy)))
                 row.append((x0t,x1t))
         rows.append(row)
     return rows
@@ -138,32 +143,25 @@ def part2(data):
 def part2(data):
 
     lines = Counter()
-    for x0,y0,x1,y1,dist in data:
+    for s in data:
 
         # The tuple here is m and b for y=mx+b.
 
-        nw = ( 1, y0 - dist - 1 - x0 )
-        ne = (-1, y0 - dist - 1 + x0 )
-        se = ( 1, y0 + dist + 1 - x0 )
-        sw = (-1, y0 + dist + 1 + x0 )
+        nw = ( 1, s.y0 - s.dist - 1 - s.x0 )
+        ne = (-1, s.y0 - s.dist - 1 + s.x0 )
+        se = ( 1, s.y0 + s.dist + 1 - s.x0 )
+        sw = (-1, s.y0 + s.dist + 1 + s.x0 )
 
-        lines.update ((nw,ne,se,sw))
-#        for line in (nw,ne,se,sw):
-#            if line in lines:
-#                lines[line] += 1
-#            else:
-#                lines[line] = 1
+        lines.update((nw,ne,se,sw))
 
     # To be the spot, we need 4 lines to intersect.  Thus, there
-    # will be two with +1 slope and two with -1 slope.
+    # will be two with +1 slope and two with -1 slope.  So, only keep
+    # the duplicates.
 
     slopes = { 1: [], -1: [] }
     for line,count in lines.items():
         if count > 1:
             slopes[line[0]].append(line[1])
-
-    def inside( x, y, data ):
-        return any( (abs(x-x0)+abs(y-y0)) <= dist for x0, y0, _, _, dist in data)
 
     # All the lines have slope of 1 or -1 so intersection is easy.
     # +x + b0 == -x + b1 so 2x = b1 - b0.
@@ -175,15 +173,11 @@ def part2(data):
             y = x + up
             if x in range(0, target+target) and \
                y in range(0, target+target) and \
-               not inside(x, y, data):
+               not any( s.within(x,y) for s in data):
                 return x * 4000000 + y
 
     return -1
 
 
-
 print("Part 1:", part1(data))
-t1 = time.perf_counter()
 print("Part 2:", part2(data))
-t2 = time.perf_counter()
-print(f"Execution time: {t2 - t1:0.4f} seconds")
