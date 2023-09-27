@@ -24,6 +24,9 @@ pat = re.compile('Valve ([A-Z][A-Z]) has flow rate=(\d*); tunnels? leads? to val
 
 # This is not my code.  I need to figure out how it works.
 
+# These should be a structure.  Simplifies some of the code, I think.
+# Make the tunnels be actual links.
+
 Fs = {}
 Vs = {}
 Os = {}
@@ -51,22 +54,31 @@ def part1(t, pos, flow):
         return m
     
     # Open valve here?
+
+# Sum up the amount released by all the open valves.
+
+    j = sum(Fs[k] for k, v in Os.items() if v)
+
+# If there is an unopened useful valve here, open it.
+# See what the best options are with this valve being 
+# open.  (Why would you ever NOT open a valve?)
                 
     if not Os[pos] and Fs[pos] > 0:
         Os[pos] = True
-        j = sum(Fs[k] for k, v in Os.items() if v)
         part1(
             t + 1,
             pos,
-            flow + [ j ]
+            flow + [ j+Fs[pos] ]
         )
         Os[pos] = False
 
-    j = sum(Fs[k] for k, v in Os.items() if v)
+# For all possible moves from here, make the move and
+# see what happens.
+
     for v in Vs[pos]:
         part1(
             t + 1,
-            v if v is not None else pos,
+            v, 
             flow + [ j ]
         )
 
@@ -92,65 +104,50 @@ def part2(t, pos1, pos2, flow):
         part2(t + 1, pos1, pos2, flow + [tf])
         return m
     
-    # possible options for us...
-    for k in (0, 1):
-        if k == 0:
-            if Os[pos1] or Fs[pos1] <= 0:
-                continue
-                
-            Os[pos1] = True
-            
-            for k2 in (0, 1):
-                if k2 == 0:
-                    if Os[pos2] or Fs[pos2] <= 0:
-                        continue
-                    
-                    Os[pos2] = True
-                    j = sum(Fs[k] for k, v in Os.items() if v)
-                    part2(
-                        t + 1,
-                        pos1,
-                        pos2,
-                        flow + [ j ]
-                    )
-                    Os[pos2] = False
-                else:
-                    j = sum(Fs[k] for k, v in Os.items() if v)
-                    for v2 in Vs[pos2]:
-                        part2(
-                            t + 1,
-                            pos1,
-                            v2,
-                            flow + [ j ]
-                        )
-            Os[pos1] = False
-        else:
-            j = sum(Fs[k] for k, v in Os.items() if v)
-            for v in Vs[pos1]:
-                for k2 in (0, 1):
-                    if k2 == 0:
-                        if Os[pos2] or Fs[pos2] <= 0:
-                            continue
+    j = sum(Fs[k] for k, v in Os.items() if v)
 
-                        Os[pos2] = True
-                        j = sum(Fs[k] for k, v in Os.items() if v)
-                        part2(
-                            t + 1,
-                            v,
-                            pos2,
-                            flow + [ j ]
-                        )
-                        Os[pos2] = False
-                    else:
-                        j = sum(Fs[k] for k, v in Os.items() if v)
-                        for v2 in Vs[pos2]:
-                            part2(
-                                t + 1,
-                                v,
-                                v2,
-                                flow + [ j ]
-                            )
-        return m
+    if not Os[pos1] and Fs[pos1] > 0:
+            
+        Os[pos1] = True
+        j += Fs[pos1]
+        
+        if not Os[pos2] and Fs[pos2] > 0:
+            Os[pos2] = True
+            part2(
+                t + 1,
+                pos1,
+                pos2,
+                flow + [ j+Fs[pos2] ]
+            )
+            Os[pos2] = False
+        for v2 in Vs[pos2]:
+            part2(
+                t + 1,
+                pos1,
+                v2,
+                flow + [ j ]
+            )
+
+        Os[pos1] = False
+    else:
+        for v in Vs[pos1]:
+            if not Os[pos2] and Fs[pos2] > 0:
+                Os[pos2] = True
+                part2(
+                    t + 1,
+                    v,
+                    pos2,
+                    flow + [ j+Fs[pos2] ]
+                )
+                Os[pos2] = False
+            for v2 in Vs[pos2]:
+                part2(
+                    t + 1,
+                    v,
+                    v2,
+                    flow + [ j ]
+                )
+    return m
 
 _seen = {}
 m = 0
