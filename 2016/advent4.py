@@ -5,7 +5,7 @@ not-a-real-room-404[oarel]
 totally-real-room-200[decoy]""".splitlines()
 
 dataset = "qzmt-zixmtkozy-ivhz-343[xxxxx]"
-dataset = open('../Downloads/day4.txt')
+dataset = open('day4.txt')
 
 import re
 

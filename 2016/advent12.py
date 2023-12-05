@@ -7,7 +7,7 @@ dec a
 jnz a 2
 dec a""".splitlines()
 
-data = [k.strip() for k in open('../Downloads/day12.txt').readlines()]
+data = [k.strip() for k in open('day12.txt').readlines()]
 
 ip = 0
 

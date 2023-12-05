@@ -51,7 +51,7 @@ def process(data):
     lastmap = []
     for row in data:
         if row.startswith('seeds'):
-            seeds = list(int(k) for k in row.split()[1:])
+            seeds = tuple(int(k) for k in row.split()[1:])
         elif len(row) < 2:
             if lastmap:
                 lastmap.sort(key=lambda k: k[1])
@@ -78,7 +78,12 @@ def domapping(i):
         i = mapping(m, i)
     return i
 
-# We need to intersect these ranges.
+# We need to intersect the ranges.
+# There are 3 cases to consider:
+#   * The range starts before any map
+#   * The range intersects one or more maps
+#   * The range extends beyond the last map
+#
 #  So given 79,14  against 50,98,2 and 52,50,48
 #    We get 79,14 had a delta of +2
 #  Given 40,70  against 50,98,2 and 52,50,48
@@ -90,8 +95,6 @@ def domapping(i):
 # Map a single range through a single map.
 
 def maprange(mapx, rnglo, size):
-    if DEBUG:
-        print("doing",rnglo,size)
     rnghi = rnglo + size
     a,b,n = mapx[0]
     if rnglo < b:
@@ -100,14 +103,10 @@ def maprange(mapx, rnglo, size):
         rnglo += take
     if rnglo == rnghi:
         return 
-    # At this point, rnglo is at or beyond the first map.
-    if DEBUG:
-        print('mapx',mapx)
+    # We now know that rnglo is at or beyond the first map.
     for a,b,n in mapx:
-        if DEBUG:
-            print("===",b+n,rnghi,rnglo)
         if rnglo <= b+n:
-            take = min(b+n, rnghi)-rnglo
+            take = min(rnghi, b+n)-rnglo
             yield rnglo+a-b, take
             rnglo += take
         if rnglo == rnghi:
@@ -121,18 +120,26 @@ def domapranges(mapx, rngs):
     for a,b in rngs:
         yield from maprange(mapx, a, b)
 
+# Map a set of ranges through all of the maps.
+
+def doallmapranges(rngs):
+    for m in maps:
+        rngs = domapranges(m, rngs)
+    return rngs
+
 def part1(seeds,maps):
-    m = [domapping(seed) for seed in seeds]
+    m = map(domapping, seeds)
     return min(m)
 
+def part1(seeds,maps):
+    ranges = [(s,1) for s in seeds]
+    ranges = doallmapranges(ranges)
+    return min(a[0] for a in ranges)
+
 def part2(seeds,maps):
-    # Convert the list to a set of ranges.
-    myseeds = zip(seeds[0::2],seeds[1::2])
-    # Run the set of ranges through all of the maps.
-    for m in maps:
-        myseeds = domapranges(m, myseeds)
-    # Find the smallest resulting range.
-    return min(a[0] for a in myseeds)
+    ranges = zip(seeds[0::2],seeds[1::2])
+    ranges = doallmapranges(ranges)
+    return min(a[0] for a in ranges)
 
 
 seeds, maps = process(data)
