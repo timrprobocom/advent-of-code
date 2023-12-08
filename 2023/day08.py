@@ -51,6 +51,8 @@ for line in data:
 
 def part1():
     curr = 'AAA'
+    if curr not in mapx:
+        return None
     steps = 0
     while curr != 'ZZZ':
         i = steps % len(directions)
