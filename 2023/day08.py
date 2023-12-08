@@ -59,11 +59,11 @@ def part1():
     return steps
 
 def part2():
-    ghosts = [k for k in mapx if k[2] == 'A']
+    ghosts = [k for k in mapx if k[-1] == 'A']
     steplist = []
     for g in ghosts:
         steps = 0
-        while g[2] != 'Z':
+        while g[-1] != 'Z':
             i = steps % len(directions)
             g = mapx[g][directions[i]]
             steps += 1
