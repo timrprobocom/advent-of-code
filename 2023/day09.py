@@ -12,8 +12,6 @@ day = os.path.splitext(os.path.basename(__file__))[0]
 
 if 'test' in sys.argv:
     data = test.splitlines()
-#elif 'test1' in sys.argv:
-#    data = test1.splitlines()
 else:
     data = open(day+'.txt').readlines()
 
