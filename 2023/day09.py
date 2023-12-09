@@ -1,6 +1,6 @@
 import os
 import sys
-import math
+import itertools
 
 test = """\
 0 3 6 9 12 15
@@ -26,12 +26,11 @@ def part1(part,data):
         stack = [row]
         # Determine differences
         while not all(r == row[0] for r in row):
-            row = [a-b for a,b in zip(row[1:],row[:-1])]
+            row = [b-a for a,b in itertools.pairwise(row)]
             stack.append( row )
         incr = 0
-        while stack:
-            row = stack.pop()
-            incr = row[-1] + incr if part==1 else row[0] - incr
+        for row in reversed(stack):
+            incr = row[-1]+incr if part==1 else row[0]-incr
         sumx += incr  
 
     return sumx
