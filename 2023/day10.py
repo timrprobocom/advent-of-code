@@ -32,7 +32,7 @@ day = os.path.splitext(os.path.basename(__file__))[0]
 if 'test' in sys.argv:
     data = test2.splitlines()
 else:
-    data = [l.strip() for l in open(day+'.txt').readlines()]
+    data = open(day+'.txt').read().splitlines()
 
 DEBUG = 'debug' in sys.argv
 
