@@ -1,0 +1,89 @@
+#        0123456789ABCD
+#Part 1: 29989297949519
+#Part 2: 19518121316118
+
+dig = [8,9,9,9,9,9,9,9,9,9,9,9,9,9]
+z = dig[0]+14
+print(z)
+
+z = z*26+dig[1]+2
+print(z)
+
+z = z*26+dig[2]+1
+print(z)
+
+z = z*26+dig[3]+13
+print(z)
+
+z = z*26+dig[4]+5
+print(z)
+
+#x = z%26-12
+#z = z//26   elim last digit
+#y = 1 if last digit was 7 else 26
+#z = z*y + dig[5]+5 if x
+
+So dig[4]+5-12 == dig[5]
+
+#x = z%26-12
+#z = z//26   elim last digit
+#y = 1 if last digit was 7 else 26
+#z = z*y + dig[6]+5 if x
+
+So dig[3]+13-12 = dig[6]
+
+z = z*26+dig[7]+9
+
+#x = z%26-7  
+#z = z//26   elim last digit
+#y = 1 if last digit was 24 else 26
+#z = z*26+dig[8]+3 if x
+
+So dig[7]+9-7 == dig[8]
+
+z = z*26+dig[9]+13
+
+#x = z%26-8
+#z = z//26   elim last digit
+#y = 1 if last digit was 21 else 26
+#z = z*y+dig[10]+2 if x
+
+So dig[9]+13-8 = dig[10]
+
+#x = z%26-5
+#z = z//26   elim last digit
+#y = 1 if last digit was 3 else 26
+#z = z*y+dig[11]+1 if x
+
+So dig[2]+1-5 == dig[11]
+
+#x = z%26-10
+#z = z//26   elim last digit
+#y = 1 if last digit was 4 else 26
+#z = z*y+dig[12]+11 if x
+
+So dig[1]+2-10 = dig[12]
+
+#x = z%26-7
+#z = z//26   elim last digit
+#y = 1 if last digit was 22 else 26
+#z = z*y+dig[13]+8 if x
+
+So dig[0]+14-7 == dig[13]
+
+# HOW can this possibly ever be 0?
+
+So coming into dig 13, last (only) dig must be 22.
+Digit before that must be 18
+
+So dig[0]+14- 7 == dig[13]
+So dig[1]+ 2-10 == dig[12]
+So dig[2]+ 1- 5 == dig[11]
+So dig[3]+13-12 == dig[6]
+So dig[4]+ 5-12 == dig[5]
+So dig[7]+ 9- 7 == dig[8]
+So dig[9]+13- 8 == dig[10]
+
+Now there are only 10,000,000 combos.
+
+# So, in base 26?
