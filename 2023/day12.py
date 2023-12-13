@@ -37,7 +37,7 @@ def match(pat,chk):
     return all( p in (c,'?') for c,p in zip(chk,pat))
 
 # Each call of this does one chunk of #s.  We generage all possible strings that
-# end on ###. for this chunk.  If that prefix matches the current spot in the 
+# end with "###." for this chunk.  If that prefix matches the current spot in the 
 # pattern, we recursively try the next.  It's only the memoizing that allows 
 # this to run in finite time.
 
