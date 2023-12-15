@@ -19,10 +19,7 @@ DEBUG = 'debug' in sys.argv
 
 @functools.cache
 def dohash(s):
-    h = 0
-    for c in s:
-        h = (h+ord(c))*17%256
-    return h
+    return functools.reduce(lambda h,c: (h+ord(c))*17%256, s, 0)
 
 def part1(data):
     return sum(dohash(p) for p in data.split(','))
