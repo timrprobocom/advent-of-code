@@ -49,23 +49,20 @@ def process(grid, start):
 
     while beams:
         x,y,dir = beams.pop(0)
-        if x not in range(WID) or y not in range(HGT):
-            continue
         if (x,y,dir) in seen:
             continue
         seen.add((x,y,dir))
         c = grid[y][x]
         if c in '/\\':
             dir = change[c][dir]
-            beams.append( (x,y,change[c][dir] ))
-        elif c == '|':
-            if dir in (E,W):
+        elif c == '|' and dir in (E,W):
+            if y > 0:
                 beams.append( (x,y-1,N) )
-                dir = S
-        elif c == '-':
-            if dir in (N,S):
+            dir = S
+        elif c == '-' and dir in (N,S):
+            if x > 0:
                 beams.append( (x-1,y,W) )
-                dir= E
+            dir = E
         x += dir[0]
         y += dir[1]
         if x in range(WID) and y in range(HGT):
