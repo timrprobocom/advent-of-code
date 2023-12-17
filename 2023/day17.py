@@ -41,16 +41,15 @@ def backward(dir):
 def part1(grid,mind,maxd):
     # Accum cost, X, Y, direction.  Cost has to be first so the dijkstra pop
     # gets the best choice so far.
-    point = (0,0,0,(0,0))
+    points = [(0,0,0,(0,0))]
     seen = set()
-    points = [point]
     costs = {}
     # At each step, we can go 1 and turn, or 2 and turn, or 3 and turn.
     while points:
         cost, x, y, dir = heapq.heappop(points)
         # If we hit the exit, yahoo.
         if x == WID-1 and y == HGT-1:
-            return cost
+            break
         # If we've been here before, bail.
         if (x, y, dir) in seen:
             continue
@@ -58,9 +57,9 @@ def part1(grid,mind,maxd):
         # Check all possible directions.  We can't go the way we were going,
         # and we can't go back the way we came.
         for direction in (N,E,S,W):
-            dcost = 0
             if direction == dir or direction == backward(dir):
                 continue
+            dcost = 0
             for distance in range(1,maxd+1):
                 xx = x + direction[0] * distance
                 yy = y + direction[1] * distance
@@ -75,6 +74,7 @@ def part1(grid,mind,maxd):
                         continue
                     costs[newp] = newc
                     heapq.heappush( points, (newc,xx,yy,direction))
+    return cost
    
 print("Part 1:", part1(grid,1,3))
 print("Part 2:", part1(grid,4,10))
