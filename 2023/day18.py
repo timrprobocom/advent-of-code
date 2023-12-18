@@ -34,10 +34,10 @@ U,R,D,L = N,E,S,W
 dirs = {'R':R, 'L':L, 'U':U, 'D':D,
         '0':R, '1':D, '2':L, '3':U }
 
-# This implements Green's theorem for integrating the area in a surface
-# enclosed by a curve.
-#
-# Gauss's "shoelace forumula", is a special case of this.
+# This implements Gauss's "shoelace formula" for computing the area of
+# a polygon described by its vertex coordinates.  "Shoelace" would 
+# normally accumulate both x*dy and y*dx, but since the side are all
+# horizontal and vertical, the sums are the same.
 
 def part1(part,data):
     area = 0
@@ -47,11 +47,12 @@ def part1(part,data):
         dir,dist,clr = row.split()
         if part == 1:
             dist = int(dist)
+            dir = dirs[dir]
         else:
             dist = int(clr[2:7],16)
-            dir = clr[7]
-        dx = dist * dirs[dir][0]
-        dy = dist * dirs[dir][1]
+            dir = dirs[clr[7]]
+        dx = dist * dir[0]
+        dy = dist * dir[1]
         area += x * dy
         perim += dist
         x,y = x+dx,y+dy
