@@ -55,7 +55,8 @@ def part1(part,data):
         area += x * dy
         perim += dist
         x,y = x+dx,y+dy
-    print(area,perim)
+    if DEBUG:
+        print(area,perim)
     return area + perim // 2 + 1
        
 print("Part 1:", part1(1,data))
