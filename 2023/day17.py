@@ -28,6 +28,12 @@ DEBUG = 'debug' in sys.argv
 
 grid = [[int(k) for k in row] for row in data.splitlines()]
 
+if 'plot' in sys.argv:
+    import matplotlib.pyplot as plt
+    plt.imshow(grid, cmap='hot')
+    plt.show()
+    exit(0)
+
 WID = len(grid[0])
 HGT = len(grid)
 
