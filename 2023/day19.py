@@ -54,9 +54,6 @@ for row in work.splitlines():
 
 DEBUG = 'debug' in sys.argv
 
-N,E,S,W = (0,-1),(1,0),(0,1),(-1,0)
-U,R,D,L = N,E,S,W
-
 # This seems ugly, but it's comparable to the other solutions.
 
 def part1(parts,flows):
@@ -98,32 +95,27 @@ def part2(flows):
                 break
             xmas,cmpr,need,nextp = step
             need = int(need)
+
+            # I originally had code to check for the condition where the
+            # "need" value was completely above or below the range, but
+            # it turns out that never happens.  EVERY rule splits a range.
+
             if cmpr == '<':
-                #  x < 400   0,399 all take the jump
+                #  x < 400   0,399   all take the jump
                 #  x < 400   200,600 200..399 take the jump 400-600 move on
                 #  x < 400   500,600 all move on
-                if part[xmas][1] < need:
-                    pending.apend((nextp,part))
-                elif part[xmas][0] >= need:
-                    continue
-                else:
-                    p1 = copy(part)
-                    p1[xmas][1] = need-1
-                    pending.append((nextp,p1))
-                    part[xmas][0] = need
+                p1 = copy(part)
+                p1[xmas][1] = need-1
+                pending.append((nextp,p1))
+                part[xmas][0] = need
             else:
-                #  x > 400   0,400 all move on
+                #  x > 400   0,400   all move on
                 #  x > 400   200,600 200..400 move on 401-600 take the jump
                 #  x > 400   500,600 all take the jump
-                if part[xmas][1] <= need:
-                    continue
-                elif part[xmas][0] >= need:
-                    pending.append((nextp,part))
-                else:
-                    p1 = copy(part)
-                    p1[xmas][0] = need+1
-                    pending.append((nextp,p1))
-                    part[xmas][1] = need
+                p1 = copy(part)
+                p1[xmas][0] = need+1
+                pending.append((nextp,p1))
+                part[xmas][1] = need
 
     return sumx
 
