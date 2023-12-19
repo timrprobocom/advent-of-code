@@ -33,22 +33,22 @@ work,rating = data.split('\n\n')
 
 match1 = re.compile("([xmas])=(\d+)")
 
-parts = []
-for s in rating.splitlines():
-    ps = match1.findall(s)
-    parts.append( {p1:int(p2) for p1,p2 in ps })
+parts = [
+    {p1:int(p2) for p1,p2 in match1.findall(s) }
+    for s in rating.splitlines()
+]
 
-match2 = re.compile('([xmas])([<>])(\d+):(\w+)')
+match2 = re.compile(r'([xmas])([<>])(\d+):(\w+)')
 
 flows = {}
 for row in work.splitlines():
     name,work = row.split('{')
     steps = []
-    for w in work.rstrip('}').split(','):
+    for w in work.removesuffix('}').split(','):
         if ':' not in w:
             steps.append(w)
         else:
-            g = match2.search(w)
+            g = match2.match(w)
             steps.append(g.groups())
     flows[name] = steps
 
@@ -57,7 +57,7 @@ DEBUG = 'debug' in sys.argv
 N,E,S,W = (0,-1),(1,0),(0,1),(-1,0)
 U,R,D,L = N,E,S,W
 
-# This seems ugly.
+# This seems ugly, but it's comparable to the other solutions.
 
 def part1(parts,flows):
     sumx = 0
