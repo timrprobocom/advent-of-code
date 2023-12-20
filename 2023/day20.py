@@ -58,10 +58,7 @@ class Nand(Part):
             self.inputs[k] = 0
     def input(self,inp,signal):
         self.inputs[inp] = signal
-        if all(self.inputs.values()):
-            return self.output(0)
-        else:
-            return self.output(1)
+        return self.output(int(not all(self.inputs.values())))
     
 circuit = {}
 for row in data.splitlines():
@@ -115,18 +112,16 @@ def part2(circuit):
     if DEBUG:
         print(check)
     cycles = []
-    prev = {}
-    occur = collections.defaultdict(int)
+    prev = collections.defaultdict(list)
     t = 0
     while len(cycles) < 4:
         todo = circuit['broadcaster'].input()
         while todo:
             src,dst,state = todo.pop(0)                
             if dst in check and not state:
-                if occur[dst] == 2:
-                    cycles.append( t - prev[dst] )
-                occur[dst] += 1
-                prev[dst] = t
+                if len(prev[dst]) == 1:
+                    cycles.append( t - prev[dst][0] )
+                prev[dst].append( t )
             todo.extend( circuit[dst].input(src.name, state))
         t += 1
     if DEBUG:
