@@ -54,8 +54,8 @@ def printgrid(s,dx=0,dy=0):
     sumx = 0
     for row in grid:
         sumx += row.count('O')
-#        print(''.join(row))
-#    print(sumx)
+        print(''.join(row))
+    print(sumx)
     return sumx
             
 def countgrid(s,dx=0,dy=0):
@@ -79,33 +79,48 @@ def part1(data):
                 pt = (x1,y1)
                 if x1 in range(WIDTH) and y1 in range(HEIGHT) and pt not in rocks: 
                     newq.add(pt)
-        printgrid(newq)
         queue = newq
     return len(newq)
 
-# So every grid reaches a stasis point, flipping between 39 and 42.
-# There's a cycle here.  When does a new layer fill up?  It takes
-# 13 to fill the center, and 35 steps to fill the next layer. 
-# We only need to handle the outermost layers. 
+# Once we get past an initial start up time, The number of cells at
+# each multiple of the grid width, is quadratic.  If the 2nd derivative
+# is N, then the first derivative is k
+#  f''(x) = N
+#  f'(x)  = Nx + b
+#  f(x)   = (N/2)x**2 + bx + c
 #
-# NOTE that we need to compute the stasis point -- 39/42 is for the
-# sample data.  7427/7434 for the real data.
+# If you look up how to derive a quadratic from differences, you'll find
+#  a = d2[0]/2
+#  b = d1[0] - 3a
+#  c = d0[0] - a - b
+# Oddly, this starts counting with 1, so we have to compensate for that.
 #
-# How fast does the circle expand?  Should be approximately steps.
+# We gather the counts where (step % width) == (steps % width), so we're
+# always at the same point in the cycle.  Note that the offset is where
+# the S is, so we're sampling just as we reach the edge of a grid.
+#
+# It takes about 45 seconds to compute enough differences to ensure
+# we know the second differences have stabilized.
 
 def part2(data):
     steps = 5000 if 'test' in sys.argv else 26501365
-    skips = 4 if 'test' in sys.argv else 1
     offset = steps % WIDTH
     queue = set()
     queue.add(origin)
-    diffs = []
-    # Gather up the first 4 multiples of the width.
+    nums = []
+    diff1 = []
+    diff2 = []
+
     for i in range(steps):
         if i % WIDTH == offset:
-            print(i,len(queue))
-            diffs.append(len(queue))
-            if len(diffs) == skips+3:
+            nums.append(len(queue))
+            if len(nums) > 1:
+                diff1.append( nums[-1]-nums[-2] )
+            if len(diff1) > 1:
+                diff2.append( diff1[-1]-diff1[-2] )
+            if DEBUG:
+                print(i,nums,diff1,diff2)
+            if len(diff2) > 1 and diff2[-1] == diff2[-2]:
                 break
         newq = set()
         while queue:
@@ -113,20 +128,21 @@ def part2(data):
             for dx,dy in N,E,W,S:
                 x1 = x+dx
                 y1 = y+dy
-                pt = (x1,y1)
-                ptm = (x1%WIDTH,y1%HEIGHT)
-                if ptm not in rocks: 
-                    newq.add(pt)
+                if (x1%WIDTH,y1%HEIGHT) not in rocks: 
+                    newq.add((x1,y1))
         queue = newq
     
-    # Given those, compute first and second differences to make
-    # a quadratic.  
-    
-    b0 = diffs[skips]
-    b1 = diffs[skips+1]-diffs[skips]
-    b2 = diffs[skips+2]-diffs[skips+1]
-    n = steps//WIDTH-skips
-    return b0 + b1*n + (n*(n-1)//2)*(b2-b1)
+    # Use the first and second differences to find the quadratic
+    # coefficients.
+
+    skips = len(nums) - 4
+    a = diff2[skips] // 2
+    b = diff1[skips] - 3*a
+    c = nums[skips] - a - b
+    if DEBUG:
+        print(skips,a,b,c)
+    n = steps//WIDTH-skips+1
+    return (a * n + b) * n + c
 
 print("Part 1:", part1(data))
 print("Part 2:", part2(data))
