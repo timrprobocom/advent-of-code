@@ -49,7 +49,6 @@ def part1(grid,mind,maxd):
     # gets the best choice so far.
     points = [(0,0,0,(0,0))]
     seen = set()
-    costs = {}
     # At each step, we can go 1 and turn, or 2 and turn, or 3 and turn.
     while points:
         cost, x, y, dir = heapq.heappop(points)
@@ -59,6 +58,8 @@ def part1(grid,mind,maxd):
         # If we've been here before, bail.
         if (x, y, dir) in seen:
             continue
+        if DEBUG:
+            print(f"Node score={cost} y={y} x={x} dir={dir}")
         seen.add((x,y,dir))
         # Check all possible directions.  We can't go the way we were going,
         # and we can't go back the way we came.
@@ -69,16 +70,11 @@ def part1(grid,mind,maxd):
             for distance in range(1,maxd+1):
                 xx = x + direction[0] * distance
                 yy = y + direction[1] * distance
-                if xx in range(WID) and yy in range(HGT):
-                    dcost += grid[yy][xx]
-                    if distance < mind:
-                        continue
+                if not (xx in range(WID) and yy in range(HGT)):
+                    break
+                dcost += grid[yy][xx]
+                if distance >= mind:
                     newc = cost + dcost
-                    newp = (xx,yy,direction)
-                    # If we've been here before more cheaply, then skip it.
-                    if newp in costs and costs[newp] < newc:
-                        continue
-                    costs[newp] = newc
                     heapq.heappush( points, (newc,xx,yy,direction))
     return cost
    
