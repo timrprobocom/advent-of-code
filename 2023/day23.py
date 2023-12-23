@@ -58,19 +58,23 @@ for y,row in enumerate(data):
             valid1[(x,y)] = [D]
 
 def part1(data):
-    queue = collections.deque([(START+(set(),))])
+    queue = collections.deque([(START+(0,))])
     maxsize = 0
+    seen = set()
     while queue:
-        x,y,seen = queue.pop()
-        seen = seen.union([(x,y)])
-        if (x,y) == TARGET:
-            maxsize = max(maxsize, len(seen)-1)
-            continue
-        for dx,dy in valid1[(x,y)]:
-            x1 = x+dx
-            y1 = y+dy
-            if (x1,y1) in valid1 and (x1,y1) not in seen and data[y1][x1] != '#':
-                queue.append( (x1,y1,seen))
+        x,y,l = queue.pop()
+        if l == -1:
+            seen.remove((x,y))
+        elif (x,y) == TARGET:
+            maxsize = max(maxsize, l)
+        elif (x,y) not in seen:
+            seen.add((x,y))
+            queue.append((x,y,-1))
+            for dx,dy in valid1[(x,y)]:
+                x1 = x+dx
+                y1 = y+dy
+                if (x1,y1) in valid1 and (x1,y1) not in seen and data[y1][x1] != '#':
+                    queue.append( (x1,y1,l+1))
     return maxsize
 
 # Make an adjacency graph.
