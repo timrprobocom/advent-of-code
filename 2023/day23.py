@@ -44,12 +44,14 @@ U,R,D,L = (0,-1),(1,0),(0,1),(-1,0)
 
 DEBUG = 'debug' in sys.argv
 
+# Construct a map of the valid directions from any given point.
+
 valid1 = {}
-valid2 = set()
+valid2 = {}
 for y,row in enumerate(data):
     for x,c in enumerate(row):
         if c != '#':
-            valid2.add((x,y))
+            valid2[(x,y)] = (U,R,D,L)
         if c == '.':
             valid1[(x,y)] = (U,R,D,L)
         elif c == '>':
@@ -57,38 +59,19 @@ for y,row in enumerate(data):
         elif c == 'v':
             valid1[(x,y)] = [D]
 
-def part1(data):
-    queue = collections.deque([(START+(0,))])
-    maxsize = 0
-    seen = set()
-    while queue:
-        x,y,l = queue.pop()
-        if l == -1:
-            seen.remove((x,y))
-        elif (x,y) == TARGET:
-            maxsize = max(maxsize, l)
-        elif (x,y) not in seen:
-            seen.add((x,y))
-            queue.append((x,y,-1))
-            for dx,dy in valid1[(x,y)]:
-                x1 = x+dx
-                y1 = y+dy
-                if (x1,y1) in valid1 and (x1,y1) not in seen and data[y1][x1] != '#':
-                    queue.append( (x1,y1,l+1))
-    return maxsize
-
 # Make an adjacency graph.
 
-def make_graph(data):
+def make_graph(data,valid):
     graph = {}
-    for y,row in enumerate(data):
-        for x,c in enumerate(row):
-            if c != '#':
+    for y in range(HEIGHT):
+        for x in range(WIDTH):
+            if (x,y) in valid:
+                poss = valid[(x,y)]
                 adj = {}
-                for dx,dy in U,D,L,R:
+                for dx,dy in poss:
                     x1 = x+dx
                     y1 = y+dy
-                    if (x1,y1) in valid2:
+                    if (x1,y1) in valid1:
                         adj[(x1,y1)] = 1
                 graph[(x,y)] = adj
     return graph
@@ -119,10 +102,7 @@ def optimize_graph(graph):
         newgraph[(hx,hy)] = adj
     return newgraph
 
-def part2(data):
-    graph = make_graph(data)
-    graph = optimize_graph(graph)
-
+def traverse(graph):
     queue = collections.deque([START+(0,)])
     maxsize = 0
     seen = set()
@@ -141,6 +121,11 @@ def part2(data):
             for x1,y1,l1 in graph[(x,y)]:
                 queue.append( (x1,y1,l+l1) )
     return maxsize
-    
-print("Part 1:", part1(data))
-print("Part 2:", part2(data))
+
+def part1(data,valid):
+    graph = make_graph(data,valid)
+    graph = optimize_graph(graph)
+    return traverse(graph)
+
+print("Part 1:", part1(data,valid1))
+print("Part 2:", part1(data,valid2))
