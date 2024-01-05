@@ -12,6 +12,7 @@
 using namespace std;
 
 bool DEBUG = false;
+bool TEST = false;
 
 const char * test1 = 
 "467..114..\n"
@@ -27,9 +28,6 @@ const char * test1 =
 ;
 
 typedef vector<string> StringVector;
-
-int W = 0;
-int H = 0;
 
 struct Number {
     int x;
@@ -52,30 +50,31 @@ bool OK(char c)
     return isdigit(c) || c == '.';
 }
 
-void parse( StringVector & data, NumberVector & nums, PointVector & syms )
+void parse( istream & fin, NumberVector & nums, PointVector & syms )
 {
     nums.clear();
     syms.clear();
-    for( int y = 0; y < data.size(); y++ )
+    int x=0, y=0;
+    bool num = false;
+    for( int c = fin.get(); c != EOF; c=fin.get(), x++)
     {
-        string row = data[y];
-        bool num = false;
-        for( int x = 0; x < row.size(); x++ )
+        if( c == '\n' )
         {
-            char c = row[x];
-            if( isdigit(c) )
-            {
-                if( !num )
-                    nums.push_back(Number({x,y,0,0}));
-                nums.back().v = nums.back().v * 10 + c - '0';
-                nums.back().l += 1;
-            }
-            else if( c != '.') 
-            {
-                syms.push_back(Point({x,y}));
-            }
-            num = isdigit(c);
+            x = -1;
+            y++;
         }
+        else if( isdigit(c) )
+        {
+            if( !num )
+                nums.push_back(Number({x,y,0,0}));
+            nums.back().v = nums.back().v * 10 + c - '0';
+            nums.back().l += 1;
+        }
+        else if( c != '.') 
+        {
+            syms.push_back(Point({x,y}));
+        }
+        num = isdigit(c);
     }
 }
 
@@ -113,16 +112,8 @@ int part2( int part, NumberVector & numbers, PointVector & symbols )
     return sumx;
 }
 
-void splitem( istream & is, StringVector & lines )
-{
-    string line;
-    while( getline( is, line ) )
-        lines.push_back( line );  
-}
-
 int main( int argc, char ** argv )
 {
-    bool TEST = false;
     while( *++argv )
     {
         string arg(*argv);
@@ -132,22 +123,19 @@ int main( int argc, char ** argv )
             TEST = true;
     }
 
-    StringVector data;
+    NumberVector numbers;
+    PointVector symbols;
     if( TEST )
     {
         istringstream iss;
         iss.str( test1 );
-        splitem( iss, data );
+        parse( iss, numbers, symbols );
     }
     else
     {
         ifstream ifs("day03.txt");
-        splitem( ifs, data );
+        parse( ifs, numbers, symbols );
     }
-
-    NumberVector numbers;
-    PointVector symbols;
-    parse( data, numbers, symbols );
 
     cout << "Part 1: " << part2(1,numbers,symbols) << "\n";
     cout << "Part 2: " << part2(2,numbers,symbols) << "\n";
