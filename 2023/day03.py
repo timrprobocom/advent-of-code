@@ -39,10 +39,6 @@ def check(x0,y0,l):
                 if x in W:
                     if data[y][x] not in OK:
                         return True
-    if x0-1 in W and data[y0][x0-1] not in OK:
-        return True
-    if x0+l in W and data[y0][x0+l] not in OK:
-        return True
     return False
 
 # How long is the number at position x?
@@ -63,11 +59,11 @@ def part1(data):
             l = numdigits(row,x)
             if l:
                 if check(x,y,l):
-                    debug(row[x:x+l])
+                    debug("Y:"+row[x:x+l])
                     sumx += int(row[x:x+l])
-            else:
-                l = 1
-            x += l
+                else:
+                    debug("n:"+row[x:x+l])
+            x += l + 1
     return sumx
 
 # row[x] points to the middle of a number.  Extract the number.
