@@ -31,76 +31,84 @@ typedef vector<string> StringVector;
 int W = 0;
 int H = 0;
 
-struct Delta {
+struct Number {
+    int x;
+    int y;
+    int v;
+    int l;
+};
+
+typedef vector<Number> NumberVector;
+
+struct Point {
     int x;
     int y;
 };
 
-Delta const dirs[8]{{-1,-1},{-1,0},{-1,1},{0,-1},{0,1},{1,-1},{1,0},{1,1}};
+typedef vector<Point> PointVector;
 
 bool OK(char c)
 {
     return isdigit(c) || c == '.';
 }
 
-bool within( int lb, int val, int rb )
+void parse( StringVector & data, NumberVector & nums, PointVector & syms )
 {
-    return lb <= val && val < rb;
-}
-
-// How long is the number at position x?
-
-int numdigits( string & row, int x )
-{
-    int l;
-    for( l = 0; within(0, x+l, W) && isdigit(row[x+l]); l++ )
-        ;
-    return l;
-}
-
-// row[x] points to the middle of a number.  Extract the number.
-
-int extract( string & row, int x )
-{
-    for( ; x > 0 && isdigit(row[x-1]); x-- )
-        ;
-    int l = numdigits(row,x);
-    return stol(row.substr(x,l));
-}
-
-int part2( int part, StringVector & data )
-{
-    int sumx = 0;
-    for( int y = 0; y < H; y++ )
+    nums.clear();
+    syms.clear();
+    for( int y = 0; y < data.size(); y++ )
     {
         string row = data[y];
-        for( int x = 0; x < W; x++ )
+        bool num = false;
+        for( int x = 0; x < row.size(); x++ )
         {
-            if( !OK(row[x]) )
+            char c = row[x];
+            if( isdigit(c) )
             {
-                set<int> nums;
-                for( auto & d : dirs )
-                {
-                    if( 
-                        within(0, x+d.x, W) && 
-                        within(0, y+d.y, H) &&
-                        isdigit(data[y+d.y][x+d.x])
-                    )
-                        nums.insert( extract(data[y+d.y], x+d.x));
-                }
-                if( part == 1 )
-                {
-                    sumx += accumulate(nums.begin(), nums.end(), 0);
-                }
-                else
-                {
-                    int p = 1;
-                    for( auto n : nums )
-                        p *= n;
-                    sumx += p;
-                }            
+                if( !num )
+                    nums.push_back(Number({x,y,0,0}));
+                nums.back().v = nums.back().v * 10 + c - '0';
+                nums.back().l += 1;
+            }
+            else if( c != '.') 
+            {
+                syms.push_back(Point({x,y}));
+            }
+            num = isdigit(c);
+        }
+    }
+}
+
+int part2( int part, NumberVector & numbers, PointVector & symbols )
+{
+    int sumx = 0;
+    vector<int> nums;
+
+    for( auto & sym : symbols )
+    {
+        nums.clear();
+        for( auto & num : numbers )
+        {
+            if(
+                num.y-1 <= sym.y && sym.y <= num.y+1 &&
+                num.x-1 <= sym.x && sym.x <= num.x+num.l
+            )
+            {
+                nums.push_back( num.v );
             }
         }
+
+        if( part == 1 )
+        {
+            sumx += accumulate(nums.begin(), nums.end(), 0);
+        }
+        else if(nums.size() == 2)
+        {
+            int p = 1;
+            for( auto n : nums )
+                p *= n;
+            sumx += p;
+        }            
     }
     return sumx;
 }
@@ -137,11 +145,12 @@ int main( int argc, char ** argv )
         splitem( ifs, data );
     }
 
-    W = data[0].size();
-    H = data.size();
+    NumberVector numbers;
+    PointVector symbols;
+    parse( data, numbers, symbols );
 
-    cout << "Part 1: " << part2(1,data) << "\n";
-    cout << "Part 2: " << part2(2,data) << "\n";
+    cout << "Part 1: " << part2(1,numbers,symbols) << "\n";
+    cout << "Part 2: " << part2(2,numbers,symbols) << "\n";
 }
 
 
