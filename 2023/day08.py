@@ -36,42 +36,48 @@ else:
 
 DEBUG = 'debug' in sys.argv
 
-mapx = {}
-for line in data:
-    line = line.strip()
-    if not line:
-        continue
-    if '=' not in line:
-        directions = line
-    else:
-        parts = line.split()
-        parts = [x.strip('(').strip(')').strip(',') for x in parts]
-        mapx[parts[0]] = {'L': parts[2], 'R':parts[3]}
 
+def parse(data):
+    global mapping
+    global directions
+    mapping = {}
+    for line in data:
+        line = line.strip()
+        if not line:
+            continue
+        if '=' not in line:
+            directions = line
+        else:
+            parts = line.split()
+            parts = [x.strip('(').strip(')').strip(',') for x in parts]
+            mapping[parts[0]] = {'L': parts[2], 'R':parts[3]}
 
 def part1():
     curr = 'AAA'
-    if curr not in mapx:
+    if curr not in mapping:
         return None
     steps = 0
     while curr != 'ZZZ':
         i = steps % len(directions)
-        curr = mapx[curr][directions[i]]
+        curr = mapping[curr][directions[i]]
         steps += 1
     return steps
 
 def part2():
-    ghosts = [k for k in mapx if k[-1] == 'A']
     steplist = []
-    for g in ghosts:
+    for g in mapping:
+        if g[-1] != 'A':
+            continue
         steps = 0
         while g[-1] != 'Z':
             i = steps % len(directions)
-            g = mapx[g][directions[i]]
+            g = mapping[g][directions[i]]
             steps += 1
         steplist.append(steps)
-    
     return math.lcm(*steplist)
 
+parse(data)
 print("Part 1:", part1())
+if 'test' in sys.argv:
+    parse(test1.splitlines())
 print("Part 2:", part2())
