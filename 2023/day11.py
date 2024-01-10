@@ -21,24 +21,7 @@ if 'test' in sys.argv:
 else:
     data = open(day+'.txt').read().splitlines()
 
-#data = [list(row) for row in data]
-
 DEBUG = 'debug' in sys.argv
-
-N = (0,-1)
-W = (-1,0)
-S = (0,1)
-E = (1,0)
-
-dirs = {
-    '|': (N,S),
-    '-': (E,W),
-    'F': (S,E),
-    'L': (N,E),
-    'J': (N,W),
-    '7': (S,W),
-    '.': {}
-}
 
 # Find the rows without galaxies.
 
