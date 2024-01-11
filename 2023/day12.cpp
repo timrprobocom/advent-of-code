@@ -17,7 +17,6 @@ bool TEST = false;
 
 typedef vector<string> StringVector;
 typedef vector<int> IntVector;
-typedef deque<int> IntDeque;
 typedef vector<int64_t> LongVector;
 
 const string test(
@@ -32,7 +31,7 @@ const string test(
 
 // Parse the input.
 
-void parse( string & line, string & maps, IntDeque & nums )
+void parse( string & line, string & maps, IntVector & nums )
 {
     int accum = 0;
     maps.clear();
@@ -72,50 +71,83 @@ bool match( string & pat,  string & chk )
 // pattern, we recursively try the next.  It's only the memoizing that allows 
 // this to run in finite time.
 
-int gen( string pat, int size, IntDeque nums )
-{
-    // TODO
-    // I probably need to memoize this.
+typedef tuple<int,int64_t,size_t> Params;
 
+int64_t makehash(IntVector & n)
+{
+    int64_t h;
+    for( auto i : n )
+        h = h*12 + i;
+    return h;
+}
+
+map<Params,int64_t> memoize;
+
+int64_t gen( string pat, int size, IntVector & nums )
+{
     if( nums.empty() )
         return pat.find('#') == string::npos;
 
-    int now = nums.front();
-    nums.pop_front();
-    int after = accumulate( nums.begin(), nums.end(), 0 ) + nums.size();
+    Params check(size,makehash(nums),hash<string>{}(pat));
+    if( memoize.find(check) != memoize.end())
+        return memoize[check];
 
-    int count = 0;
+    int now = nums.front();
+    IntVector rest( nums.begin()+1, nums.end());
+    int after = accumulate( rest.begin(), rest.end(), rest.size());
+
+    int64_t count = 0;
     string t(now, '#');
-    cout << "now is " << now << ", t is " << t << "\n";
     for( int before = 0; before < size-after-now+1; before++ )
     {
         string s = string(before,'.') + t + ".";
-        cout << "Checking " << pat << " vs " << s << "\n";
         if( match( pat, s ) )
         {
-            if( pat.size() >= s.size() )
-            count += gen( pat.substr(s.size()), size-now-before-1, nums );
+            int n = min(pat.size(),s.size());
+            count += gen( pat.substr(n), size-now-before-1, rest );
         }
     }
 
+    memoize[check] = count;
+    if( memoize.size() % 100000 == 0 )
+    cout << memoize.size() << "\n";
     return count;
 }
 
-int count_matches( string & pat, IntDeque & nums )
+int64_t count_matches( string & pat, IntVector & nums )
 {
     return gen( pat, pat.size(), nums );
 }
 
 
-int64_t part1( StringVector & lines )
+int part1( StringVector & lines )
 {
     string pat;
-    IntDeque nums;
+    IntVector nums;
 
     int sumx = 0;
     for( auto & s : lines )
     {
         parse( s, pat, nums );
+        sumx += count_matches( pat, nums );
+    }
+    return sumx;
+}
+
+
+int64_t part2( StringVector & lines )
+{
+    string pat;
+    IntVector nums;
+
+    int64_t sumx = 0;
+    for( auto & s : lines )
+    {
+        parse( s, pat, nums );
+        int n = nums.size();
+        pat = pat + "?" + pat + "?" + pat + "?" + pat + "?" + pat;
+        for( int i = 0; i < n * 4; i++ )
+            nums.push_back( nums[i] );
         sumx += count_matches( pat, nums );
     }
     return sumx;
@@ -144,12 +176,12 @@ int main( int argc, char ** argv )
     }
     else 
     {
-        ifstream data("day11.txt");
+        ifstream data("day12.txt");
         string line;
         while( getline( data, line ) )
             lines.push_back( line );
     }
 
     cout << "Part 1: " << part1(lines) << "\n";
-//    cout << "Part 2: " << part2(lines) << "\n";
+    cout << "Part 2: " << part2(lines) << "\n";
 }
