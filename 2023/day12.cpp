@@ -66,29 +66,39 @@ bool match( string & pat,  string & chk )
     return true;
 }
 
+template<>
+struct std::hash<IntVector>
+{
+    size_t operator() (IntVector& n)
+    {
+        int64_t h;
+        for( auto i : n )
+            h = h*12 + i;
+        return h;
+    }
+};
+
+template<typename T>
+size_t makehash(T & x)
+{
+    return hash<T>{}(x);
+}
+
+typedef tuple<int,size_t,size_t> Params;
+
+map<Params,int64_t> memoize;
+
 // Each call of this does one chunk of #s.  We generage all possible strings that
 // end with "###." for this chunk.  If that prefix matches the current spot in the 
 // pattern, we recursively try the next.  It's only the memoizing that allows 
 // this to run in finite time.
-
-typedef tuple<int,int64_t,size_t> Params;
-
-int64_t makehash(IntVector & n)
-{
-    int64_t h;
-    for( auto i : n )
-        h = h*12 + i;
-    return h;
-}
-
-map<Params,int64_t> memoize;
 
 int64_t gen( string pat, int size, IntVector & nums )
 {
     if( nums.empty() )
         return pat.find('#') == string::npos;
 
-    Params check(size,makehash(nums),hash<string>{}(pat));
+    Params check(size,makehash(nums),makehash(pat));
     if( memoize.find(check) != memoize.end())
         return memoize[check];
 
