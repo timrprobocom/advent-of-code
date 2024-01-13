@@ -167,7 +167,8 @@ int part1( StringVector grid )
 
 int part2( StringVector grid )
 {
-    vector<uint64_t> seen(1);
+    map<uint64_t,int> seen;
+    seen[0] = 0;
     IntVector scores(1);
     int pat0 = 0;
     for( ;; )
@@ -180,13 +181,12 @@ int part2( StringVector grid )
         scores.push_back(weight(grid));
         if( DEBUG )
             cout << seen.size() << " " << scores.back() << " " << cur << "\n";
-        auto pat = find(seen.begin(), seen.end(), cur);
-        if( pat != seen.end() )
+        if( seen.find(cur) != seen.end() )
         {
-            pat0 = pat - seen.begin();
+            pat0 = seen[cur];
             break;
         }
-        seen.push_back( cur );
+        seen[cur] = seen.size();
     }
     int cycle = seen.size() - pat0;
     int want =  (1000000000 - pat0) % cycle + pat0;
