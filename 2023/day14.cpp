@@ -170,7 +170,7 @@ int part2( StringVector grid )
     vector<uint64_t> seen(1);
     IntVector scores(1);
     int pat0 = 0;
-    for( int i = 0; ; i++ )
+    for( ;; )
     {
         tilt_n(grid);
         tilt_w(grid);
@@ -179,8 +179,8 @@ int part2( StringVector grid )
         uint64_t cur = unique(grid);
         scores.push_back(weight(grid));
         if( DEBUG )
-            cout << i+1 << " " << scores.back() << " " << cur << "\n";
-        auto pat = find(seen.begin(), seen.end(), cur );
+            cout << seen.size() << " " << scores.back() << " " << cur << "\n";
+        auto pat = find(seen.begin(), seen.end(), cur);
         if( pat != seen.end() )
         {
             pat0 = pat - seen.begin();
