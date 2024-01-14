@@ -52,121 +52,42 @@ void parse( istream & fin, StringVector & lines )
 }
 
 
-struct Point {
-    int x;
-    int y;
+typedef unsigned short Direction;
 
-    bool operator==(const Point & other)
-    {
-        return x==other.x & y == other.y;
-    }
+#define makedir(dx,dy) (((dx+1)<<4) | (dy+1))
+#define getdx(dir)     ((dir>>4)-1)
+#define getdy(dir)     ((dir&15)-1)
 
-    string str() const
-    {
-        ostringstream s;
-        s << "(" << x << "," << y << ")";
-        return s.str();
-    }
-};
-
-bool operator<(const Point & a, const Point & b )
-{
-    if( a.x == b.x )
-        return a.y < b.y;
-    return a.x < b.x;
-}
-
-struct Direction {
-    int dx;
-    int dy;
-
-    bool operator==(const Direction & other)
-    {
-        return dx==other.dx & dy == other.dy;
-    }
-
-    string str() const
-    {
-        ostringstream s;
-        s << "(" << dx << "," << dy << ")";
-        return s.str();
-    }
-};
-
-bool operator<(const Direction & a, const Direction & b )
-{
-    if( a.dx == b.dx )
-        return a.dy < b.dy;
-    return a.dx < b.dx;
-}
-
-
-Direction N({0,-1});
-Direction W({-1,0});
-Direction S({0,1});
-Direction E({1,0});
-
-map<Direction,Direction> fslash;
-map<Direction,Direction> bslash;
+Direction N = makedir(0,-1);
+Direction W = makedir(-1,0);
+Direction S = makedir(0,1);
+Direction E = makedir(1,0);
 
 Direction change( char c, Direction d )
 {
-    if( fslash.empty() )
-    {
-        fslash[N] = E;
-        fslash[S] = W;
-        fslash[E] = N;
-        fslash[W] = S;
-        bslash[N] = W;
-        bslash[S] = E;
-        bslash[E] = S;
-        bslash[W] = N;
-    }
-
-    return c == '/' ? fslash[d] : bslash[d];
+    int dx = getdx(d);
+    int dy = getdy(d);
+    return c == '/' ?  makedir(-dy,-dx) : makedir(dy,dx);
 }
 
 
-#if 0
-struct Beam {
-    int x;
-    int y;
-    Direction dir;
-
-    int hash() const {
-        return (x << 16) | (y << 8) | ((dir.dx+1) << 4) | (dir.dy+1);
-    };
-};
-
-
-bool operator<(const Beam & a, const Beam & b )
-{
-    return a.hash() < b.hash();
-}
-#endif
 typedef int Beam;
 
-Beam makebeam( int x, int y, Direction & dir )
+Beam makebeam( int x, int y, Direction  dir )
 {
-    return (x << 16) | (y << 8) | ((dir.dx+1) << 4) | (dir.dy+1);
+    return (x << 16) | (y << 8) | dir;
 }
 
-#define getx(beam)      beam >> 16
-#define gety(beam)      (beam >> 8) & 255
-#define getdir(beam)    Direction({(beam>>4)&15-1,beam&15-1})
-
-void print( StringVector & grid )
-{
-    cout << "----\n";
-    for( auto & s : grid )
-        cout << s << "\n";
-}
+#define getx(beam)      (beam >> 16)
+#define gety(beam)      ((beam >> 8) & 255)
+#define getdir(beam)    (beam & 255)
 
 
 void printg(set<Beam> & seen)
 {
     string s(WID, '.');
     StringVector grid(HGT, s);
+    cout << "\n";
     for( auto & p : seen )
         grid[gety(p)][getx(p)] = '#';
     for( auto & row : grid )
@@ -186,8 +107,8 @@ int process(StringVector & grid, Beam start )
         beams.pop_front();
         if( seen.find(beam) != seen.end() )
             continue;
-
         seen.insert(beam);
+
         int x = getx(beam);
         int y = gety(beam);
         Direction dir = getdir(beam);
@@ -209,8 +130,8 @@ int process(StringVector & grid, Beam start )
                 beams.push_back( makebeam(x-1,y,W) );
             dir = E;
         }
-        x += dir.dx;
-        y += dir.dy;
+        x += getdx(dir);
+        y += getdy(dir);
         if( 0 <= x && x < WID && 0 <= y && y < HGT )
             beams.push_back( makebeam(x,y,dir) );
     }
