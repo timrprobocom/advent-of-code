@@ -3,7 +3,7 @@
 ifndef windir
 O = .o
 EXE =
-CPPFLAGS = --std=c++11
+CPPFLAGS = --std=c++17
 CXX = g++
 #LIBS = -lgmpxx -lgmp
 else
