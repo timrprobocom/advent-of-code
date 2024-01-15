@@ -38,7 +38,7 @@ change = {
 
 def printg(seen):
     grid = [list('.'*WID) for _ in range(HGT)]
-    for x,y in seen:
+    for x,y,_ in seen:
         grid[y][x] = '#'
     for row in grid:
         print(''.join(row))
@@ -46,8 +46,10 @@ def printg(seen):
 def process(grid, start):
     beams = [start]
     seen = set()
+    k = 0
 
     while beams:
+        k += 1
         x,y,dir = beams.pop(0)
         if (x,y,dir) in seen:
             continue
@@ -67,6 +69,8 @@ def process(grid, start):
         y += dir[1]
         if x in range(WID) and y in range(HGT):
             beams.append( (x,y,dir) )
+    if DEBUG:
+        printg(seen)
     return len(set( (x,y) for (x,y,_) in seen ))
 
 def part1(grid):

@@ -19,7 +19,7 @@ TEST = 'test' in sys.argv
 DEBUG = 'debug' in sys.argv
 
 data = test.strip()
-#data = open('day24.txt').read().strip()
+data = open('day24.txt').read().strip()
 
 nums = re.compile(r"-*\d+")
 
@@ -27,37 +27,32 @@ class Point:
     def __init__(self,x,y,z,dx,dy,dz):
         self.pos = np.array((x,y,z))
         self.dt = np.array((dx,dy,dz))
-        self.x = x
-        self.y = y
-        self.z = z
-        self.dx = dx
-        self.dy = dy
-        self.dz = dz
 
     @classmethod
     def make(self,row):
         return Point(*tuple(int(i) for i in nums.findall(row)))
 
     def copy(self):
-        return Point(*(self.__dict__.values()))
+        p = Point(0,0,0,0,0,0)
+        p.pos = self.pos[:]
+        p.dt = self.dt[:]
+        return p
 
     def find_mbx(self):
         self.m = self.dy/self.dx
         self.b = self.y - m * self.x
 
-    def translate(self,pt):
-        self.x -= pt.x
-        self.y -= pt.y
-        self.z -= pt.z
-        self.dx -= pt.dx
-        self.dy -= pt.dy
-        self.dz -= pt.dz
+    def subtract(self,pt):
+        self.pos -= pt.pos
+        self.dt -= pt.dt
 
     def at(self,t):
         return self.pos + t * self.dt
     
     def __repr__(self):
-        return f'<Point {self.x},{self.y},{self.z}, delta={self.dx},{self.dy},{self.dz}>'
+        x,y,z = self.pos
+        dx,dy,dz = self.dt
+        return f'<Point {x},{y},{z}, delta={dx},{dy},{dz}>'
 
 vectors = [Point.make(row) for row in data.splitlines()]
 
@@ -89,6 +84,7 @@ def attempt1():
     print(math.dist(p2.at(3),p3.at(4))) # 3.7
 
 
+
 # Given two points on our first line and a point on a second line, 
 # find our plane.
 
@@ -100,6 +96,7 @@ def find_plane_3pt(pt1,pt2):
     v1 = p2-p0
     v2 = p2-p1
     normal = np.cross(v1,v2)
+    normal = normal / math.gcd(*normal)
     print("Normal vector",normal)
     return normal, np.dot(normal,p0)
 
@@ -116,8 +113,9 @@ def find_plane(pt1,pt2):
     return normal
 
 def plot_plane(ax,pt1,pt2):
-    normal = find_plane(pt1,pt2)
-    point = np.array([pt1.x,pt1.y,pt1.z])
+#    normal = find_plane(pt1,pt2)
+    normal = pt1.dt
+    point = pt1.pos
     d = -point.dot(normal)
     xx, yy = np.meshgrid(range(50), range(50))
     z = (-normal[0] * xx - normal[1] * yy - d) / normal[2]
@@ -134,25 +132,99 @@ def intersect( normal, point, line ):
     print( "intersects at t=",d)
     return pt0 + d*dd0
 
-normal = find_plane_3pt(vectors[0],vectors[1])[0]
-pts = [intersect(normal,vectors[0],v) for v in vectors[1:]]
+# Try the reference frame shift.
 
-def doplot(pts):
+def attempt2():
+    p1,p2,p3,_ = vectors[:4]
+    p2.subtract(p1)
+    p3.subtract(p1)
+    p1 = Point(0,0,0,0,0,0)
+    n2 = p2.dt
+    n3 = p3.dt
+    n2 = find_plane_3pt(p2,p1)[0]
+    n3 = find_plane_3pt(p3,p1)[0]
+    n4 = np.cross(n2,n3) / 8
+    print("before",n4)
+    n4 += vectors[0].dt
+    print(n2)
+    print(n3)
+    print(n4)
+
+# Make some lines.
+
     ax = plt.subplot(projection='3d')
-    plot_plane(ax, vectors[0],vectors[1])
-    plot_plane(ax, vectors[0],vectors[2])
-    plot_plane(ax, vectors[0],vectors[3])
-    ax.scatter( *pts[0], color='green')
-    ax.scatter( *pts[1], color='red')
-    ax.scatter( *pts[2], color='blue')
+    t = np.array([0,1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0,9,0,10])
+    for n in (n2,n3,n4):
+        x = t * n[0]
+        y = t * n[1]
+        z = t * n[2]
+        plt.plot( x, y, z )
     plt.show()
 
-#doplot(pts)
-print(pts)
+def doplot():
+    p0,p1,p2,p3 = vectors[:4]
+    p1.subtract(p0)
+    p2.subtract(p0)
+    p3.subtract(p0)
+    p0 = Point(0,0,0,0,0,0)
+#    normal = find_plane_3pt(p1,p0)[0]
+#    pts = [intersect(normal,p0,v) for v in vectors[1:]]
+    ax = plt.subplot(projection='3d')
+    plot_plane(ax, p1, p0 )
+    plot_plane(ax, p2, p0 )
+    plot_plane(ax, p3, p0 )
+#    ax.scatter( *pts[0], color='green')
+#    ax.scatter( *pts[1], color='red')
+#    ax.scatter( *pts[2], color='blue')
+    plt.show()
 
-print(find_plane_3pt(vectors[0],vectors[1]))
-print(find_plane(vectors[0],vectors[1]))
-print(find_plane_3pt(vectors[0],vectors[2]))
-print(find_plane(vectors[0],vectors[2]))
-print(find_plane_3pt(vectors[0],vectors[3]))
-print(find_plane(vectors[0],vectors[3]))
+# If three vectors are coplanar, the triple scalar product is 0.
+def attempt3():
+    dr = np.array((-3,1,2))
+    p1 = vectors[0]
+    p2 = vectors[1]
+    p3 = vectors[2]
+
+    v1 = p1.pos-p2.pos
+    v2 = p1.dt-p2.dt
+    v3 = p1.dt-dr
+    print(v1,v2,v3)
+    r = np.dot(v3,np.cross(v1,v2))
+    print(r)
+
+    v1 = p2.pos-p1.pos
+    v2 = p1.dt-dr
+    v3 = p2.dt-dr
+    r = np.dot(v1,np.cross(v2,v3))
+    print(r)
+
+def attempt4():
+    p1 = vectors[0]
+    p2 = vectors[1]
+    p3 = vectors[2]
+    sys = []
+    sys.append( np.cross(p1.pos-p2.pos,p1.dt-p2.dt) )
+    sys.append( np.cross(p2.pos-p3.pos,p2.dt-p3.dt) )
+    sys.append( np.cross(p3.pos-p1.pos,p3.dt-p1.dt) )
+    sys = np.array(sys)
+    print(sys)
+    equals = np.array([
+        np.dot(sys[0],p2.dt),
+        np.dot(sys[1],p3.dt),
+        np.dot(sys[2],p1.dt)
+    ])
+    return np.linalg.solve(np.array(sys), equals)
+
+drock = attempt4()
+print(drock)
+
+#doplot()
+#print(pts)
+
+def printthem():
+    print(find_plane_3pt(vectors[0],vectors[1]))
+    print(find_plane(vectors[0],vectors[1]))
+    print(find_plane_3pt(vectors[0],vectors[2]))
+    print(find_plane(vectors[0],vectors[2]))
+    print(find_plane_3pt(vectors[0],vectors[3]))
+

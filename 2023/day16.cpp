@@ -100,9 +100,11 @@ int process(StringVector & grid, Beam start )
     deque<Beam> beams;
     beams.push_back(start);
     set<Beam> seen;
+int k=0;
 
     while( !beams.empty() )
     {
+k += 1;
         Beam beam = beams.front();
         beams.pop_front();
         if( seen.find(beam) != seen.end() )
@@ -141,6 +143,7 @@ int process(StringVector & grid, Beam start )
     set<int> gather;
     for( auto & b : seen )
         gather.insert( b >> 8 );
+cout << start << " " << k << "\n";
     return gather.size();
 }
 
