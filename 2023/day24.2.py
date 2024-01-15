@@ -19,7 +19,7 @@ TEST = 'test' in sys.argv
 DEBUG = 'debug' in sys.argv
 
 data = test.strip()
-data = open('day24.txt').read().strip()
+#data = open('day24.txt').read().strip()
 
 nums = re.compile(r"-*\d+")
 
@@ -179,6 +179,7 @@ def doplot():
     plt.show()
 
 # If three vectors are coplanar, the triple scalar product is 0.
+
 def attempt3():
     dr = np.array((-3,1,2))
     p1 = vectors[0]
@@ -217,6 +218,7 @@ def attempt4():
 
 drock = attempt4()
 print(drock)
+
 
 #doplot()
 #print(pts)
