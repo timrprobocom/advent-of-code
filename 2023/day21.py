@@ -65,7 +65,7 @@ def countgrid(s,dx=0,dy=0):
             sumx += 1
     return sumx
 
-def part1(data):
+def part1(rocks):
     steps = 6 if 'test' in sys.argv else 64
     queue = set()
     queue.add(origin)
@@ -102,7 +102,7 @@ def part1(data):
 # It takes about 45 seconds to compute enough differences to ensure
 # we know the second differences have stabilized.
 
-def part2(data):
+def part2(rocks):
     steps = 5000 if 'test' in sys.argv else 26501365
     offset = steps % WIDTH
     queue = set()
@@ -144,5 +144,5 @@ def part2(data):
     n = steps//WIDTH-skips+1
     return (a * n + b) * n + c
 
-print("Part 1:", part1(data))
-print("Part 2:", part2(data))
+print("Part 1:", part1(rocks))
+print("Part 2:", part2(rocks))
