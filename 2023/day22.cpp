@@ -68,17 +68,21 @@ int how_much_drop(Tops & top, Brick & brick)
 }
 
 
-
 // Drop all the bricks that can be dropped.  We remember the
 // highest brick for each x,y in `top`.  We sorted the bricks
 // by z, so we're always building from bottom to top.
 
-int countdrop(vector<Brick> & bricks)
+int countdrops(vector<Brick> & bricks, int except)
 {
     int dropped = 0;
     Tops top;
-    for( auto & brick : bricks )
+    for( int i = 0; i < bricks.size(); i++ )
     {
+        if( i == except )
+            continue;
+
+        Brick & brick = bricks[i];
+
         int dz = how_much_drop(top,brick);
         if( dz )
             dropped += 1;
@@ -100,15 +104,11 @@ void drop(vector<Brick> & bricks)
     Tops top;
     for( auto & brick : bricks )
     {
-        int dz = how_much_drop(top,brick);
-
         // If it can be dropped, drop it.
 
-        if( dz )
-        {
-            brick.z0 -= dz;
-            brick.z1 -= dz;
-        }
+        int dz = how_much_drop(top,brick);
+        brick.z0 -= dz;
+        brick.z1 -= dz;
 
         // Register the new peak.
 
@@ -130,10 +130,7 @@ auto part1( vector<Brick> & bricks )
     // For each brick, if we remove the brick, how many will fall?
     for( int i = 0; i < bricks.size(); i++ )
     {
-        vector<Brick> bx;
-        copy( bricks.begin(), bricks.begin()+i, back_inserter(bx));
-        copy( bricks.begin()+i+1, bricks.end(), back_inserter(bx));
-        int dropped = countdrop(bx);
+        int dropped = countdrops(bricks,i);
         sum1 += !dropped;
         sum2 += dropped;
     }
