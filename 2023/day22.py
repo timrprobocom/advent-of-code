@@ -64,20 +64,33 @@ def drop(bricks):
         for x in range(brick.x0, brick.x1 + 1):
             for y in range(brick.y0, brick.y1 + 1):
                 top[(x, y)] = new.z1
-    return dropped,newstack
+    return newstack
+
+def countdrops(bricks):
+    dropped = 0
+    top = collections.defaultdict(int)
+    for brick in bricks:
+        dz = how_much_drop(top,brick)
+        if dz:
+            dropped += 1
+        # If it can be dropped, drop it.
+        z1 = brick.z1 - dz
+        # Register the new peak.
+        for x in range(brick.x0, brick.x1 + 1):
+            for y in range(brick.y0, brick.y1 + 1):
+                top[(x, y)] = z1
+    return dropped
 
 def part1(bricks):
     sum1, sum2 = 0, 0
     # Eliminate all the gaps.
-    _, bricks = drop(bricks)
+    bricks = drop(bricks)
     # For each brick, if we remove the brick, how many will fall?
     for i in range(len(bricks)):
         bx = bricks[:i] + bricks[i+1:]
-        dropped,_ = drop(bx)
-        if not dropped:
-            sum1 += 1
-        else:
-            sum2 += dropped
+        dropped = countdrops(bx)
+        sum1 += not dropped
+        sum2 += dropped
     return sum1, sum2
 
 p1, p2 = part1(bricks)
