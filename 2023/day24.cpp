@@ -32,26 +32,6 @@ extern "C" int dgesv_(
      OUT int * info     // success/fail code, 0=OK
  );
 
-#if 0
-// Holy crap, this works.
-
-int main()
-{
-    int N = 3;
-    int NRHS = 1;
-    double A[] = { -16, 0, -12, -8, -8, 2, -4, 4, -3 };
-    int LDA = 3;
-    int IPIV[3];
-    double B[] = { 32, 0, 32 };
-    int LDB = 3;
-    int info;
-
-    sgesv_( &N, &NRHS, A, &LDA, IPIV, B, &LDB, &info );
-    std::cout << "info = " << info << "\n";
-    std::cout << "B = " << B[0] << ", " << B[1] <<", " << B[2] << "\n";
-}
-#endif
-
 bool DEBUG = false;
 bool TEST = false;
 
