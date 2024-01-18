@@ -19,16 +19,17 @@ DEBUG = 'debug' in sys.argv
 data = test.strip()
 data = open('day24.txt').read().strip()
 
-nums = re.compile(r"-*\d+")
 
 class Point:
+    nums = re.compile(r"-*\d+")
+
     def __init__(self,x,y,z,dx,dy,dz):
         self.pos = np.array((x,y,z))
         self.dt = np.array((dx,dy,dz))
 
     @classmethod
-    def make(self,row):
-        return Point(*tuple(int(i) for i in nums.findall(row)))
+    def make(cls,row):
+        return Point(*tuple(int(i) for i in cls.nums.findall(row)))
 
     def copy(self):
         p = Point(0,0,0,0,0,0)

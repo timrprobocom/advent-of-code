@@ -1,8 +1,6 @@
 import os
 import re
 import sys
-import collections
-from sympy import solve_poly_system, Symbol
 import numpy as np
 
 test = """\
@@ -22,22 +20,45 @@ if TEST:
 else:
     data = open(day+'.txt').read().strip()
 
-Point = collections.namedtuple('Point',('x','y','z','dx','dy','dz','m','b'))
 
-nums = re.compile(r"-*\d+")
-def get_all_nums(line):
-    return tuple(int(i) for i in nums.findall(row))
+class Point:
+    nums = re.compile(r"-*\d+")
+
+    def __init__(self,x,y,z,dx,dy,dz):
+        self.pos = np.array((x,y,z))
+        self.dt = np.array((dx,dy,dz))
+
+    @classmethod
+    def make(cls,row):
+        return Point(*tuple(int(i) for i in cls.nums.findall(row)))
+
+    def copy(self):
+        p = Point(0,0,0,0,0,0)
+        p.pos = self.pos[:]
+        p.dt = self.dt[:]
+        return p
+
+    def find_mbx(self):
+        return find_mbx(self.pos[0],self.pos[1],self.dt[0],self.dt[1])
+
+    def subtract(self,pt):
+        self.pos -= pt.pos
+        self.dt -= pt.dt
+
+    def at(self,t):
+        return self.pos + t * self.dt
+    
+    def __repr__(self):
+        x,y,z = self.pos
+        dx,dy,dz = self.dt
+        return f'<Point {x},{y},{z}, delta={dx},{dy},{dz}>'
+
+vectors = [Point.make(row) for row in data.splitlines()]
 
 def find_mbx(x0,y0,dx,dy):
     m = dy/dx
     b = y0 - m * x0
     return (m,b)
-
-vectors = []
-for row in data.splitlines():
-    n = get_all_nums(row)
-    n = n + find_mbx(n[0],n[1],n[3],n[4])
-    vectors.append( Point(*n))
 
 def intersect2d(p1m,p1b,p2m,p2b):
     # Are the lines parallel?
@@ -47,71 +68,62 @@ def intersect2d(p1m,p1b,p2m,p2b):
     y = round(p1m*x+p1b)
     return (x,y)
 
-def intersect2dchk(pt1,pt2):
-    x,y = intersect2d(pt1.m,pt1.b,pt2.m,pt2.b)
-    # Did this happen in the past?
-    if ((pt1.dx > 0) == (x < pt1.x)) or ((pt2.dx > 0) == (x < pt2.x)):
-        return (0,0)
-    return (x,y)
+def in_the_future(pt1,pt2,x,y):
+    # Did this happen in the future?
+    return ((pt1.dt[0] < 0) == (x < pt1.pos[0])) and ((pt2.dt[0] < 0) == (x < pt2.pos[0]))
 
 def part1(vectors):
     rmin,rmax = (7,28) if TEST else (2*10**14,4*10**14) 
     count = 0
     for i,pt0 in enumerate(vectors):
+        p1m,p1b = pt0.find_mbx()
         for pt1 in vectors[i+1:]:
-            x,y = intersect2dchk(pt0,pt1)
-            count += rmin <= x <= rmax and rmin < y < rmax
+            p2m,p2b = pt1.find_mbx()
+            x,y = intersect2d(p1m,p1b,p2m,p2b)
+            if in_the_future(pt0,pt1,x,y):
+                count += rmin <= x <= rmax and rmin < y < rmax
     return count
 
+# Find the velocity of the rock.
+
 def find_rock_vel(vectors):
-    p1pos = getpos(vectors[0])
-    p1vel = getvel(vectors[0])
-    p2pos = getpos(vectors[1])
-    p2vel = getvel(vectors[1])
-    p3pos = getpos(vectors[2])
-    p3vel = getvel(vectors[2])
-    sys = []
-    sys.append( np.cross(p1pos-p2pos,p1vel-p2vel) )
-    sys.append( np.cross(p2pos-p3pos,p2vel-p3vel) )
-    sys.append( np.cross(p3pos-p1pos,p3vel-p1vel) )
-    sys = np.array(sys)
+    p1 = vectors[0]
+    p2 = vectors[1]
+    p3 = vectors[2]
+    sys = np.array([
+        np.cross(p1.pos-p2.pos,p1.dt-p2.dt),
+        np.cross(p2.pos-p3.pos,p2.dt-p3.dt),
+        np.cross(p3.pos-p1.pos,p3.dt-p1.dt)
+    ])
     if DEBUG:
         print(sys)
     equals = np.array([
-        np.dot(sys[0],p2vel),
-        np.dot(sys[1],p3vel),
-        np.dot(sys[2],p1vel)
+        np.dot(sys[0],p2.dt),
+        np.dot(sys[1],p3.dt),
+        np.dot(sys[2],p1.dt)
     ])
     return np.linalg.solve(np.array(sys), equals).round().astype(int)
 
-# We know the velocity of the rock.  Now we need the position.
-
-def getpos(pt):
-    return np.array((pt.x,pt.y,pt.z))
-
-def getvel(pt):
-    return np.array((pt.dx,pt.dy,pt.dz))
+# Given the velocity of the rock, find the initial position.
 
 def find_rock_pos(vectors, drock):
-    p1pos = getpos(vectors[0])
-    p1vel = getvel(vectors[0]) - drock
-    p2pos = getpos(vectors[1])
-    p2vel = getvel(vectors[1]) - drock
+    p1 = vectors[0].copy()
+    p2 = vectors[1].copy()
+    p1.dt = p1.dt - drock
+    p2.dt = p2.dt - drock
 
-    p1m,p1b = find_mbx(p1pos[0],p1pos[1],p1vel[0],p1vel[1])
-    p2m,p2b = find_mbx(p2pos[0],p2pos[1],p2vel[0],p2vel[1])
-# So, hailstones 0 and 1 intersect in x, y here:
+    p1m,p1b = find_mbx(p1.pos[0],p1.pos[1],p1.dt[0],p1.dt[1])
+    p2m,p2b = find_mbx(p2.pos[0],p2.pos[1],p2.dt[0],p2.dt[1])
+
+    # So, hailstones 0 and 1 intersect in x, y here:
     x,y = intersect2d(p1m,p1b,p2m,p2b)
 
-# At these times:
-    ta = int((x - p1pos[0]) / p1vel[0])
-    tb = int((x - p2pos[0]) / p2vel[0])
+    # At these times:
+    ta = int((x - p1.pos[0]) / p1.dt[0])
+    tb = int((x - p2.pos[0]) / p2.dt[0])
 
-# Working backwards from the real hailstone 0:
-    
-    p1pos = getpos(vectors[0])
-    p1vel = getvel(vectors[0])
-    return p1pos + ta * (p1vel - drock)
+    # And what is that location in 3D?
+    return p1.at(ta)
 
 def part2(vectors):
     drock = find_rock_vel(vectors)
@@ -119,6 +131,8 @@ def part2(vectors):
     return sum(prock)
 
 def part2b(vectors):
+    #from sympy import solve_poly_system, Symbol
+
     # They're saying there is some line that intersects ALL of the lines at an integer location.
     
     # It's a system of linear equations, right?  For the first three vectors:
