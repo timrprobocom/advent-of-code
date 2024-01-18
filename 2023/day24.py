@@ -39,13 +39,16 @@ for row in data.splitlines():
     n = n + find_mbx(n[0],n[1],n[3],n[4])
     vectors.append( Point(*n))
 
-def intersect2d(pt1,pt2):
+def intersect2d(p1m,p1b,p2m,p2b):
     # Are the lines parallel?
-    if pt1.m == pt2.m:
+    if p1m == p2m:
         return (0,0)
-    # So, where does m0 x + b0 = m1 x + b1?
-    x = (pt2.b-pt1.b)/(pt1.m-pt2.m)
-    y = pt1.m*x+pt1.b
+    x = round((p2b-p1b)/(p1m-p2m))
+    y = round(p1m*x+p1b)
+    return (x,y)
+
+def intersect2dchk(pt1,pt2):
+    x,y = intersect2d(pt1.m,pt1.b,pt2.m,pt2.b)
     # Did this happen in the past?
     if ((pt1.dx > 0) == (x < pt1.x)) or ((pt2.dx > 0) == (x < pt2.x)):
         return (0,0)
@@ -56,11 +59,66 @@ def part1(vectors):
     count = 0
     for i,pt0 in enumerate(vectors):
         for pt1 in vectors[i+1:]:
-            x,y = intersect2d(pt0,pt1)
+            x,y = intersect2dchk(pt0,pt1)
             count += rmin <= x <= rmax and rmin < y < rmax
     return count
 
+def find_rock_vel(vectors):
+    p1pos = getpos(vectors[0])
+    p1vel = getvel(vectors[0])
+    p2pos = getpos(vectors[1])
+    p2vel = getvel(vectors[1])
+    p3pos = getpos(vectors[2])
+    p3vel = getvel(vectors[2])
+    sys = []
+    sys.append( np.cross(p1pos-p2pos,p1vel-p2vel) )
+    sys.append( np.cross(p2pos-p3pos,p2vel-p3vel) )
+    sys.append( np.cross(p3pos-p1pos,p3vel-p1vel) )
+    sys = np.array(sys)
+    if DEBUG:
+        print(sys)
+    equals = np.array([
+        np.dot(sys[0],p2vel),
+        np.dot(sys[1],p3vel),
+        np.dot(sys[2],p1vel)
+    ])
+    return np.linalg.solve(np.array(sys), equals).round().astype(int)
+
+# We know the velocity of the rock.  Now we need the position.
+
+def getpos(pt):
+    return np.array((pt.x,pt.y,pt.z))
+
+def getvel(pt):
+    return np.array((pt.dx,pt.dy,pt.dz))
+
+def find_rock_pos(vectors, drock):
+    p1pos = getpos(vectors[0])
+    p1vel = getvel(vectors[0]) - drock
+    p2pos = getpos(vectors[1])
+    p2vel = getvel(vectors[1]) - drock
+
+    p1m,p1b = find_mbx(p1pos[0],p1pos[1],p1vel[0],p1vel[1])
+    p2m,p2b = find_mbx(p2pos[0],p2pos[1],p2vel[0],p2vel[1])
+# So, hailstones 0 and 1 intersect in x, y here:
+    x,y = intersect2d(p1m,p1b,p2m,p2b)
+
+# At these times:
+    ta = int((x - p1pos[0]) / p1vel[0])
+    tb = int((x - p2pos[0]) / p2vel[0])
+
+# Working backwards from the real hailstone 0:
+    
+    p1pos = getpos(vectors[0])
+    p1vel = getvel(vectors[0])
+    return p1pos + ta * (p1vel - drock)
+
 def part2(vectors):
+    drock = find_rock_vel(vectors)
+    prock = find_rock_pos(vectors, drock)
+    return sum(prock)
+
+def part2b(vectors):
     # They're saying there is some line that intersects ALL of the lines at an integer location.
     
     # It's a system of linear equations, right?  For the first three vectors:

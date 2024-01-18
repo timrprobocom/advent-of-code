@@ -3,8 +3,6 @@ import re
 import sys
 import math
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 test = """\
 19, 13, 30 @ -2,  1, -2
@@ -19,7 +17,7 @@ TEST = 'test' in sys.argv
 DEBUG = 'debug' in sys.argv
 
 data = test.strip()
-#data = open('day24.txt').read().strip()
+data = open('day24.txt').read().strip()
 
 nums = re.compile(r"-*\d+")
 
@@ -56,150 +54,16 @@ class Point:
 
 vectors = [Point.make(row) for row in data.splitlines()]
 
-print(vectors)
-
 # Compute the distance between the two lines at time t.
 
 def distance(p1,p2,t):
     return math.dist( p1.at(t), p2.at(t) )
 
-# We want to know the integral times t1,t2 where the distance between
-# p1.at(t1) and p2.at(t2) equals (t1-t2)*k.  Right?
-
-def attempt1():
-    base = Point(24,13,10,-3,1,2) # At time 5,3,4
-    p1,p2,p3 = vectors[0:3]
-    for t in range(50):
-        print(t, 
-            math.dist(base.at(t),p1.at(t)),
-            math.dist(base.at(t),p2.at(t)),
-            math.dist(base.at(t),p3.at(t))
-        )
-
-    # Distance traveled by our throw in one t
-    print(math.sqrt(-3*-3+1*1+2*2))     # 3.7
-
-    print(math.dist(p1.at(5),p2.at(3))) # 7.4
-    print(math.dist(p1.at(5),p3.at(4))) # 3.7
-    print(math.dist(p2.at(3),p3.at(4))) # 3.7
-
-
 
 # Given two points on our first line and a point on a second line, 
 # find our plane.
 
-def find_plane_3pt(pt1,pt2):
-    p0 = pt1.pos
-    p1 = p0 + pt1.dt
-    p2 = pt2.pos
-
-    v1 = p2-p0
-    v2 = p2-p1
-    normal = np.cross(v1,v2)
-    normal = normal / math.gcd(*normal)
-    print("Normal vector",normal)
-    return normal, np.dot(normal,p0)
-
-def find_plane(pt1,pt2):
-    normal = np.cross(pt1.dt,pt2.dt)
-    print("Normal vector",normal)
-    d0 = np.dot(normal, pt1.pos)
-    d1 = np.dot(normal, pt2.pos)
-    d2 = np.dot(normal, pt1.at(1))
-    txt = f"{normal[0]}x + {normal[1]}y + {normal[2]}z ="
-    print( txt, d0 )
-    print( txt, d1 )
-    print( txt, d2 )
-    return normal
-
-def plot_plane(ax,pt1,pt2):
-#    normal = find_plane(pt1,pt2)
-    normal = pt1.dt
-    point = pt1.pos
-    d = -point.dot(normal)
-    xx, yy = np.meshgrid(range(50), range(50))
-    z = (-normal[0] * xx - normal[1] * yy - d) / normal[2]
-
-    ax.plot_surface(xx, yy, z, alpha=0.2)
-
-def intersect( normal, point, line ):
-    pt = point.pos
-    pt0 = line.pos
-    dd0 = line.dt
-    a = (pt-pt0).dot(normal)
-    b = dd0.dot(normal)
-    d = a/b
-    print( "intersects at t=",d)
-    return pt0 + d*dd0
-
-# Try the reference frame shift.
-
-def attempt2():
-    p1,p2,p3,_ = vectors[:4]
-    p2.subtract(p1)
-    p3.subtract(p1)
-    p1 = Point(0,0,0,0,0,0)
-    n2 = p2.dt
-    n3 = p3.dt
-    n2 = find_plane_3pt(p2,p1)[0]
-    n3 = find_plane_3pt(p3,p1)[0]
-    n4 = np.cross(n2,n3) / 8
-    print("before",n4)
-    n4 += vectors[0].dt
-    print(n2)
-    print(n3)
-    print(n4)
-
-# Make some lines.
-
-    ax = plt.subplot(projection='3d')
-    t = np.array([0,1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0,9,0,10])
-    for n in (n2,n3,n4):
-        x = t * n[0]
-        y = t * n[1]
-        z = t * n[2]
-        plt.plot( x, y, z )
-    plt.show()
-
-def doplot():
-    p0,p1,p2,p3 = vectors[:4]
-    p1.subtract(p0)
-    p2.subtract(p0)
-    p3.subtract(p0)
-    p0 = Point(0,0,0,0,0,0)
-#    normal = find_plane_3pt(p1,p0)[0]
-#    pts = [intersect(normal,p0,v) for v in vectors[1:]]
-    ax = plt.subplot(projection='3d')
-    plot_plane(ax, p1, p0 )
-    plot_plane(ax, p2, p0 )
-    plot_plane(ax, p3, p0 )
-#    ax.scatter( *pts[0], color='green')
-#    ax.scatter( *pts[1], color='red')
-#    ax.scatter( *pts[2], color='blue')
-    plt.show()
-
-# If three vectors are coplanar, the triple scalar product is 0.
-
-def attempt3():
-    dr = np.array((-3,1,2))
-    p1 = vectors[0]
-    p2 = vectors[1]
-    p3 = vectors[2]
-
-    v1 = p1.pos-p2.pos
-    v2 = p1.dt-p2.dt
-    v3 = p1.dt-dr
-    print(v1,v2,v3)
-    r = np.dot(v3,np.cross(v1,v2))
-    print(r)
-
-    v1 = p2.pos-p1.pos
-    v2 = p1.dt-dr
-    v3 = p2.dt-dr
-    r = np.dot(v1,np.cross(v2,v3))
-    print(r)
-
-def attempt4():
+def find_rock_dv():
     p1 = vectors[0]
     p2 = vectors[1]
     p3 = vectors[2]
@@ -214,19 +78,57 @@ def attempt4():
         np.dot(sys[1],p3.dt),
         np.dot(sys[2],p1.dt)
     ])
-    return np.linalg.solve(np.array(sys), equals)
+    return np.linalg.solve(np.array(sys), equals).round().astype(int)
 
-drock = attempt4()
+def find_mbx(x0,y0,dx,dy):
+    m = dy/dx
+    b = y0 - m * x0
+    return (m,b)
+
+def mxb(pt):
+    m = pt.dt[1]/pt.dt[0]
+    b = pt.pos[1] - m * pt.pos[0]
+    return m,b
+
+def intersect2d(p1m,p1b,p2m,p2b):
+    # Are the lines parallel?
+    if p1m == p2m:
+        return (0,0)
+    x = round((p2b-p1b)/(p1m-p2m))
+    y = round(p1m*x+p1b)
+    return (x,y)
+
+
+# We know the velocity of the rock.  Now we need the position.
+
+def find_rock_pos(drock):
+    p1 = vectors[0].copy()
+    p2 = vectors[1].copy()
+    p1.dt = p1.dt - drock
+    p2.dt = p2.dt - drock
+    print(p1,p2)
+
+    p1m,p1b = find_mbx(p1.pos[0],p1.pos[1],p1.dt[0],p1.dt[1])
+    p2m,p2b = find_mbx(p2.pos[0],p2.pos[1],p2.dt[0],p2.dt[1])
+# So, hailstones 0 and 1 intersect in x, y here:
+    x,y = intersect2d(p1m,p1b,p2m,p2b)
+
+# At these times:
+    ta = int((x - p1.pos[0]) / p1.dt[0])
+    tb = int((x - p2.pos[0]) / p2.dt[0])
+
+# Working backwards from the real hailstone 0:
+    pt0 = vectors[0]
+    return pt0.pos + ta * (pt0.dt - drock)
+
+
+drock = find_rock_dv()
 print(drock)
+prock = find_rock_pos(drock)
+print(sum(prock))
 
 
 #doplot()
 #print(pts)
 
-def printthem():
-    print(find_plane_3pt(vectors[0],vectors[1]))
-    print(find_plane(vectors[0],vectors[1]))
-    print(find_plane_3pt(vectors[0],vectors[2]))
-    print(find_plane(vectors[0],vectors[2]))
-    print(find_plane_3pt(vectors[0],vectors[3]))
 
