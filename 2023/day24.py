@@ -68,9 +68,9 @@ def intersect2d(p1m,p1b,p2m,p2b):
     y = round(p1m*x+p1b)
     return (x,y)
 
-def in_the_future(pt1,pt2,x,y):
+def in_the_future(pt1,x,y):
     # Did this happen in the future?
-    return ((pt1.dt[0] < 0) == (x < pt1.pos[0])) and ((pt2.dt[0] < 0) == (x < pt2.pos[0]))
+    return (pt1.dt[0] < 0) == (x < pt1.pos[0])
 
 def part1(vectors):
     rmin,rmax = (7,28) if TEST else (2*10**14,4*10**14) 
@@ -80,7 +80,7 @@ def part1(vectors):
         for pt1 in vectors[i+1:]:
             p2m,p2b = pt1.find_mbx()
             x,y = intersect2d(p1m,p1b,p2m,p2b)
-            if in_the_future(pt0,pt1,x,y):
+            if in_the_future(pt0,x,y) and in_the_future(pt1,x,y):
                 count += rmin <= x <= rmax and rmin < y < rmax
     return count
 

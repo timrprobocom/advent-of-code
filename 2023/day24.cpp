@@ -16,7 +16,6 @@ using namespace std;
 #define OUT
 #define INOUT
 
-#if 0
 // We use LAPACK's for singles, dgesv_ for doubles.
 //
 // sgesv_ is a symbol in the LAPACK library files for solving systems 
@@ -33,6 +32,7 @@ extern "C" int dgesv_(
      OUT int * info     // success/fail code, 0=OK
  );
 
+#if 0
 // Holy crap, this works.
 
 int main()
@@ -68,10 +68,10 @@ const string test(
 "20, 19, 15 @  1, -5, -3"
 );
 
-tuple<double,int64_t> find_mbx(int64_t x0, int64_t y0, int dx, int dy)
+tuple<double,double> find_mbx(int64_t x0, int64_t y0, int dx, int dy)
 {
     double m = double(dy)/double(dx);
-    int64_t b = y0 - m * x0;
+    double b = y0 - m * x0;
     return make_tuple(m,b);
 }
 
@@ -118,6 +118,7 @@ struct Point
                 sign = 1;
             }
         }
+        dt[2] *= sign;
     }
 
     Point( const Point & pt )
@@ -128,12 +129,12 @@ struct Point
         copy( &pt.dt[0], &pt.dt[3], &dt[0] );
     }
 
-    tuple<double,int64_t> find_mbx() 
+    tuple<double,double> find_mbx() 
     { 
         return ::find_mbx(pos[0],pos[1],dt[0],dt[1]);
     }
 
-    tuple<int64_t,int64_t,int64_t> at(int t) 
+    tuple<int64_t,int64_t,int64_t> at(int64_t t) 
     {
         int64_t p0 = pos[0] + t * dt[0];
         int64_t p1 = pos[1] + t * dt[1];
@@ -152,7 +153,7 @@ void parse( string & data, PointVector & points ) {
 }
 
 
-tuple<int64_t,int64_t> intersect2d(double p1m, int64_t p1b, double p2m, int64_t p2b)
+tuple<int64_t,int64_t> intersect2d(double p1m, double p1b, double p2m, double p2b)
 {
     // Are the lines parallel?
     if( p1m == p2m )
@@ -162,10 +163,10 @@ tuple<int64_t,int64_t> intersect2d(double p1m, int64_t p1b, double p2m, int64_t 
     return make_tuple(x,y);
 }
 
-bool in_the_future(Point & pt1, Point & pt2, int x, int y)
+bool in_the_future(Point & pt1, int64_t x, int64_t y)
 {
     // Did this happen in the future?
-    return ((pt1.dt[0] < 0) == (x < pt1.pos[0])) && ((pt2.dt[0] < 0) == (x < pt2.pos[0]));
+    return (pt1.dt[0] < 0) == (x < pt1.pos[0]);
 }
 
 
@@ -173,7 +174,6 @@ int64_t part1( PointVector & vectors )
 {
     int64_t rmin = TEST ?  7 : 200000000000000;
     int64_t rmax = TEST ? 28 : 400000000000000;
-    cout << rmin << " " << rmax << "\n";
     int count = 0;
     for( int i = 0; i < vectors.size(); i++ )
     {
@@ -182,20 +182,128 @@ int64_t part1( PointVector & vectors )
         {
             auto [p2m,p2b] = vectors[j].find_mbx();
             auto [x,y] = intersect2d(p1m,p1b,p2m,p2b);
-            if( x && y && in_the_future(vectors[i],vectors[j],x,y) )
+
+            if( x && y && 
+                in_the_future(vectors[i],x,y) && 
+                in_the_future(vectors[j],x,y) &&
+                (rmin <= x && x <= rmax && rmin <= y && y <= rmax)
+            )
             {
-                if( (rmin <= x && x <= rmax && rmin <= y && y <= rmax) )
-                    cout << x << " " << y << ": " 
-                        << p1m << " " << p1b << " " 
-                        << p2m << " " << p2b << ": " 
-                        << vectors[i].pos[1] << " " << vectors[j].pos[1] << "\n";
-                count += (rmin <= x && x <= rmax && rmin <= y && y <= rmax);
+                count++;
             }
         }
     }
     return count;
 }
 
+void subtract(LongVector & a, LongVector & b )
+{
+    a[0] -= b[0];
+    a[1] -= b[1];
+    a[2] -= b[2];
+}
+
+void crossproduct( LongVector & out, LongVector & a, LongVector & b )
+{
+    out.resize(a.size());
+    out[0] = a[1]*b[2] - a[2]*b[1];
+    out[1] = a[2]*b[0] - a[0]*b[2];
+    out[2] = a[0]*b[1] - a[1]*b[0];
+}
+
+int64_t dotproduct( LongVector & a, IntVector & b )
+{
+    return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+}
+
+// Find the velocity of the rock.
+
+int find_rock_vel(PointVector & vectors, LongVector & result)
+{
+    // Create a system of equations.  Remember that we need this in Fortran
+    // column-major order.
+
+    vector<double> sys(9);
+    vector<double> equals;
+
+    for( int i = 0; i < 3; i++ )
+    {
+        Point & p1 = vectors[i];
+        Point & p2 = vectors[(i+1)%3];
+
+        LongVector pa(3);
+        LongVector pb(3);
+
+
+        pa[0] = p1.pos[0] - p2.pos[0];
+        pa[1] = p1.pos[1] - p2.pos[1];
+        pa[2] = p1.pos[2] - p2.pos[2];
+        pb[0] = p1.dt[0] - p2.dt[0];
+        pb[1] = p1.dt[1] - p2.dt[1];
+        pb[2] = p1.dt[2] - p2.dt[2];
+
+        LongVector dp;
+        crossproduct( dp, pa, pb );
+        sys[i+0] = dp[0];
+        sys[i+3] = dp[1];
+        sys[i+6] = dp[2];
+        equals.push_back( dotproduct( dp, p2.dt ));
+    }
+
+    // Set up the call to LAPACK dgesv.
+
+    int N = 3;
+    int NRHS = 1;
+    int LDA = 3;
+    int IPIV[3];
+    int LDB = 3;
+    int info;
+
+    dgesv_( &N, &NRHS, sys.data(), &LDA, IPIV, equals.data(), &LDB, &info );
+
+    result.resize(3);
+    result[0] = equals[0];
+    result[1] = equals[1];
+    result[2] = equals[2];
+
+    return info;
+}
+
+
+// Given the velocity of the rock, find the initial position.
+
+tuple<int64_t,int64_t,int64_t> find_rock_pos(PointVector & vectors, LongVector & drock)
+{
+    Point p1(vectors[0]);
+    Point p2(vectors[1]);
+    for( int i = 0; i < 3; i++ )
+    {
+        p1.dt[i] -= drock[i];
+        p2.dt[i] -= drock[i];
+    }
+
+    auto [p1m,p1b] = find_mbx(p1.pos[0],p1.pos[1],p1.dt[0],p1.dt[1]);
+    auto [p2m,p2b] = find_mbx(p2.pos[0],p2.pos[1],p2.dt[0],p2.dt[1]);
+
+    // So, hailstones 0 and 1 intersect in x, y here:
+    auto [x,y] = intersect2d(p1m,p1b,p2m,p2b);
+
+    // At these times:
+    int64_t ta = (x - p1.pos[0]) / p1.dt[0];
+    int64_t tb = (x - p2.pos[0]) / p2.dt[0];
+
+    // And what is that location in 3D?
+    return p1.at(ta);
+}
+
+
+int64_t part2( PointVector & vectors )
+{
+    LongVector drock;
+    find_rock_vel(vectors, drock);
+    auto [x,y,z] = find_rock_pos(vectors, drock);
+    return x+y+z;
+}
 
 
 int main( int argc, char ** argv )
@@ -226,55 +334,5 @@ int main( int argc, char ** argv )
     parse( data, vectors );
 
     cout << "Part 1: " << part1(vectors) << "\n"; // 2154
-//    cout << "Part 2: " << part2(vectors) << "\n"; // 6654
+    cout << "Part 2: " << part2(vectors) << "\n"; // 6654
 }
-
-
-
-#if 0
-# Find the velocity of the rock.
-
-def find_rock_vel(vectors):
-    p1 = vectors[0]
-    p2 = vectors[1]
-    p3 = vectors[2]
-    sys = np.array([
-        np.cross(p1.pos-p2.pos,p1.dt-p2.dt),
-        np.cross(p2.pos-p3.pos,p2.dt-p3.dt),
-        np.cross(p3.pos-p1.pos,p3.dt-p1.dt)
-    ])
-    if DEBUG:
-        print(sys)
-    equals = np.array([
-        np.dot(sys[0],p2.dt),
-        np.dot(sys[1],p3.dt),
-        np.dot(sys[2],p1.dt)
-    ])
-    return np.linalg.solve(np.array(sys), equals).round().astype(int)
-
-# Given the velocity of the rock, find the initial position.
-
-def find_rock_pos(vectors, drock):
-    p1 = vectors[0].copy()
-    p2 = vectors[1].copy()
-    p1.dt = p1.dt - drock
-    p2.dt = p2.dt - drock
-
-    p1m,p1b = find_mbx(p1.pos[0],p1.pos[1],p1.dt[0],p1.dt[1])
-    p2m,p2b = find_mbx(p2.pos[0],p2.pos[1],p2.dt[0],p2.dt[1])
-
-    # So, hailstones 0 and 1 intersect in x, y here:
-    x,y = intersect2d(p1m,p1b,p2m,p2b)
-
-    # At these times:
-    ta = int((x - p1.pos[0]) / p1.dt[0])
-    tb = int((x - p2.pos[0]) / p2.dt[0])
-
-    # And what is that location in 3D?
-    return p1.at(ta)
-
-def part2(vectors):
-    drock = find_rock_vel(vectors)
-    prock = find_rock_pos(vectors, drock)
-    return sum(prock)
-#endif
