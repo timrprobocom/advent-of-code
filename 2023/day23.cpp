@@ -62,8 +62,8 @@ Direction R = makedir(1,0);
 
 Direction backward( Direction d )
 {
-    int dx = getdx(d);
-    int dy = getdy(d);
+    short dx = getdx(d);
+    short dy = getdy(d);
     return makedir(-dx,-dy);
 }
 
@@ -77,8 +77,8 @@ enum {
 };
 
 struct Point {
-    int x;
-    int y;
+    short x;
+    short y;
 
     bool operator==(const Point & other)
     {
@@ -106,9 +106,9 @@ void parse( string & data, StringVector & grid, ValidMap & valid1, ValidMap & va
     string line;
     while( getline( parse, line ) )
     {
-        int y = grid.size();
+        short y = grid.size();
         grid.push_back( line );
-        for( int x = 0; x < line.size(); x++ )
+        for( short x = 0; x < line.size(); x++ )
         {
             char c = line[x];
             if( c != '#' )
@@ -123,6 +123,8 @@ void parse( string & data, StringVector & grid, ValidMap & valid1, ValidMap & va
     }
     WIDTH = grid[0].size();
     HEIGHT = grid.size();
+    TARGET.x = WIDTH-2;
+    TARGET.y = HEIGHT-1;
 }
 
 // Make an adjacency graph.
@@ -133,8 +135,8 @@ typedef map<Point,PathMap> AdjacencyGraph;
 AdjacencyGraph make_graph(const StringVector & data, ValidMap & valid)
 {
     AdjacencyGraph graph;
-    for( int y = 0; y < HEIGHT; y++ )
-        for( int x = 0; x < WIDTH; x++ )
+    for( short y = 0; y < HEIGHT; y++ )
+        for( short x = 0; x < WIDTH; x++ )
         {
             Point pt({x,y});
             if( valid.find(pt) != valid.end() )
@@ -145,8 +147,8 @@ AdjacencyGraph make_graph(const StringVector & data, ValidMap & valid)
                 {
                     if( valid[pt] & (1<<i) )
                     {
-                        int x1 = x + getdx(directions[i]);
-                        int y1 = y + getdy(directions[i]);
+                        short x1 = x + getdx(directions[i]);
+                        short y1 = y + getdy(directions[i]);
                         Point pt1({x1,y1});
                         if( valid.find(pt1) != valid.end() )
                             adj[pt1] = 1;
@@ -177,28 +179,27 @@ AdjacencyGraph optimize_graph(AdjacencyGraph & graph)
             hubs.insert( kv.first );
     }
 
-    cout << "Found " << hubs.size() << " hubs\n";
+    if( DEBUG )
+        cout << "Found " << hubs.size() << " hubs\n";
 
     // For each hub, find the next hubs in line.
 
     AdjacencyGraph newgraph;
     for( auto & hub : hubs )
     {
-        cout << "Trying " << hub.x << ", " << hub.y << "\n";
         PathMap adj;
         deque<Tracking> queue;
         queue.push_back( Tracking({hub,1,set<Point>()}) );
 
         while( !queue.empty() )
         {
-            Tracking & t = queue.front();
+            Tracking t = queue.front();
             queue.pop_front();
             // Can this ever happen?
             if( t.seen.find(t.pt) != t.seen.end() )
                 continue;
             set<Point> seen = t.seen;
             seen.insert( t.pt );
-            cout << "  Looking at " << t.pt.x << "," << t.pt.y << " seen has " << seen.size() << "\n";
             for( auto & kv : graph[t.pt] )
             {
                 const Point & pt2 = kv.first;
@@ -223,14 +224,14 @@ struct Traverse {
 
 int64_t traverse(AdjacencyGraph & graph)
 {
-    deque<Traverse> queue;
+    vector<Traverse> queue;
     queue.push_back( Traverse({START,0}) );
     int maxsize = 0;
     set<Point> seen;
     while( !queue.empty() )
     {
-        Traverse & t = queue.front();
-        queue.pop_front();
+        Traverse t = queue.back();
+        queue.pop_back();
         if( t.cost < 0 )
             seen.erase( t.pt );
         else if ( t.pt == TARGET )
@@ -258,11 +259,8 @@ int64_t traverse(AdjacencyGraph & graph)
 
 int64_t part1( StringVector & grid, ValidMap & valid )
 {
-    cout << "make_graph\n";
     AdjacencyGraph graph = make_graph(grid,valid);
-    cout << "optimize_graph\n";
     graph = optimize_graph(graph);
-    cout << "traverse\n";
     return traverse(graph);
 }
 
@@ -287,7 +285,7 @@ int main( int argc, char ** argv )
     else 
     {
         stringstream buffer;
-        buffer << ifstream("day21.txt").rdbuf();
+        buffer << ifstream("day23.txt").rdbuf();
         data = buffer.str();
     }
 
@@ -297,7 +295,7 @@ int main( int argc, char ** argv )
     ValidMap valid2;
     parse( data, grid, valid1, valid2 );
 
-    cout << "Part 1: " << part1(grid,valid1) << "\n";
-    cout << "Part 2: " << part1(grid,valid2) << "\n";
+    cout << "Part 1: " << part1(grid,valid1) << "\n"; // 2154
+    cout << "Part 2: " << part1(grid,valid2) << "\n"; // 6654
 }
 
