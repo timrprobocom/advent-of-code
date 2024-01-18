@@ -143,7 +143,6 @@ k += 1;
     set<int> gather;
     for( auto & b : seen )
         gather.insert( b >> 8 );
-cout << start << " " << k << "\n";
     return gather.size();
 }
 
