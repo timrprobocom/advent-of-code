@@ -16,8 +16,10 @@ day = os.path.splitext(os.path.basename(__file__))[0]
 TEST = 'test' in sys.argv
 DEBUG = 'debug' in sys.argv
 
-data = test.strip()
-data = open('day24.txt').read().strip()
+if TEST:
+    data = test.strip()
+else:
+    data = open('day24.txt').read().strip()
 
 
 class Point:
@@ -79,17 +81,13 @@ def find_rock_dv():
         np.dot(sys[1],p3.dt),
         np.dot(sys[2],p1.dt)
     ])
+    print(equals)
     return np.linalg.solve(np.array(sys), equals).round().astype(int)
 
 def find_mbx(x0,y0,dx,dy):
     m = dy/dx
     b = y0 - m * x0
     return (m,b)
-
-def mxb(pt):
-    m = pt.dt[1]/pt.dt[0]
-    b = pt.pos[1] - m * pt.pos[0]
-    return m,b
 
 def intersect2d(p1m,p1b,p2m,p2b):
     # Are the lines parallel?
