@@ -86,6 +86,29 @@ def part1(vectors):
 
 # Find the velocity of the rock.
 
+# Here's an explanation, as best as I can.
+#
+# Call the rock's location r, and it's velocity dr.  For every hailstone s, 
+# there must be a time t so that
+#   r + dr*t = s * ds*t
+# Which means
+#   r = s + (ds-dr) * t
+# That means if we shift our framework relative to the rock's velocity,
+# every ray passes through that point r.  That makes for some nice triangles.
+#
+# That means that the vectors (s2-s1), (ds1-dr) and (ds2-dr) are all coplanar,
+# in the plane of the triangle that contains s1, s2, and r.  (The two velocity
+# vectors don't make up the other legs, but they are in the same direction.)
+# This is where I went wrong with my first analysis -- I was using vectors
+# that were not coplanar.
+#
+# By rearranging, it also means that (s2-s1), (ds1-ds2), and (ds2-dr) are 
+# coplanar.  If we look up the Wikipedia definition of a "triple scalar
+# product", we find definitions that let us construct a system of three
+# linear equations that produce dr.
+#
+# Believe it or not.
+
 def find_rock_vel(vectors):
     p1 = vectors[0]
     p2 = vectors[1]
@@ -105,6 +128,16 @@ def find_rock_vel(vectors):
     return np.linalg.solve(np.array(sys), equals).round().astype(int)
 
 # Given the velocity of the rock, find the initial position.
+
+# As above, we warp space by shifting the reference frame so that the rock's 
+# velocity is zero.  That way, all of the hailstones will pass through a 
+# single point.  If we can find the point where two of the hailstones
+# cross, since the rock's velocity is zero, that must be the point where
+# the rock started.
+
+# It's not easy to find the intersection of two 3D lines, but if the vectors
+# intersect in 2D (and we know how to do that), it's pretty safe to assume 
+# they cross in 3D.
 
 def find_rock_pos(vectors, drock):
     p1 = vectors[0].copy()
@@ -135,10 +168,10 @@ def part2b(vectors):
 
     # They're saying there is some line that intersects ALL of the lines at an integer location.
     
-    # It's a system of linear equations, right?  For the first three vectors:
-    # x + dx*t == vx + vdx * t
-    # y + dy*t == vy + vdy * t
-    # z + dz*t == vz + vdz * t
+    # It's a system of non-linear equations.  For the first three vectors:
+    # x + dx * t == vx + vdx * t
+    # y + dy * t == vy + vdy * t
+    # z + dz * t == vz + vdz * t
 
     x = Symbol('x')
     y = Symbol('y')

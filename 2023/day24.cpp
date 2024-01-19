@@ -16,21 +16,23 @@ using namespace std;
 #define OUT
 #define INOUT
 
-// We use LAPACK's for singles, dgesv_ for doubles.
+// We use LAPACK's sgesv_ for singles, dgesv_ for doubles.
 //
 // sgesv_ is a symbol in the LAPACK library files for solving systems 
-// of linear equations.  Note that the inputs must be column-major.
+// of linear equations.  Note that the arrays must be column-major.
+// Also, Fortran is strictly pass by reference, which is why 
+// everything here is a pointer.
 
 extern "C" int dgesv_(
-     IN  int * N,     // number of equations (3)
-     IN  int * NRHS,  // number of right-hand sides (1)
+     IN  int * N,       // number of equations (3)
+     IN  int * NRHS,    // number of right-hand sides (1)
    INOUT double * A,
-     IN  int * LDA,   // leading dimension of A
-     OUT int * IPIV,        // pivot indexes 
-   INOUT double * B,
-     IN  int * LDB,
+     IN  int * LDA,     // leading dimension of A
+     OUT int * IPIV,    // pivot indexes 
+   INOUT double * B,    // RHS in, result out
+     IN  int * LDB,     // leading dimension of B
      OUT int * info     // success/fail code, 0=OK
- );
+);
 
 bool DEBUG = false;
 bool TEST = false;
@@ -198,6 +200,32 @@ int64_t dotproduct( LongVector & a, IntVector & b )
 
 // Find the velocity of the rock.
 
+// Find the velocity of the rock.
+
+/* Here's an explanation, as best as I can.
+
+ Call the rock's location r, and it's velocity dr.  For every hailstone s, 
+ there must be a time t so that
+   r + dr*t = s * ds*t
+ Which means
+   r = s + (ds-dr) * t
+ That means if we shift our framework relative to the rock's velocity,
+ every ray passes through that point r.  That makes for some nice triangles.
+
+ That means that the vectors (s2-s1), (ds1-dr) and (ds2-dr) are all coplanar,
+ in the plane of the triangle that contains s1, s2, and r.  (The two velocity
+ vectors don't make up the other legs, but they are in the same direction.)
+ This is where I went wrong with my first analysis -- I was using vectors
+ that were not coplanar.
+
+ By rearranging, it also means that (s2-s1), (ds1-ds2), and (ds2-dr) are 
+ coplanar.  If we look up the Wikipedia definition of a "triple scalar
+ product", we find definitions that let us construct a system of three
+ linear equations that produce dr.
+
+ Believe it or not.
+*/
+
 int find_rock_vel(PointVector & vectors, LongVector & result)
 {
     // Create a system of equations.  Remember that we need this in Fortran
@@ -251,6 +279,17 @@ int find_rock_vel(PointVector & vectors, LongVector & result)
 
 
 // Given the velocity of the rock, find the initial position.
+
+/* As above, we warp space by shifting the reference frame so that the rock's 
+   velocity is zero.  That way, all of the hailstones will pass through a 
+   single point.  If we can find the point where two of the hailstones
+   cross, since the rock's velocity is zero, that must be the point where
+   the rock started.
+
+   It's not easy to find the intersection of two 3D lines, but if the vectors
+   intersect in 2D (and we know how to do that), it's pretty safe to assume 
+   they cross in 3D.
+*/
 
 tuple<int64_t,int64_t,int64_t> find_rock_pos(PointVector & vectors, LongVector & drock)
 {
