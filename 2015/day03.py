@@ -22,9 +22,9 @@ def record(pt):
     y = int(pt.real) + 26
     x = int(pt.imag) + 17
     grid[y][x] = nexts[grid[y][x]]
-    for row in grid:
-        print( ''.join(row).rstrip() )
-    time.sleep(.10)
+#    for row in grid:
+#        print( ''.join(row).rstrip() )
+#    time.sleep(.10)
 
 
 visit = set()
