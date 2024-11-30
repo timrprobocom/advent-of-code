@@ -17,9 +17,12 @@ else:
     target = 150
     data = live
 
+DEBUG = 'debug' in sys.argv
+
 winners = []
 def fill( nog, jugs, sofar ):
-    print( nog, jugs )
+    if DEBUG:
+        print( nog, jugs )
     if not jugs:
         return
     for i in range(len(jugs)):
