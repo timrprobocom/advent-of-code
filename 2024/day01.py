@@ -14,20 +14,14 @@ if 'test' in sys.argv:
 else:
     data = open('day01.txt').readlines()
 
-l1 = []
-l2 = []
-for line in data:
-    a,b = (int(x) for x in line.split())
-    l1.append(a)
-    l2.append(b)
+data = ((int(a),int(b)) for a,b in (z1.split() for z1 in data))
+data = list(sorted(k) for k in zip(*data))
 
-def part1(l1,l2):
-    l1.sort()
-    l2.sort()
-    return sum(abs(a-b) for a,b in zip(l1,l2))
+def part1(data):
+    return sum(abs(a-b) for a,b in zip(*data))
 
 def part2(l1,l2):
-    return sum( a*l2.count(a) for a in l1)
+    return sum( a*l2.count(a) for a in l1 )
 
-print("Part 1:", part1(l1,l2))
-print("Part 2:", part2(l1,l2))
+print("Part 1:", part1(data))
+print("Part 2:", part2(*data))

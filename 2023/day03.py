@@ -60,6 +60,7 @@ def part2(part,numbers,symbols):
     for sx,sy in symbols:
         nums = [v for dx,dy,l,v in numbers
                   if (dy-1 <= sy <= dy+1) and (dx-1 <= sx <= dx+l)]
+        debug(nums)
         if part==1:
             sumx += sum(nums)
         elif len(nums) == 2:
