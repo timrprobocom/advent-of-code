@@ -2,52 +2,32 @@ import sys
 import re
 
 test = """\
-1abc2
-pqr3stu8vwx
-a1b2c3d4e5f
-treb7uchet"""
-
-test2 = """\
-two1nine
-eightwothree
-abcone2threexyz
-xtwone3four
-4nineeightseven2
-zoneight234
-7pqrstsixteen"""
-
-nums = ['\\d','one','two','three','four','five','six','seven','eight','nine']
-pat = re.compile('|'.join(nums))
+3   4
+4   3
+2   5
+1   3
+3   9
+3   3"""
 
 if 'test' in sys.argv:
     data = test.splitlines()
 else:
     data = open('day01.txt').readlines()
 
+l1 = []
+l2 = []
+for line in data:
+    a,b = (int(x) for x in line.split())
+    l1.append(a)
+    l2.append(b)
 
-def part1(data):
-    sumx = 0
-    for line in data:
-        dig = []
-        for c in line:
-            if c.isdigit():
-                dig.append(int(c))
-        sumx += dig[0]*10 + dig[-1]
-    return sumx
+def part1(l1,l2):
+    l1.sort()
+    l2.sort()
+    return sum(abs(a-b) for a,b in zip(l1,l2))
 
+def part2(l1,l2):
+    return sum( a*l2.count(a) for a in l1)
 
-def part2(data):
-    sumx = 0
-    for line in data:
-        for z in nums[1:]:
-            line = line.replace(z,z[0]+z+z[-1])
-        p = pat.findall(line)
-        dig = [int(i) if i.isdigit() else nums.index(i) for i in p]
-        sumx += dig[0]*10 + dig[-1]
-    return sumx
-
-
-print("Part 1:", part1(data))
-if 'test' in sys.argv:
-    data = test2.splitlines()
-print("Part 2:", part2(data))
+print("Part 1:", part1(l1,l2))
+print("Part 2:", part2(l1,l2))
