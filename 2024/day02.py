@@ -1,5 +1,5 @@
+import os
 import sys
-import re
 
 test = """\
 7 6 4 2 1
@@ -9,14 +9,17 @@ test = """\
 8 6 4 4 1
 1 3 6 7 9"""
 
-if 'test' in sys.argv:
-    lines = test.splitlines()
-else:
-    lines = open('day02.txt').readlines()
+day = os.path.splitext(os.path.basename(__file__))[0]
 
+TEST = 'test' in sys.argv
 DEBUG = 'debug' in sys.argv
 
-data = [ [int(i) for i in l.split()] for l in lines ]
+if TEST:
+    data = test.splitlines()
+else:
+    data = open(day+'.txt').readlines()
+
+data = [ [int(i) for i in l.split()] for l in data ]
 
 def is_safe(row):
     for x,y in zip(row[:-1],row[1:]):

@@ -1,5 +1,5 @@
+import os
 import sys
-import re
 
 test = """\
 3   4
@@ -9,12 +9,17 @@ test = """\
 3   9
 3   3"""
 
-if 'test' in sys.argv:
+day = os.path.splitext(os.path.basename(__file__))[0]
+
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+
+if TEST:
     data = test.splitlines()
 else:
-    data = open('day01.txt').readlines()
+    data = open(day+'.txt').readlines()
 
-data = ((int(a),int(b)) for a,b in (z1.split() for z1 in data))
+data = [ [int(i) for i in l.split()] for l in data ]
 data = list(sorted(k) for k in zip(*data))
 
 def part1(data):
