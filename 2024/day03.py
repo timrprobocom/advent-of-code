@@ -15,12 +15,13 @@ if TEST:
 else:
     data = open(day+'.txt').read().strip()
 
+pat1 = r"mul\((\d*),(\d*)\)"
+pat2 = pat1+r"|(do\(\))|(don't\(\))"
+
 def part1(data):
-    pat1 = r"mul\((\d*),(\d*)\)"
     return sum( int(i)*int(j) for i,j in re.findall(pat1,data))
 
 def part2(data):
-    pat2 = pat1+r"|(do\(\))|(don't\(\))"
     yes = 1
     sumx = 0
     for j in re.findall(pat2, data):
