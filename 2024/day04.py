@@ -59,14 +59,14 @@ def part2(data):
     for x0,y0 in findall('A'):
         if not (0 < x0 < WIDTH-1) or not (0 < y0 < HEIGHT-1):
             continue
-        if (
+        winner += (
               (data[y0-1][x0-1] == 'M' and  data[y0+1][x0+1] == 'S') or 
               (data[y0-1][x0-1] == 'S' and  data[y0+1][x0+1] == 'M')
         ) and (
               (data[y0-1][x0+1] == 'M' and  data[y0+1][x0-1] == 'S') or 
               (data[y0-1][x0+1] == 'S' and  data[y0+1][x0-1] == 'M')
-        ):
-            winner += 1
+        )#:
+        #    winner += 1
     return winner
 
 print("Part 1:", part1(data))
