@@ -21,13 +21,13 @@ DEBUG = 'debug' in sys.argv
 if TEST:
     data = test.splitlines()
 else:
-    data = open(day+'.txt').readlines()
+    data = open(day+'.txt').read().splitlines()
 
-data = list( l.strip() for l in data )
 WIDTH = len(data[0])
 HEIGHT = len(data)
 
-# Find the Xes
+# Find all occurrances of c.
+
 def findall(c):
     xx = []
     for y,row in enumerate(data):
