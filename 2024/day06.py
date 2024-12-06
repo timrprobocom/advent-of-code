@@ -55,7 +55,6 @@ turn = {
 def part1(data):
     steps = set()
     gx,gy = GUARD
-    nx,ny = GUARD
     dir = N
     while 1:
         steps.add((gx,gy))
@@ -71,18 +70,6 @@ def part1(data):
     return len(steps)
 
 # If we are facing an empty cell, but there is an already-reached spot to our right, that's a loop.
-# Do I have to search around corners?  Ick.
-
-def to_our_right( x, y, dir, data, seen ):
-    dx,dy = dir
-    chkx = x
-    chky = y
-    while chkx in range(WIDTH) and chky in range(HEIGHT) and data[chky][chkx] != '#':
-        if (chkx,chky) in seen:
-            return True
-        chkx += dx
-        chky += dy
-    return False
 
 def follow( x, y, dir, data, seen ):
     gx = x
@@ -143,30 +130,6 @@ def part2(data):
         if nx in range(WIDTH) and ny in range(HEIGHT):
             right = turn[dir]
             if data[ny][nx] != '#':
-                if to_our_right( gx, gy, right, data, steps[right] ):
-                    print("Added", nx, ny)
-                    blocks.add( (nx,ny) )
-                gx,gy = nx,ny
-            else:
-                dir = right
-        else:
-            break
-
-    return len(blocks)
-
-def part2(data):
-    steps = {N:set(), W:set(), E:set(), S:set()}
-    blocks = set()
-    gx,gy = GUARD
-    dir = N
-
-    while 1:
-        steps[dir].add((gx,gy))
-        nx = gx+dir[0]
-        ny = gy+dir[1]
-        if nx in range(WIDTH) and ny in range(HEIGHT):
-            right = turn[dir]
-            if data[ny][nx] != '#':
                 print('checking',gx,gy,right)
                 if follow( gx, gy, right, data, steps ):
                     print("Added", nx, ny)
@@ -179,8 +142,7 @@ def part2(data):
 
     return len(blocks)
 
-
-# For every spot we visited, if we put an obstacle, do we block?
+# Brute force.  For every spot we visited, if we put an obstacle, do we loop?
 
 def part2(data):
     visits = solve(data)
