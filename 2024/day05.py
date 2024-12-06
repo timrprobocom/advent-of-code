@@ -1,6 +1,7 @@
 import os
 import sys
 from collections import defaultdict
+from functools import cmp_to_key
 from pprint import pprint
 
 test = """\
@@ -43,8 +44,6 @@ if TEST:
 else:
     data = open(day+'.txt').read().splitlines()
 
-# Not sure why the topological sort didn't work for this one.
-
 before = defaultdict(set)
 cases = []
 for line in data:
@@ -56,37 +55,21 @@ for line in data:
     else:
         cases.append( list(int(k) for k in line.split(',')))
 
-def is_ordered(case):
-    remain = set(case)
-    for page in case:
-        remain.remove(page)
-        if remain & before[page]:
-            return False
-    return True
+def compare(a,b):
+    return 0 if a == b else 1 if b in before[a] else -1
 
 def do_sort(case):
-    for i,_ in enumerate(case):
-        remain = set(case[i:])
-        for j,p2 in enumerate(case):
-            if i <= j:
-                if not before[p2] & remain:
-                    case[i],case[j] = case[j],case[i]
-                    break
+    return sorted(case, key=cmp_to_key(compare))
 
-def part1(cases):
-    sumx = 0
-    for case in cases:
-        if is_ordered(case):
-            sumx += case[len(case)//2]
-    return sumx
+sum1 = 0
+sum2 = 0
 
-def part2(cases):
-    sumx = 0
-    for case in cases:
-        if not is_ordered(case):
-            do_sort(case)
-            sumx += case[len(case)//2]
-    return sumx
+for case in cases:
+    order = do_sort(case)
+    if order == case:
+        sum1 += case[len(case)//2]
+    else:
+        sum2 += order[len(order)//2]
 
-print("Part 1:", part1(cases))
-print("Part 2:", part2(cases))
+print("Part 1:", sum1)
+print("Part 2:", sum2)
