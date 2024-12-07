@@ -25,9 +25,7 @@ else:
 
 dx = []
 for row in data:
-    w = row.split()
-    a = int(w[0][:-1])
-    dx.append( [a] + list(int(k) for k in w[1:]) )
+    dx.append( list(int(k.rstrip(':')) for k in row.split()) )
 
 def part1(data):
     sumx = 0
@@ -35,12 +33,11 @@ def part1(data):
         k = row[0]
         maybe = [row[1]]
         for v1 in row[2:]:
-            next = []
-            for m in maybe:
-                for s in m+v1, m*v1:
-                    if s <= k:
-                        next.append(s)
-            maybe = next
+            maybe = [ s 
+                for m in maybe
+                for s in (m+v1, m*v1)
+                if s <= k
+            ]
         if k in maybe:
             sumx += k
     return sumx
@@ -51,12 +48,11 @@ def part2(data):
         k = row[0]
         maybe = [row[1]]
         for v1 in row[2:]:
-            next = []
-            for m in maybe:
-                for s in m+v1, m*v1, int(str(m)+str(v1)):
-                    if s <= k:
-                        next.append(s)
-            maybe = next
+            maybe = [ s 
+                for m in maybe
+                for s in (m+v1, m*v1, int(str(m)+str(v1)))
+                if s <= k
+            ]
         if k in maybe:
             sumx += k
     return sumx
