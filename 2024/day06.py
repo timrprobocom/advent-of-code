@@ -149,12 +149,8 @@ def part2(data):
     sumx = 0
     for x,y in visits:
         data[y][x] = '#'        
-        if not solve(data):
-            if DEBUG:
-                print( "Block ", x, y )
-            sumx += 1
-#        sumx += not solve(data)
-#        print(sumx,end='\r')
+        sumx += not solve(data)
+        print(sumx,end='\r')
         data[y][x] = '.'
     return sumx
 
