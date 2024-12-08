@@ -84,6 +84,11 @@ Point find_guard( StringVector& data )
     return Point(-1,-1);
 }
 
+bool between( short low, short val, short hi )
+{
+    return (low <= val) && (val < hi);
+}
+
 set<Point> solve( StringVector & data )
 {
     set<Point> steps;
@@ -98,7 +103,7 @@ set<Point> solve( StringVector & data )
             g.x + directions[dir].x,
             g.y + directions[dir].y
         );
-        if( 0 <= n.x && n.x < WIDTH && 0 <= n.y && n.y < HEIGHT )
+        if( between(0, n.x, WIDTH) && between(0, n.y, HEIGHT) )
         {
             if( lines[dir].find(n) != lines[dir].end() )
                 return set<Point>();
@@ -124,10 +129,11 @@ int part2( StringVector & data )
     int sums = 0;
     for( auto && pt : visits )
     {
+        char c = data[pt.y][pt.x];
         data[pt.y][pt.x] = '#';
         if( solve(data).empty() )
             sums ++;
-        data[pt.y][pt.x] = '.';
+        data[pt.y][pt.x] = c;
     }
     return sums;
 }
