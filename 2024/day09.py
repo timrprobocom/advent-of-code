@@ -1,8 +1,5 @@
 import os
 import sys
-from pprint import pprint
-from collections import defaultdict
-from itertools import permutations
 
 test = """\
 2333133121414131402"""
@@ -23,11 +20,11 @@ def part1(data):
     idn = 0
     disk = []
 
-    for i,c in enumerate(data):
+    for i,size in enumerate(data):
         if i % 2:
-            disk.extend( [-1]*c)
+            disk.extend( [-1]*size)
         else:
-            disk.extend( [idn]*c)
+            disk.extend( [idn]*size)
             idn += 1
 
     # Now compact it.
@@ -39,11 +36,10 @@ def part1(data):
             i += 1
         while disk[j] < 0:
             j -= 1
-        if i >= j:
-            break
-        disk[i], disk[j] = disk[j], -1
-        i += 1
-        j -= 1
+        if i < j:
+            disk[i], disk[j] = disk[j], -1
+            i += 1
+            j -= 1
     
     if DEBUG:
         print(disk)
@@ -55,6 +51,8 @@ def part1(data):
         if i >= 0:
             sumx += n*i
     return sumx
+
+# Combine free blocks and remove empty ones.
 
 def coalesce( space, start, size ):
     newspace = []
@@ -74,6 +72,7 @@ def coalesce( space, start, size ):
             break
     return newspace+space
 
+# Find the first hold large enough to hold this file.
 
 def find_hole_below( space, start, size ):
     for i,s in enumerate(space):
@@ -84,47 +83,41 @@ def find_hole_below( space, start, size ):
     return -1
 
 def part2(data):
-    idn = 0
     locate = 0
     files = []
     space = []
 
-    for i,c in enumerate(data):
+    for i,size in enumerate(data):
         if i % 2:
-            space.append( [locate, c])
+            space.append( [locate, size] )
         else:
-            files.append( [locate, idn , c] )
-            idn += 1
-        locate += c
+            files.append( [locate, size, len(files)] )
+        locate += size
 
     if DEBUG:
         print(files)
         print(space)
 
-    idnmax = idn
+    # Now try to move all the files starting from the end.
 
-    for idn in range(idnmax-1,-1,-1):
-        start, _, size = files[idn]
+    for start,size,idn in reversed(files):
         n = find_hole_below( space, start, size )
         if n >= 0:
+            # Move this file.  Reduce empty space.
             files[idn][0] = space[n][0]
             space[n][0] += size
             space[n][1] -= size
             space = coalesce(space, start, size)
     
-    # Sort the files by location.
-
-    files.sort()
     if DEBUG:
+        files.sort()
         print(files)
         print(space)
 
-    # Evaluate.
+    # Evaluate.  There are better ways to compute the sum of a sequence, but
+    # we know that no file is longer than 9 blocks.
 
-    sumx = 0
-    for start, idn, size in files:
-        sumx += sum(range(start,start+size)) * idn
-    return sumx
+    return sum( sum(range(start,start+size)) * idn for start,size,idn in files )
 
 print("Part 1:", part1(data))
 print("Part 2:", part2(data))
