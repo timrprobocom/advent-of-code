@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <iterator>
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -20,10 +21,6 @@ bool DEBUG = false;
 bool TEST = false;
 
 /*
-# 0 becomes 1
-# Even digits: split in two, half on each stone
-# Else N becomes 2024*N
-
 # The key here is recognizing that the stones are independent.  A given
 # stone will always follow the same path.  So, we can cache the results 
 # without actually remembering all of the stones.
@@ -54,10 +51,13 @@ int64_t blink( int64_t s, int n )
 
 int64_t part1(vector<int> data, int N)
 {
-    int64_t sum = 0;
-    for( auto & i : data )
-        sum += blink(i, N);
-    return sum;
+    // This actually is marginally faster than the explicit loop.
+    return std::accumulate(
+        data.begin(),
+        data.end(),
+        0ll,
+        [N](int64_t sum,int64_t i){return sum+blink(i,N);}
+    );
 }
 
 int main( int argc, char ** argv )
@@ -72,13 +72,10 @@ int main( int argc, char ** argv )
     }
 
     stringstream input( TEST ? test : live );
-    vector<int> data;
-    while (!input.eof() )
-    {
-        int i;
-        input >> i;
-        data.push_back(i);
-    }
+    vector<int> data{
+        istream_iterator<int>(input),
+        istream_iterator<int>()
+    };
 
     cout << "Part 1: " << part1(data,25) << "\n";
     cout << "Part 2: " << part1(data,75) << "\n";
