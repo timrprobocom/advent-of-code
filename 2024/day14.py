@@ -1,7 +1,8 @@
 import os
 import sys
 import re
-from collections import defaultdict, Counter
+from collections import Counter
+import numpy as np
 
 test = """\
 p=0,4 v=3,-3
@@ -36,7 +37,7 @@ for line in data:
     m = match1.match(line)
     info.append( list(int(i) for i in m.groups()))
 
-data = info
+data = np.array(info, dtype=int)
 
 def printgrid(data):
     grid = [[0]*WIDTH for _ in range(HEIGHT)]
@@ -48,14 +49,16 @@ def printgrid(data):
         print()
 
 def move(data):
-    for bot in data:
-        bot[0] = (bot[0]+bot[2]) % WIDTH
-        bot[1] = (bot[1]+bot[3]) % HEIGHT
+    data[:,0] = (data[:,0] + data[:,2]) % WIDTH
+    data[:,1] = (data[:,1] + data[:,3]) % HEIGHT
+
+# The tree is solid, so the standard deviation of the coordinates goes WAY down.
+# Tpyical is 30, tree gets 19.
 
 def detect_tree(data):
-    x = Counter((bot[0] for bot in data))
-    y = Counter((bot[1] for bot in data))
-    if x.most_common()[0][1] > 33 and y.most_common()[0][1] > 31:
+    x = np.std(data[:,0])
+    y = np.std(data[:,1])
+    if x < 20 and y < 20:
         if DEBUG:
             printgrid(data)
         return True
@@ -65,20 +68,11 @@ def part1(data):
         move(data)
     hw = WIDTH//2
     hh = HEIGHT//2
-    counts = Counter()
-    for bot in data:
-        (x,y,_,_) = bot
-        quadrant = 0
-        if x < hw:
-            quadrant += 1
-        elif x > hw:
-            quadrant += 2
-        if y < hh:
-            quadrant += 4
-        elif y > hh:
-            quadrant += 8
-        counts[quadrant] += 1    
-    return counts[5]*counts[9]*counts[6]*counts[10]
+    k1 = sum((data[:,0] < hw) & (data[:,1] < hh))
+    k2 = sum((data[:,0] > hw) & (data[:,1] < hh))
+    k3 = sum((data[:,0] < hw) & (data[:,1] > hh))
+    k4 = sum((data[:,0] > hw) & (data[:,1] > hh))
+    return k1*k2*k3*k4 
 
 def part2(data):
     for i in range(100,10000):
