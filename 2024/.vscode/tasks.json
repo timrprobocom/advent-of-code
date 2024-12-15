@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "echo",
+            "type": "shell",
+            "command": "echo Hello"
+        },
+        {
+            "label": "run-advent-test",
+            "type": "shell",
+            "command": "python",
+            "args": ["${file}", "test"]
+        },
+        {
+            "label": "run-advent-real",
+            "type": "shell",
+            "command": "python",
+            "args": ["${file}"]
+        },
+        {
+            "label": "run-advent-debug",
+            "type": "shell",
+            "command": "python",
+            "args": ["${file}", "debug"]
+        }
+    ]
+}
