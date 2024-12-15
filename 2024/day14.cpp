@@ -202,8 +202,9 @@ int main( int argc, char ** argv )
     }
     else 
     {
+        string name = argv[0];
         stringstream buffer;
-        buffer << ifstream("day14.txt").rdbuf();
+        buffer << ifstream(name + ".txt").rdbuf();
         input = buffer.str();
     }
 
