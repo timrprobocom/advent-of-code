@@ -92,10 +92,8 @@ dirs = {
 #  ....[]....
 #  .....@....
 
-def can_we_move(grid, pt, dir):
-    x, y = pt
-    dx, dy = dir
-    affected = [pt]
+def can_we_move(grid, x, y, dx, dy):
+    affected = [(x,y)]
     c = grid[y][x]
     if dy:
         if c == '[':
@@ -103,24 +101,22 @@ def can_we_move(grid, pt, dir):
         elif c == ']':
             affected.append((x - 1, y))
 
-    for pt in affected:
-        nx,ny = (x + dx, y + dy)
+    for (x,y) in affected:
+        nx,ny = x+dx, y+dy
         dc = grid[ny][nx]
         if dc == '.':
             continue
         elif dc == '#':
             return False
         elif dc in 'O[]':
-            if not can_we_move(grid, (nx,ny), dir):
+            if not can_we_move(grid, nx, ny, dx, dy):
                 return False
     return True
 
-def do_a_move(grid, pt, dir):
-    if not can_we_move(grid, pt, dir):
+def do_a_move(grid, x, y, dx, dy):
+    if not can_we_move(grid, x, y, dx, dy):
         return False
-    dx, dy = dir
-    x,y = pt
-    affected = [pt]
+    affected = [(x,y)]
     c = grid[y][x]
     if dy:
         if c == '[':
@@ -131,16 +127,20 @@ def do_a_move(grid, pt, dir):
     for pt in affected:
         x,y = pt
         c = grid[y][x]
-        npt = (x + dx, y + dy)
-        dc = grid[npt[1]][npt[0]]
+        nx,ny = (x + dx, y + dy)
+        dc = grid[ny][nx]
+        if dc == '#':
+            printgrid(grid)
+            print(affected)
+            print(x,y,nx,ny)
         assert dc != '#'
         if dc == '.':
-            grid[pt[1]][pt[0]] = '.'
-            grid[npt[1]][npt[0]] = c
+            grid[y][x] = '.'
+            grid[ny][nx] = c
         elif dc in 'O[]':
-            do_a_move(grid, npt, dir)
-            grid[pt[1]][pt[0]] = '.'
-            grid[npt[1]][npt[0]] = c
+            do_a_move(grid, nx, ny, dx, dy)
+            grid[y][x] = '.'
+            grid[ny][nx] = c
     return True
 
 def part1(grid,robot):
@@ -150,7 +150,7 @@ def part1(grid,robot):
         printgrid(grid)
     for c in moves:
         dx,dy = dirs[c]
-        if do_a_move(grid, (bx, by), (dx,dy)):
+        if do_a_move(grid, bx, by, dx,dy):
             bx += dx
             by += dy
             if grid[by][bx] != '@':
