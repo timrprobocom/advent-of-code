@@ -51,36 +51,32 @@ else:
 
 WIDTH = HEIGHT = len(data[0])
 
-sgrid = {}
-dgrid = {}
+sgrid = []
+dgrid = []
 moves = ''
 for y, line in enumerate(data):
     if not line:
         continue
     elif line[0] == '#':
+        srow = list(line)
+        drow = []
         for x, c in enumerate(line):
-            sgrid[(x, y)] = c
             if c == 'O':
-                dgrid[(x + x, y)] = '['
-                dgrid[(x + x + 1, y)] = ']'
+                drow.extend( ['[',']'])
             elif c == '@':
-                dgrid[(x + x, y)] = c
-                dgrid[(x + x + 1, y)] = '.'
+                drow.extend( ['@','.'] )
                 srobot = (x, y)
                 drobot = (x+x, y)
             else:
-                dgrid[(x + x, y)] = c
-                dgrid[(x + x + 1, y)] = c
+                drow.extend( [c,c] )
+        sgrid.append(srow)
+        dgrid.append(drow)
     elif line:
         moves += line
 
 def printgrid(grid):
-    mw = max(k[0] for k in grid)+1
-    mh = max(k[1] for k in grid)+1
-    for y in range(mh):
-        for x in range(mw):
-            print(grid[(x, y)], end='')
-        print()
+    for row in grid:
+        print(''.join(row))
     print()
 
 dirs = {
@@ -97,24 +93,25 @@ dirs = {
 #  .....@....
 
 def can_we_move(grid, pt, dir):
+    x, y = pt
     dx, dy = dir
     affected = [pt]
-    c = grid[pt]
+    c = grid[y][x]
     if dy:
         if c == '[':
-            affected.append((pt[0] + 1, pt[1]))
+            affected.append((x + 1, y))
         elif c == ']':
-            affected.append((pt[0] - 1, pt[1]))
+            affected.append((x - 1, y))
 
     for pt in affected:
-        npt = (pt[0] + dx, pt[1] + dy)
-        dc = grid[npt]
+        nx,ny = (x + dx, y + dy)
+        dc = grid[ny][nx]
         if dc == '.':
             continue
         elif dc == '#':
             return False
         elif dc in 'O[]':
-            if not can_we_move(grid, npt, dir):
+            if not can_we_move(grid, (nx,ny), dir):
                 return False
     return True
 
@@ -122,30 +119,31 @@ def do_a_move(grid, pt, dir):
     if not can_we_move(grid, pt, dir):
         return False
     dx, dy = dir
+    x,y = pt
     affected = [pt]
-    c = grid[pt]
+    c = grid[y][x]
     if dy:
         if c == '[':
-            affected.append((pt[0] + 1, pt[1]))
+            affected.append((x + 1, y))
         elif c == ']':
-            affected.append((pt[0] - 1, pt[1]))
+            affected.append((x - 1, y))
 
     for pt in affected:
-        c = grid[pt]
-        npt = (pt[0] + dx, pt[1] + dy)
-        dc = grid[npt]
+        x,y = pt
+        c = grid[y][x]
+        npt = (x + dx, y + dy)
+        dc = grid[npt[1]][npt[0]]
         assert dc != '#'
         if dc == '.':
-            grid[pt] = '.'
-            grid[npt] = c
+            grid[pt[1]][pt[0]] = '.'
+            grid[npt[1]][npt[0]] = c
         elif dc in 'O[]':
             do_a_move(grid, npt, dir)
-            grid[pt] = '.'
-            grid[npt] = c
+            grid[pt[1]][pt[0]] = '.'
+            grid[npt[1]][npt[0]] = c
     return True
 
-
-def part1(grid,robot,factor=1):
+def part1(grid,robot):
     bx, by = robot
     if DEBUG:
         print("START")
@@ -155,18 +153,19 @@ def part1(grid,robot,factor=1):
         if do_a_move(grid, (bx, by), (dx,dy)):
             bx += dx
             by += dy
-            if grid[(bx, by)] != '@':
-                printgrid(grid, factor)
+            if grid[by][bx] != '@':
+                printgrid(grid)
                 print(bx,by)
-            assert grid[(bx,by)] == '@'
+            assert grid[by][bx] == '@'
     if DEBUG:
         printgrid(grid)
     
     score = 0
-    for k, v in grid.items():
-        if v in 'O[':
-            score += k[1] * 100 + k[0]
+    for y,row in enumerate(grid):
+        for x,c in enumerate(row):
+            if c in 'O[':
+                score += y * 100 + x
     return score
 
-print("Part 1:", part1(sgrid,srobot,1))
-print("Part 2:", part1(dgrid,drobot,2))
+print("Part 1:", part1(sgrid,srobot))
+print("Part 2:", part1(dgrid,drobot))
