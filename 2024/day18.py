@@ -52,8 +52,7 @@ dirs = [(-1,0),(0,-1),(1,0),(0,1)]
 
 def shortest(walls):
     queue = [(0,0,0)]
-    visited = set()
-    visited.add( (0,0) )
+    visited = set([(0,0)])
     while queue:
         x,y,d = queue.pop(0)
         if (x,y) == finish:
@@ -78,8 +77,7 @@ def part2(walls):
 
     while minx < maxx:
         mid = (maxx+minx)//2
-        n = shortest(walls[:mid])
-        if n < 0:
+        if shortest(walls[:mid]) < 0:
             maxx = mid
             if DEBUG:
                 print(mid, "fails")
