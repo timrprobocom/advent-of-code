@@ -15,18 +15,6 @@ bwurrg
 brgr
 bbrgwb"""
 
-test = """\
-bwu, wr, rb, gb, br, r, b, g
-
-brwrr
-bggr
-gbbr
-rrbgbr
-ubwu
-bwurrg
-brgr
-bbrgwb"""
-
 day = os.path.splitext(os.path.basename(__file__))[0]
 
 TEST = 'test' in sys.argv
@@ -41,8 +29,6 @@ towels,needs = data.split('\n\n')
 towels = towels.split(', ')
 needs = needs.splitlines()
 
-
-@cache
 def possible(need,sofar=''):
     return 1 if need==sofar else any(possible(need,sofar+t) for t in towels if need.startswith(sofar+t))
 
@@ -58,3 +44,6 @@ def part2(needs):
 
 print("Part 1:", part1(needs))
 print("Part 2:", part2(needs))
+
+if DEBUG:
+    print(howmany.cache_info())
