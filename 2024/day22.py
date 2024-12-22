@@ -1,7 +1,7 @@
 import os
 import sys
 import math
-from functools import cache
+from collections import defaultdict
 
 test = """\
 1
@@ -25,7 +25,8 @@ if TEST:
 else:
     data = open(day+'.txt').read()
 
-data = data.splitlines()
+data = list(map(int,data.splitlines()))
+test2 = list(map(int,test2.splitlines()))
     
 # Sequence: x64, mix, prune?
 # /32, mix, prune
@@ -42,8 +43,7 @@ def gen(secret):
 
 def part1(data):
     sumx = 0
-    for line in data:
-        secret = int(line)
+    for secret in data:
         for _ in range(2000):
             secret = gen(secret)
         sumx += secret
@@ -61,33 +61,21 @@ def sequence(secret):
         secret = news
     return prices, deltas
 
-# Generate all of the 4-tuplies from the deltas and the price at the end.
-
-def max4(prices, deltas):
-    four = {}
-    for i in range(len(prices)-4):
-        key = tuple(deltas[i:i+4])
-        if key not in four:
-            four[key] = prices[i+3]
-    return four
-
-# Sum up all of the prices for all buyers that have this sequence.
-
-def all_for_this(fours,seq):
-    return sum(d.get(seq,0) for d in fours)
+# Generate all of the 4-tuples from the deltas and the price at the end.
 
 def part2(data):
-    fours = []
-    for line in data:
-        secret = int(line)
-        p,d = sequence(secret)
-        fours.append( max4(p, d))
-    # Get the set of all 4-tuples for all buyers.
-    allseqs = set(k for d in fours for k in d)
-    # Find the best one.
-    return max(all_for_this(fours, k) for k in allseqs)
+    fours = defaultdict(int)
+    for secret in data:
+        prices,deltas = sequence(secret)
+        seen = set()
+        for i in range(len(prices)-4):
+            key = tuple(deltas[i:i+4])
+            if key not in seen:
+                fours[key] += prices[i+3]
+                seen.add( key )
+    return max(fours.values())
 
 print("Part 1:", part1(data))
 if TEST:
-    data = test2.splitlines()
+    data = test2
 print("Part 2:", part2(data))
