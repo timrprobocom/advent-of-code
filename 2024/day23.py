@@ -73,24 +73,19 @@ def part2(data):
         connx[b].add(a)
 
     matches = ((a & b) for a,b in permutations(connx.values(),2))
-    poss = []
+    poss = Counter()
     for m in matches:
         if len(m) < 3:
             continue
-        base = set.intersection( *(connx[n] for n in m) )
+        base = ','.join(sorted(set.intersection( *(connx[n] for n in m) )))
         if base:
-            poss.append(base)
+            poss[base] += 1
 
-    # Keep the longest sequences.
+    # Return the most common subset found.
 
-    maxx = max(len(p) for p in poss)
-    print(maxx)
-    poss = [p for p in poss if len(p)==maxx]
-    print(len(poss))
-    # I don't know why there are maxes other than our winner, but the most common is the answer.
-    counts = Counter(','.join(sorted(p)) for p in poss)
-    print(counts.most_common())
-    return [k for k,v in counts.items() if v > 2][0]
+    if DEBUG:
+        print(poss.most_common())
+    return poss.most_common()[0][0]
 
 print("Part 1:", part1(pairs))
 print("Part 2:", part2(pairs))
