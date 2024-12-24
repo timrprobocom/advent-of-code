@@ -62,8 +62,7 @@ DEBUG = 'debug' in sys.argv
 if TEST:
     data = test
 else:
-#    data = open(day+'.txt').read()
-    data = open(day+'.master').read()
+    data = open(day+'.txt').read()
 
 gates = {}
 codes = []
@@ -89,20 +88,6 @@ def binary(gates,c):
         sumx = sumx * 2 + gates[k]
     return sumx
 
-def part1(codes):
-    global allgates
-    outgates = gates.copy()
-    while codes:
-        undone = []
-        for a,op,b,_,r in codes:
-            if a in outgates and b in outgates:
-                outgates[r] = operate(outgates, a, op, b )
-            else:
-                undone.append((a,op,b,0,r))
-        codes = undone
-    allgates = list(outgates.keys())
-    return binary(outgates, 'z')
-
 def do_a_run(gates, codes, swap):
     xgates = {k:v for k,v in gates.items() if k[0] in 'xy'}
     while codes:
@@ -126,145 +111,99 @@ def do_a_run(gates, codes, swap):
 #// Cn-1 XOR Mn -> Zn
 #// Rn OR Nn -> Cn
 
-#z[n] = xor(
-#    xor(x[n], y[n]),
-#    or(
-#        and(x[n-1], y[n-1]),
-#        and(
-#            xor(x[n-1], y[n-1]),
-#            ...
-#        )
-#    )
-#)
+def part1(codes, gates):
 
-#gwh jct rcb z09 z21 z39
-
-def crack(codes):
-    or_ins = {}
-    xor_ins = {}
-    and_ins = {}
-    outs = {}
-    for p in codes:
-        outs[p[4]] = p
-        if p[1] == 'AND':
-            and_ins[p[0]] = p
-            and_ins[p[2]] = p
-        elif p[1] == 'OR':
-            or_ins[p[0]] = p
-            or_ins[p[2]] = p
-        elif p[1] == 'XOR':
-            xor_ins[p[0]] = p
-            xor_ins[p[2]] = p
-
-    zs = [f'z{i:02}' for i in range(46)]
-    print(zs)
+    zs = [p[4] for p in codes if p[4][0] == 'z']
+    zs.sort()
 
     # Make our expectations.
 
     swaps = []
-    gates = {}
+    lastcarry = 'xxx'
+    outgates = {}
+    xgates = {}
     for rzv in zs:
-        gates['x'+rzv[1:]] = 0
-        gates['y'+rzv[1:]] = 0
-        sources = ['x'+rzv[1:],  'y'+rzv[1:]]
-        new_rules = ["                  "] * 5
+        x = 'x'+rzv[1:]
+        y = 'y'+rzv[1:]
+        sources = [x,y]
+        xgates[x] = gates.get(x,None)
+        xgates[y] = gates.get(y,None)
+        new_rules = [['   ','   ','   ','  ','   ']]*5
         while codes:
             undone = []
             for rule in codes:
                 c1, op, c2, _, r = rule
-                if c1 in gates and c2 in gates:
+                if c1 in xgates and c2 in xgates:
                     if op == 'AND':
-                        gates[r] = gates[c1] & gates[c2]
+                        xgates[r] = xgates[c1] & xgates[c2]
                         if c1 in sources and c2 in sources:
-                            new_rules[3] = ' '.join(rule)
+                            new_rules[3] = rule
                         else:
-                            new_rules[2] = ' '.join(rule)
+                            new_rules[2] = rule
                     if op == 'OR':
-                        gates[r] = gates[c1] | gates[c2]
-                        new_rules[4] = ' '.join(rule)
+                        xgates[r] = xgates[c1] | xgates[c2]
+                        new_rules[4] = rule
                     if op == 'XOR':
-                        gates[r] = gates[c1] ^ gates[c2]
+                        xgates[r] = xgates[c1] ^ xgates[c2]
                         if c1 in sources and c2 in sources:
-                            new_rules[0] = ' '.join(rule)
+                            new_rules[0] = rule
                         else:
-                            new_rules[1] = ' '.join(rule)
-                            if r[0] != 'z':
-                                print("WRONG", rule, 'swap', rzv, 'and', r )
-                                swaps.append( rzv )
-                                swaps.append( r )
+                            new_rules[1] = rule
                 else:
                     undone.append( rule )
             if len(undone) == len(codes):
                 break
             codes = undone
-        if new_rules[0][-3:] not in new_rules[1]:
-            print("WRONG", new_rules[0][-3:], 'not present in', new_rules[1])
-        lastcarry = new_rules[-1][-3:]
-        print(new_rules)
-    print(swaps)
 
+        # Capture the output.
 
-    return 1
+        outgates[rzv] = xgates.get(rzv,0)
+        if DEBUG:
+            print(new_rules)
+
+        # Validate the rules.
+
+        if new_rules[1][0] != '   ':
+            if new_rules[1][4][0] != 'z':
+                if DEBUG:
+                    print("WRONG", new_rules[1], 'swap', rzv, 'and', new_rules[1][4] )
+                swaps.append( rzv )
+                swaps.append( new_rules[1][4] )
+            if new_rules[0][4] not in new_rules[1]:
+                if new_rules[1][0] == lastcarry:
+                    shd = new_rules[1][2]
+                else:
+                    shd = new_rules[1][0]
+                if DEBUG:
+                    print("WRONG", new_rules[0][4], 'not present in', new_rules[1], 'swap', new_rules[0][4], shd)
+                swaps.append( new_rules[0][4] )
+                swaps.append( shd )
+        if new_rules[4]:
+            lastcarry = new_rules[4][4]
+    return binary(outgates,'z'), swaps
         
-
-    # Start at X1
-
-    for i in range(1,45):
-        x = f'x{i:02}'
-        n1 = xor_ins[x]
-        c1 = and_ins[x]
-        print(n1,c1)
-        z2 = xor_ins[n1[4]]
-        p2 = and_ins[n1[4]]
-        c2 = or_ins[c1[4]]
-        print(i,i,i,n1,c1,z2,p2,c2)
-        assert(z2[4][0] == 'z')
-    return 0
-exit(crack(codes))
-
-def part2(codes,got):
+def part2(codes,gates,got,swap):
     xx = binary(gates, 'x')
     yy = binary(gates, 'y')
     target = xx+yy
     diff = bin(target ^ got)[2:]
-    print(target,got,target^got,diff)
-    diffones = diff.count('1')
-    wrong = []
-    for i in range(len(diff)):
-        if diff[-i-1] == '1':
-            wrong.append(f'z{i:02}')
-    print(wrong)
-    badrules = []
-    swaps = []
-    for r in codes:
-        if r[0] in wrong or r[2] in wrong or r[4] in wrong:
-            badrules.append( r )
-            if r[0][0] not in 'xy':
-                swaps.append( r[0] )
-            if r[2][0] not in 'xy':
-                swaps.append( r[2] )
-#            swaps.append(r[4])
-    print(swaps)
-    for b in badrules:
-        print(b)
-    return 1
-    # For each pair of swaps, do we eliminate swapped bits in the result?
+    if DEBUG:
+        print(target,got,diff)
+    res = ','.join(sorted(swap))
 
-    maybe = set()
-    for a,b in permutations(swaps,2):
-        res = do_a_run(gates, codes, {a:b, b:a})
-        if res:
-            diffs = bin(target^res).count('1')
-            if diffs < diffones:
-                maybe.add((a,b))
-    for a,b in maybe:
-        print(a,b)
+    swaps = {}
+    while swap:
+        a = swap.pop(0)
+        b = swap.pop(0)
+        swaps[a] = b
+        swaps[b] = a
+    ans = do_a_run(gates, codes, swaps )
+    if DEBUG:
+        print(target,ans)
+    assert ans == target
+    return res
 
-    res = do_a_run(gates, codes, maybe)
-    print(target,res)
-    return 0
-
-
-p1 = part1(codes)
+p1,p2 = part1(codes,gates)
 print("Part 1:", p1)
-print("Part 2:", part2(codes,p1))
+if not TEST:
+    print("Part 2:", part2(codes,gates,p1,p2))
