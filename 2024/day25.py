@@ -1,8 +1,5 @@
 import os
 import sys
-import numpy as np
-from collections import defaultdict, Counter
-from itertools import permutations, combinations
 
 test = """\
 #####
@@ -58,14 +55,16 @@ else:
 
 # Convert the input into locks and keys.
 
+data = data.replace('#','1').replace('.','0')
+
 def tobinary(pattern):
-    return np.array( [[int(c=='#') for c in line] for line in pattern] )
+    return int((''.join(pattern)),2)
 
 locks = []
 keys = []
 for chunk in data.split('\n\n'):
     lines = chunk.splitlines()
-    if lines[0][0] == '.':
+    if lines[0][0] == '0':
         keys.append(tobinary(lines))
     else:
         locks.append(tobinary(lines))
@@ -73,12 +72,6 @@ for chunk in data.split('\n\n'):
 # Any #/# invalidates.
 
 def part1(locks, keys):
-    sumx = 0
-    for l in locks:
-        for k in keys:
-            x = l & k
-            if not np.flatnonzero(x).size:
-                sumx += 1
-    return sumx
+    return sum(not (l&k) for k in keys for l in locks)
 
 print("Part 1:", part1(locks,keys))

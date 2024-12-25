@@ -100,6 +100,8 @@ int main( int argc, char ** argv )
         input = buffer.str();
     }
 
+    // Convert to binary.
+
     vector<unsigned int> locks;
     vector<unsigned int> keys;
     unsigned int row;
@@ -124,9 +126,6 @@ int main( int argc, char ** argv )
         locks.push_back( row );
     else
         keys.push_back( row );
-
-    for( auto l : keys )
-        cout << hex << l << "\n";
 
     cout << "Part 1: " << dec << part1(locks,keys) << "\n";
 }
