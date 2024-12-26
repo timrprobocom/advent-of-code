@@ -118,13 +118,15 @@ bool detect_tree( IntBlock & data )
     vector<int> column;
     for( int i = 0; i < 2; i++ )
     {
-        column.clear();
-        column.reserve( data.size() );
-        for( auto & row : data )
-            column.push_back( row[i] );
+        transform( 
+            data.begin(),
+            data.end(),
+            back_inserter( column ),
+            [i]( vector<int> & row ) { return row[i]; }
+        );
 
         double x = calculateStandardDeviation(column);
-        if( x > 20.0 )
+        if( x > 24.0 )
             return false;
     }
     if( DEBUG )
@@ -175,6 +177,7 @@ int64_t part2( IntBlock & data )
 
 int main( int argc, char ** argv )
 {
+    string name = *argv;
     while( *++argv )
     {
         string arg(*argv);
@@ -202,7 +205,6 @@ int main( int argc, char ** argv )
     }
     else 
     {
-        string name = argv[0];
         stringstream buffer;
         buffer << ifstream(name + ".txt").rdbuf();
         input = buffer.str();
