@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <numeric>
 
+#include "utils.h"
+
 using namespace std;
 
 const string test(
@@ -35,22 +37,6 @@ const string live(
 bool DEBUG = false;
 bool TEST = false;
 
-typedef vector<string> StringVector;
-
-StringVector split( string src, string delim )
-{
-    StringVector sv;
-    for( int j = src.find(delim); j != -1; )
-    {
-        sv.push_back( src.substr(0,j) );
-        src = src.substr(j+delim.size());
-        j = src.find(delim);
-    }
-    sv.push_back(src);
-    return sv;
-}
-
-typedef unsigned short byte_t;
 typedef unsigned short point_t;
 
 inline point_t make_point(byte_t x, byte_t y)

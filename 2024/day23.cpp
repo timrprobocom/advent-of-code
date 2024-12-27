@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <numeric>
 
+#include "utils.h"
+
 using namespace std;
 
 const string test(
@@ -53,21 +55,6 @@ const string test(
 
 bool DEBUG = false;
 bool TEST = false;
-
-typedef vector<string> StringVector;
-
-StringVector split( string src, string delim )
-{
-    StringVector sv;
-    for( int j = src.find(delim); j != -1; )
-    {
-        sv.push_back( src.substr(0,j) );
-        src = src.substr(j+delim.size());
-        j = src.find(delim);
-    }
-    sv.push_back(src);
-    return sv;
-}
 
 int part1( StringVector & data )
 {
@@ -188,17 +175,7 @@ int main( int argc, char ** argv )
             TEST = true;
     }
 
-    string input;
-    if( TEST )
-    {
-        input = test;
-    }
-    else
-    {
-        stringstream buffer;
-        buffer << ifstream("day23.txt").rdbuf();
-        input = buffer.str();
-    }
+    string input = TEST ? test : file_contents("day23.txt");
 
     StringVector data = split(input, "\n");
 

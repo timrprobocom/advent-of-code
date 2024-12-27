@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <numeric>
 
+#include "utils.h"
+
 using namespace std;
 
 const string test(
@@ -159,17 +161,7 @@ int main( int argc, char ** argv )
             TEST = true;
     }
 
-    string input;
-    if( TEST )
-    {
-        input = test;
-    }
-    else 
-    {
-        stringstream buffer;
-        buffer << ifstream("day20.txt").rdbuf();
-        input = buffer.str();
-    }
+    string input = TEST ? test : file_contents("day20.txt");
 
     map_t normals = makemap(input);
     cout << "Part 1: " << part2(normals,  2, TEST ? 20 : 100) << "\n";

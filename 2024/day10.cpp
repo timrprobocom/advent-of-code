@@ -11,6 +11,8 @@
 #include <algorithm>
 #include <numeric>
 
+#include <utils.h>
+
 using namespace std;
 
 const string test(
@@ -27,11 +29,11 @@ bool DEBUG = false;
 bool TEST = false;
 
 typedef vector<string> StringVector;
-typedef vector<vector<short>> ShortBlock;
+typedef Point<short> point_t;
 
-ShortBlock parse( string src )
+ShortMatrix parse( string src )
 {
-    ShortBlock sb(1);
+    ShortMatrix sb(1);
     for( auto c : src )
     {
         if( c == '\n' )
@@ -45,26 +47,7 @@ ShortBlock parse( string src )
 int WIDTH = -1;
 int HEIGHT = -1;
 
-struct Point {
-    short x;
-    short y;
-
-    Point( short _x=0, short _y=0)
-    : x(_x), y(_y)
-    {}
-
-    bool operator<(const Point & other) const
-    {
-        return ((x << 16) | y) < ((other.x << 16) | other.y);
-    }
-
-    bool operator==(const Point & other) const
-    {
-        return x==other.x && y == other.y;
-    }
-};
-
-Point dirs[4] = { {-1,0}, {1,0}, {0,-1}, {0,1}};
+point_t dirs[4] = { {-1,0}, {1,0}, {0,-1}, {0,1}};
 
 struct Record {
     short x;
@@ -75,15 +58,15 @@ struct Record {
     {}
 };
 
-pair<int,int> part1( ShortBlock & data )
+pair<int,int> part1( ShortMatrix & data )
 {
     // Find the zeros.
 
-    vector<Point> zeros;
+    vector<point_t> zeros;
     for( short y = 0; y < HEIGHT; y++ )
         for( short x = 0; x < WIDTH; x++ )
             if( !data[y][x] )
-                zeros.push_back( Point({x,y}));
+                zeros.push_back( point_t({x,y}));
     
     queue<Record> queue;
     int part1 = 0;
@@ -92,7 +75,7 @@ pair<int,int> part1( ShortBlock & data )
     for( auto & z : zeros )
     {
         queue.emplace( Record(z.x,z.y,0) );
-        set<Point> solutions;
+        set<point_t> solutions;
         while( !queue.empty() )
         {
             Record p = queue.front();
@@ -108,7 +91,7 @@ pair<int,int> part1( ShortBlock & data )
                     if( c == 9 )
                     {
                         part2 ++;
-                        solutions.insert( Point(x0,y0) );
+                        solutions.insert( point_t(x0,y0) );
                     }
                     else
                     {
@@ -134,19 +117,9 @@ int main( int argc, char ** argv )
             TEST = true;
     }
 
-    string input;
-    if( TEST )
-    {
-        input = test;
-    }
-    else 
-    {
-        stringstream buffer;
-        buffer << ifstream("day10.txt").rdbuf();
-        input = buffer.str();
-    }
+    string input = TEST ? test : file_contents("day10.txt");
 
-    ShortBlock data = parse(input);
+    ShortMatrix data = parse(input);
     WIDTH = data[0].size();
     HEIGHT = data.size();
 

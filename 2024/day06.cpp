@@ -11,6 +11,8 @@
 #include <algorithm>
 #include <numeric>
 
+#include "utils.h"
+
 using namespace std;
 
 const string test(
@@ -29,59 +31,27 @@ const string test(
 bool DEBUG = false;
 bool TEST = false;
 
-typedef vector<string> StringVector;
-
-StringVector split( string src, string delim )
-{
-    StringVector sv;
-    for( int j = src.find(delim); j != -1; )
-    {
-        sv.push_back( src.substr(0,j) );
-        src = src.substr(j+delim.size());
-        j = src.find(delim);
-    }
-    sv.push_back(src);
-    return sv;
-}
-
 int WIDTH = -1;
 int HEIGHT = -1;
 
-struct Point {
-    short x;
-    short y;
+typedef Point<short> point_t;
 
-    Point( short _x=0, short _y=0)
-    : x(_x), y(_y)
-    {}
-
-    bool operator<(const Point & other) const
-    {
-        return ((x << 16) | y) < ((other.x << 16) | other.y);
-    }
-
-    bool operator==(const Point & other) const
-    {
-        return x==other.x && y == other.y;
-    }
+const point_t directions[] = {    // N  E  S  W
+    point_t({0,-1}),
+    point_t({1,0}),
+    point_t({0,1}),
+    point_t({-1,0})
 };
 
-const Point directions[] = {    // N  E  S  W
-    Point({0,-1}),
-    Point({1,0}),
-    Point({0,1}),
-    Point({-1,0})
-};
-
-Point find_guard( StringVector& data )
+point_t find_guard( StringVector& data )
 {
     for( int y=0; y < HEIGHT; y++ )
     {
         int x = data[y].find('^');
         if( x != string::npos )
-            return Point(x,y);
+            return point_t(x,y);
     }
-    return Point(-1,-1);
+    return point_t(-1,-1);
 }
 
 bool between( short low, short val, short hi )
@@ -89,24 +59,24 @@ bool between( short low, short val, short hi )
     return (low <= val) && (val < hi);
 }
 
-set<Point> solve( StringVector & data )
+set<point_t> solve( StringVector & data )
 {
-    set<Point> steps;
-    set<Point> lines[4];
-    Point g = find_guard( data );
+    set<point_t> steps;
+    set<point_t> lines[4];
+    point_t g = find_guard( data );
     int dir = 0;
     for(;;)
     {
         steps.insert(g);
         lines[dir].insert(g);
-        Point n(
+        point_t n(
             g.x + directions[dir].x,
             g.y + directions[dir].y
         );
         if( between(0, n.x, WIDTH) && between(0, n.y, HEIGHT) )
         {
             if( lines[dir].find(n) != lines[dir].end() )
-                return set<Point>();
+                return set<point_t>();
             else if( data[n.y][n.x] != '#' )
                 g = n;
             else
@@ -125,7 +95,7 @@ int part1( StringVector & data )
 
 int part2( StringVector & data )
 {
-    set<Point> visits = solve(data);
+    set<point_t> visits = solve(data);
     int sums = 0;
     for( auto && pt : visits )
     {
@@ -150,18 +120,8 @@ int main( int argc, char ** argv )
             TEST = true;
     }
 
-    string input;
-    if( TEST )
-    {
-        input = test;
-    }
-    else 
-    {
-        stringstream buffer;
-        buffer << ifstream("day06.txt").rdbuf();
-        input = buffer.str();
-    }
-
+    string input = TEST ? test : file_contents("day06.txt");
+    
     StringVector data = split( input, "\n");
     WIDTH = data[0].size();
     HEIGHT = data.size();

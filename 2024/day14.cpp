@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <numeric>
 
+#include "utils.h"
+
 using namespace std;
 
 const string test(
@@ -36,23 +38,9 @@ bool TEST = false;
 int WIDTH = -1;
 int HEIGHT = -1;
 
-typedef vector<string> StringVector;
-typedef vector<vector<int>> IntBlock;
+typedef vector<vector<int>> IntMatrix;
 
-StringVector split( string src, string delim )
-{
-    StringVector sv;
-    for( int j = src.find(delim); j != -1; )
-    {
-        sv.push_back( src.substr(0,j) );
-        src = src.substr(j+delim.size());
-        j = src.find(delim);
-    }
-    sv.push_back(src);
-    return sv;
-}
-
-void printdata( IntBlock & data )
+void printdata( IntMatrix & data )
 {
     for( auto & row : data )
     {
@@ -61,7 +49,7 @@ void printdata( IntBlock & data )
 }
 
 
-void printgrid( IntBlock & data )
+void printgrid( IntMatrix & data )
 {
     vector<string> grid;
     for( int i = 0; i < HEIGHT; i++ )
@@ -73,7 +61,7 @@ void printgrid( IntBlock & data )
 }
 
 
-void move( IntBlock & data )
+void move( IntMatrix & data )
 {
     for( auto & row : data )
     {
@@ -113,7 +101,7 @@ double calculateStandardDeviation(const vector<int> & arr)
 // The tree is solid, so the standard deviation of the coordinates goes WAY down.
 // Typical is 30, tree gets 19.
 
-bool detect_tree( IntBlock & data )
+bool detect_tree( IntMatrix & data )
 {
     vector<int> column;
     for( int i = 0; i < 2; i++ )
@@ -135,7 +123,7 @@ bool detect_tree( IntBlock & data )
 }
 
 
-int64_t part1( IntBlock & data )
+int64_t part1( IntMatrix & data )
 {
     for( int i = 0; i < 100; i++ )
         move( data );
@@ -164,7 +152,7 @@ int64_t part1( IntBlock & data )
     return k1*k2*k3*k4;
 }
 
-int64_t part2( IntBlock & data )
+int64_t part2( IntMatrix & data )
 {
     for( int i = 101; i < 10000; i++ )
     {
@@ -198,19 +186,9 @@ int main( int argc, char ** argv )
         HEIGHT = 103;
     }
 
-    string input;
-    if( TEST )
-    {
-        input = test;
-    }
-    else 
-    {
-        stringstream buffer;
-        buffer << ifstream(name + ".txt").rdbuf();
-        input = buffer.str();
-    }
+    string input = TEST ? test : file_contents("day14.txt");
 
-    IntBlock data(1);
+    IntMatrix data(1);
     int sign = 1;
     int accum = 0;
     bool more = false;

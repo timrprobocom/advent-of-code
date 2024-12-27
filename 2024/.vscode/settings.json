@@ -3,6 +3,12 @@
         "*.tcc": "cpp",
         "string": "cpp",
         "string_view": "cpp",
-        "cstdint": "cpp"
+        "cstdint": "cpp",
+        "array": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "vector": "cpp",
+        "span": "cpp",
+        "fstream": "cpp"
     }
 }

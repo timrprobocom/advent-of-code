@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <numeric>
 
+#include "utils.h"
+
 using namespace std;
 
 const char * test[3] = {
@@ -50,21 +52,6 @@ const char * opcodes[] = {
 //    0      1      2      3      4      5      6      7
     "adv", "bxl", "bst", "jnz", "bxc", "out", "bdv", "cdv"
 };
-
-typedef vector<string> StringVector;
-
-StringVector split( string src, string delim )
-{
-    StringVector sv;
-    for( int j = src.find(delim); j != -1; )
-    {
-        sv.push_back( src.substr(0,j) );
-        src = src.substr(j+delim.size());
-        j = src.find(delim);
-    }
-    sv.push_back(src);
-    return sv;
-}
 
 struct CPU {
     uint64_t A;

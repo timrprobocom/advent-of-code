@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <numeric>
 
+#include "utils.h"
+
 using namespace std;
 
 const string test(
@@ -69,10 +71,8 @@ int part1( vector<unsigned int> & locks, vector<unsigned int> & keys )
     int sumx = 0;
     for( auto l : locks )
         for( auto k : keys )
-        {
             if( !(l&k) )
                 sumx++;
-        }
    return sumx;
 }
 
@@ -88,17 +88,7 @@ int main( int argc, char ** argv )
             TEST = true;
     }
 
-    string input;
-    if( TEST )
-    {
-        input = test;
-    }
-    else 
-    {
-        stringstream buffer;
-        buffer << ifstream("day25.txt").rdbuf();
-        input = buffer.str();
-    }
+    string input = TEST ? test : file_contents("day25.txt");
 
     // Convert to binary.
 

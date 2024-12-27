@@ -11,6 +11,8 @@
 #include <algorithm>
 #include <numeric>
 
+#include "utils.h"
+
 using namespace std;
 
 const string test(
@@ -31,44 +33,12 @@ const string test(
 bool DEBUG = false;
 bool TEST = false;
 
-typedef vector<string> StringVector;
-
-StringVector split( string src, string delim )
-{
-    StringVector sv;
-    for( int j = src.find(delim); j != -1; )
-    {
-        sv.push_back( src.substr(0,j) );
-        src = src.substr(j+delim.size());
-        j = src.find(delim);
-    }
-    sv.push_back(src);
-    return sv;
-}
-
 int WIDTH = -1;
 int HEIGHT = -1;
 
-struct Point {
-    short x;
-    short y;
+typedef Point<int> point_t;
 
-    Point( short _x=0, short _y=0)
-    : x(_x), y(_y)
-    {}
-
-    bool operator<(const Point & other) const
-    {
-        return ((x << 16) | y) < ((other.x << 16) | other.y);
-    }
-
-    bool operator==(const Point & other) const
-    {
-        return x==other.x && y == other.y;
-    }
-};
-
-typedef map<char, vector<Point>> spots_t;
+typedef map<char, vector<point_t>> spots_t;
 
 #if 0
 def printgrid(antinodes):
@@ -87,7 +57,7 @@ bool between( short low, short val, short hi )
 
 int part1( spots_t & spots )
 {
-    set<Point> antinodes;
+    set<point_t> antinodes;
     for( auto && kv : spots )
     {
         for( int i1=0; i1 < kv.second.size(); i1 ++ )
@@ -99,11 +69,11 @@ int part1( spots_t & spots )
                 int y1 = kv.second[i2].y;
                 int dx = x1-x0;
                 int dy = y1-y0;
-                antinodes.insert( Point(x0-dx,y0-dy) );                
-                antinodes.insert( Point(x1+dx,y1+dy) );                
+                antinodes.insert( point_t(x0-dx,y0-dy) );                
+                antinodes.insert( point_t(x1+dx,y1+dy) );                
             }
     }
-    int sum = count_if( antinodes.begin(), antinodes.end(), [](const Point & pt){
+    int sum = count_if( antinodes.begin(), antinodes.end(), [](const point_t & pt){
         return between(0, pt.x, WIDTH) && between( 0, pt.y, HEIGHT);
     });
     return sum;
@@ -112,7 +82,7 @@ int part1( spots_t & spots )
 
 int part2( spots_t & spots )
 {
-    set<Point> antinodes;
+    set<point_t> antinodes;
     for( auto && kv : spots )
     {
         for( int i1=0; i1 < kv.second.size(); i1 ++ )
@@ -126,13 +96,13 @@ int part2( spots_t & spots )
                 int dy = y1-y0;
                 while( between(0, x0, WIDTH) && between(0, y0, HEIGHT) )
                 {
-                    antinodes.insert( Point(x0,y0) );
+                    antinodes.insert( point_t(x0,y0) );
                     x0 -= dx;
                     y0 -= dy;                
                 }
                 while( between(0, x1, WIDTH) && between(0, y1, HEIGHT) )
                 {
-                    antinodes.insert( Point(x1,y1) );
+                    antinodes.insert( point_t(x1,y1) );
                     x1 += dx;
                     y1 += dy;                
                 }
@@ -153,17 +123,7 @@ int main( int argc, char ** argv )
             TEST = true;
     }
 
-    string input;
-    if( TEST )
-    {
-        input = test;
-    }
-    else 
-    {
-        stringstream buffer;
-        buffer << ifstream("day08.txt").rdbuf();
-        input = buffer.str();
-    }
+    string input = TEST ? test : file_contents("day08.txt");
 
     StringVector data = split( input, "\n");
     WIDTH = data[0].size();
@@ -174,7 +134,7 @@ int main( int argc, char ** argv )
         for( int x = 0; x < WIDTH; x++ )
             if( data[y][x] != '.' )
             {
-                spots[data[y][x]].push_back( Point(x,y) );            
+                spots[data[y][x]].push_back( point_t(x,y) );            
             }
 
     cout << "Part 1: " << part1(spots) << "\n";
