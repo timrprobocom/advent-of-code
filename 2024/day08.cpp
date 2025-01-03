@@ -36,7 +36,7 @@ bool TEST = false;
 int WIDTH = -1;
 int HEIGHT = -1;
 
-typedef Point<int> point_t;
+typedef Point<short> point_t;
 
 typedef map<char, vector<point_t>> spots_t;
 

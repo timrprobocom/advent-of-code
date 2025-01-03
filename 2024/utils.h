@@ -10,7 +10,7 @@ typedef std::vector<std::vector<int64_t>> LongMatrix;
 
 typedef std::vector<std::string> StringVector;
 
-StringVector split( std::string src, std::string delim )
+StringVector split( std::string src, std::string delim="\n" )
 {
     StringVector sv;
     for( int j = src.find(delim); j != -1; )
@@ -23,12 +23,23 @@ StringVector split( std::string src, std::string delim )
     return sv;
 }
 
+std::vector<StringVector> split_chunks( const std::string & src )
+{
+    std::vector<StringVector> build;
+    auto mid = src.find("\n\n");
+    if( mid == std::string::npos )
+        return build;
+    build.push_back( split( src.substr( 0, mid )) );
+    build.push_back( split( src.substr(mid+2)) );
+    return build;
+}
+
 template<typename T>
 struct Point {
     T x;
     T y;
 
-    Point( T _x=0, T _y=0)
+    Point( int _x=0, int _y=0)
     : x(_x), y(_y)
     {}
 

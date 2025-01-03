@@ -52,16 +52,16 @@ bool TEST = false;
 
 int WIDTH = -1;
 
-typedef Point<int> point_t;
+typedef Point<short> point_t;
 
-point_t START = Point(0,0);
+point_t START = point_t(0,0);
 point_t FINISH;
 
 point_t dirs[] = {
-    Point(-1,0),
-    Point(0,-1),
-    Point(1,0),
-    Point(0,1)
+    point_t(-1,0),
+    point_t(0,-1),
+    point_t(1,0),
+    point_t(0,1)
 };
 
 typedef pair<point_t,int> queue_t;
@@ -163,7 +163,7 @@ int main( int argc, char ** argv )
     }
 
     WIDTH = TEST ? 7 : 71;
-    FINISH = Point(WIDTH-1,WIDTH-1);
+    FINISH = point_t(WIDTH-1,WIDTH-1);
 
     string data = TEST ? test : file_contents(DAY".txt");
 
