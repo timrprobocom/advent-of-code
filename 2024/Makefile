@@ -17,11 +17,11 @@ endif
 COMPILE.cpp = $(CXX) $(CPPFLAGS)
 
 SRCS = $(wildcard *.cpp)
-SRCS += $(wildcard *.rs)
+#SRCS += $(wildcard *.rs)
 OBJS = $(SRCS:.cpp=$O)
-OBJS += $(SRCS:.rs=$O)
+#OBJS += $(SRCS:.rs=$O)
 EXES = $(SRCS:.cpp=$(EXE))
-EXES += $(SRCS:.rs=$(EXE))
+#EXES += $(SRCS:.rs=$(EXE))
 
 %$(EXE): %.cpp
 	$(COMPILE.cpp) $(OUTPUT_OPTION) $< $(LIBS)
@@ -31,3 +31,5 @@ EXES += $(SRCS:.rs=$(EXE))
 
 all:	$(EXES)
 
+clean:
+	rm $(EXES)
