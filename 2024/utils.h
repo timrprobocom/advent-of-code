@@ -74,3 +74,10 @@ std::string file_contents(const char * name)
     buffer << std::ifstream(name).rdbuf();
     return buffer.str();
 }
+
+
+template<typename T>
+bool between( T low, T val, T hi )
+{
+    return (low <= val) && (val < hi);
+}

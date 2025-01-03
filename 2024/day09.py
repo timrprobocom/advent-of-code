@@ -69,6 +69,8 @@ def coalesce( space, start, size ):
             newspace.append( [sstart, size+ssize] )
             break
         elif sstart > start+size:
+            newspace.append( (start, size) )
+            newspace.append( [sstart, ssize] )
             break
     return newspace+space
 
@@ -88,10 +90,10 @@ def part2(data):
     space = []
 
     for i,size in enumerate(data):
-        if i % 2:
-            space.append( [locate, size] )
-        else:
+        if not i % 2:
             files.append( [locate, size, len(files)] )
+        elif size:
+            space.append( [locate, size] )
         locate += size
 
     if DEBUG:
