@@ -17,11 +17,9 @@ endif
 COMPILE.cpp = $(CXX) $(CPPFLAGS)
 
 SRCS = $(wildcard *.cpp)
-#SRCS += $(wildcard *.rs)
-OBJS = $(SRCS:.cpp=$O)
-#OBJS += $(SRCS:.rs=$O)
-EXES = $(SRCS:.cpp=$(EXE))
-#EXES += $(SRCS:.rs=$(EXE))
+SRCS += $(wildcard *.rs)
+OBJS = $(subst .cpp,.$O,$(subst .rs,.$O,$(SRCS)))
+EXES = $(subst .cpp,$(EXE),$(subst .rs,$(EXE),$(SRCS)))
 
 %$(EXE): %.cpp
 	$(COMPILE.cpp) $(OUTPUT_OPTION) $< $(LIBS)
