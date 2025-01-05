@@ -54,11 +54,6 @@ point_t find_guard( StringVector& data )
     return point_t(-1,-1);
 }
 
-bool between( short low, short val, short hi )
-{
-    return (low <= val) && (val < hi);
-}
-
 set<point_t> solve( StringVector & data )
 {
     set<point_t> steps;
@@ -69,10 +64,7 @@ set<point_t> solve( StringVector & data )
     {
         steps.insert(g);
         lines[dir].insert(g);
-        point_t n(
-            g.x + directions[dir].x,
-            g.y + directions[dir].y
-        );
+        point_t n = g + directions[dir];
         if( between(0, n.x, WIDTH) && between(0, n.y, HEIGHT) )
         {
             if( lines[dir].find(n) != lines[dir].end() )

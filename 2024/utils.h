@@ -48,6 +48,11 @@ struct Point {
         return Point(x+other.x, y+other.y);
     }
 
+    Point operator-( const Point<T> & other ) const
+    {
+        return Point(x-other.x, y-other.y);
+    }
+
     Point operator+=( const Point<T> & other )
     {
         x += other.x;
@@ -89,7 +94,7 @@ std::string file_contents(const char * name)
 
 
 template<typename T>
-bool between( T low, T val, T hi )
+bool between( int low, T val, int hi )
 {
     return (low <= val) && (val < hi);
 }

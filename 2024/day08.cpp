@@ -49,12 +49,6 @@ def printgrid(antinodes):
         print(''.join(row)) 
 #endif
 
-bool between( short low, short val, short hi )
-{
-    return (low <= val) && (val < hi);
-}
-
-
 int part1( spots_t & spots )
 {
     set<point_t> antinodes;
@@ -63,6 +57,12 @@ int part1( spots_t & spots )
         for( int i1=0; i1 < kv.second.size(); i1 ++ )
             for( int i2=i1+1; i2 < kv.second.size(); i2 ++ )
             {
+                point_t xy0 = kv.second[i1];
+                point_t xy1 = kv.second[i2];
+                point_t dxy = xy1-xy0;
+                antinodes.insert( xy0-dxy );                
+                antinodes.insert( xy1+dxy ); 
+                #if 0               
                 int x0 = kv.second[i1].x;                
                 int y0 = kv.second[i1].y;                
                 int x1 = kv.second[i2].x;                
@@ -70,7 +70,8 @@ int part1( spots_t & spots )
                 int dx = x1-x0;
                 int dy = y1-y0;
                 antinodes.insert( point_t(x0-dx,y0-dy) );                
-                antinodes.insert( point_t(x1+dx,y1+dy) );                
+                antinodes.insert( point_t(x1+dx,y1+dy) );    
+                #endif            
             }
     }
     int sum = count_if( antinodes.begin(), antinodes.end(), [](const point_t & pt){
