@@ -43,6 +43,18 @@ struct Point {
     : x(_x), y(_y)
     {}
 
+    Point operator+( const Point<T> & other ) const
+    {
+        return Point(x+other.x, y+other.y);
+    }
+
+    Point operator+=( const Point<T> & other )
+    {
+        x += other.x;
+        y += other.y;
+        return *this;
+    }
+
     bool operator<(const Point & other) const
     {
         return x == other.x ? y < other.y : x < other.x;
