@@ -72,11 +72,8 @@ inline string gets(queue_t q)
 }
 #endif
 
-map<char, point_t> buttons;
-map<char, point_t> dirpad;
+// This is faster than a map<char,point_t>.
 
-void initialize()
-{
 /*
 # +---+---+---+
 # | 7 | 8 | 9 |
@@ -89,18 +86,25 @@ void initialize()
 #     +---+---+
 */
 
-    buttons['7'] = make_point(0,0);
-    buttons['8'] = make_point(1,0);
-    buttons['9'] = make_point(2,0);
-    buttons['4'] = make_point(0,1);
-    buttons['5'] = make_point(1,1);
-    buttons['6'] = make_point(2,1);
-    buttons['1'] = make_point(0,2);
-    buttons['2'] = make_point(1,2);
-    buttons['3'] = make_point(2,2);
-    buttons['X'] = make_point(0,3);
-    buttons['0'] = make_point(1,3);
-    buttons['A'] = make_point(2,3);
+constexpr point_t buttons(char c)
+{
+    switch(c)
+    {
+        case '7': return make_point(0,0);
+        case '8': return make_point(1,0);
+        case '9': return make_point(2,0);
+        case '4': return make_point(0,1);
+        case '5': return make_point(1,1);
+        case '6': return make_point(2,1);
+        case '1': return make_point(0,2);
+        case '2': return make_point(1,2);
+        case '3': return make_point(2,2);
+        case 'X': return make_point(0,3);
+        case '0': return make_point(1,3);
+        case 'A': return make_point(2,3);
+    }
+    return make_point(0,0);
+}
 
 /*
 #     +---+---+
@@ -110,13 +114,20 @@ void initialize()
 # +---+---+---+
 */
 
-    dirpad['X'] = make_point(0,0);
-    dirpad['^'] = make_point(1,0);
-    dirpad['A'] = make_point(2,0);
-    dirpad['<'] = make_point(0,1);
-    dirpad['v'] = make_point(1,1);
-    dirpad['>'] = make_point(2,1);
+constexpr point_t dirpad(char c)
+{
+    switch(c)
+    {
+        case 'X': return make_point(0,0);
+        case '^': return make_point(1,0);
+        case 'A': return make_point(2,0);
+        case '<': return make_point(0,1);
+        case 'v': return make_point(1,1);
+        case '>': return make_point(2,1);
+    }
+    return make_point(0,0);
 }
+
 
 int64_t cheapest( point_t pt0, point_t pt1, int botcount=2 );
 int64_t cheapestAuxPad( point_t pt0, point_t pt1, int robots );
@@ -149,16 +160,14 @@ int64_t cheapestAuxPad( point_t pt0, point_t pt1, int robots )
 
     while( !q.empty() )
     {
-        queue_t xys = q.front();
+        auto [xy, s] = q.front();
         q.pop();
-        point_t xy = xys.first;
-        string s = xys.second;
         if( xy == pt1 )
         {
             res = min( res, cheapestRobot( s+"A", robots-1 ));
             continue;
         }
-        if( xy == dirpad['X'] )
+        if( xy == dirpad('X') )
             continue;
         if( getx(xy) < getx(pt1) )
             q.push( pair(make_point(getx(xy)+1, gety(xy)), s+">"));
@@ -179,10 +188,10 @@ int64_t cheapestRobot( const string & keys, int robots )
     if( !robots )
         return keys.size();
     int64_t sumx = 0;
-    point_t pt0 = dirpad['A'];
+    point_t pt0 = dirpad('A');
     for( char c : keys )
     {
-        point_t pt1  = dirpad[c];
+        point_t pt1  = dirpad(c);
         sumx += cheapestAuxPad( pt0, pt1, robots);
         pt0 = pt1;
     }
@@ -199,16 +208,14 @@ int64_t cheapest( point_t pt0, point_t pt1, int botcount )
 
     while( !q.empty() )
     {
-        queue_t xys = q.front();
+        auto [xy, s] = q.front();
         q.pop();
-        point_t xy = xys.first;
-        string s = xys.second;
         if( xy == pt1 )
         {
             res = min( res, cheapestRobot( s+"A", botcount ) );
             continue;
         }
-        if( xy == buttons['X'] )
+        if( xy == buttons('X') )
             continue;
         if( getx(xy) < getx(pt1) )
             q.push( pair(make_point(getx(xy)+1, gety(xy)), s+">" ));
@@ -229,12 +236,12 @@ int64_t part1( StringVector & data, int bots=2 )
     for( auto & line : data )
     {
         int64_t res = 0;
-        point_t pt0 = buttons['A'];
+        point_t pt0 = buttons('A');
         for( char c : line )
         {
             if( DEBUG )
                 cout << "---" << c << "---\n";
-            point_t pt1 = buttons[c];
+            point_t pt1 = buttons(c);
             res += cheapest( pt0, pt1, bots);
             pt0 = pt1;
         }
@@ -261,8 +268,6 @@ int main( int argc, char ** argv )
         else if( arg =="test")
             TEST = true;
     }
-
-    initialize();
 
     string input = TEST ? test : live;
     StringVector data = split(input, "\n");

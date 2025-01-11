@@ -27,6 +27,7 @@ const string test(
 
 bool DEBUG = false;
 bool TEST = false;
+#define DAY "day10"
 
 typedef vector<string> StringVector;
 typedef Point<short> point_t;
@@ -102,7 +103,7 @@ pair<int,int> part1( ShortMatrix & data )
         }
         part1 += solutions.size();
     }
-    return pair<int,int>(part1, part2);
+    return pair(part1, part2);
 }
 
 
@@ -117,13 +118,13 @@ int main( int argc, char ** argv )
             TEST = true;
     }
 
-    string input = TEST ? test : file_contents("day10.txt");
+    string input = TEST ? test : file_contents(DAY".txt");
 
     ShortMatrix data = parse(input);
     WIDTH = data[0].size();
     HEIGHT = data.size();
 
-    auto result = part1( data );
-    cout << "Part 1: " << result.first << "\n";
-    cout << "Part 2: " << result.second << "\n";
+    auto [one, two] = part1( data );
+    cout << "Part 1: " << one << "\n";
+    cout << "Part 2: " << two << "\n";
 }

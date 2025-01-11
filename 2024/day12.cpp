@@ -123,9 +123,7 @@ int sides( set<pair<point_t,point_t>> border )
     int sides = 0;
     while( !border.empty() )
     {
-        auto xydxy = border.extract(border.begin()).value();
-        point_t xy = xydxy.first;
-        point_t dxy = xydxy.second;
+        auto [xy, dxy] = border.extract(border.begin()).value();
         point_t perp[] = {
             point_t(-dxy.y,dxy.x),
             point_t(dxy.y,-dxy.x)
