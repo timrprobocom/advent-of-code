@@ -148,14 +148,10 @@ bool do_a_move(vector<vector<char>> & grid, point_t pt, point_t delta )
             cout << pt.x << "," << pt.y << " " << npt.x << "," << npt.y << "\n";
             return false;
         }
-        else if( dc == '.' )
+        else
         {
-            grid[pt.y][pt.x] = '.';
-            grid[npt.y][npt.x] = c;
-        }
-        else if( dc == 'O' || dc == '[' || dc == ']' )
-        {
-            do_a_move(grid, npt, delta);
+            if( dc != '.' )
+                do_a_move(grid, npt, delta);
             grid[pt.y][pt.x] = '.';
             grid[npt.y][npt.x] = c;
         }

@@ -134,13 +134,10 @@ def do_a_move(grid, x, y, dx, dy):
             print(affected)
             print(x,y,nx,ny)
         assert dc != '#'
-        if dc == '.':
-            grid[y][x] = '.'
-            grid[ny][nx] = c
-        elif dc in 'O[]':
+        if dc != '.':
             do_a_move(grid, nx, ny, dx, dy)
-            grid[y][x] = '.'
-            grid[ny][nx] = c
+        grid[y][x] = '.'
+        grid[ny][nx] = c
     return True
 
 def part1(grid,robot):
