@@ -14,6 +14,7 @@
 #include <numeric>
 
 #include "utils.h"
+#undef howmany
 
 using namespace std;
 
