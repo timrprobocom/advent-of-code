@@ -1,8 +1,6 @@
 import os
 import sys
 import math
-from collections import defaultdict
-import heapq
 
 test = """\
 5,4

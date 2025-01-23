@@ -98,3 +98,9 @@ bool between( int low, T val, int hi )
 {
     return (low <= val) && (val < hi);
 }
+
+template<typename T, typename U>
+bool is_in( T ele, U & coll )
+{
+    return coll.find(ele) != coll.end();
+}

@@ -2,7 +2,6 @@ import os
 import sys
 import math
 from collections import defaultdict
-import heapq
 
 test = ["""\
 Register A: 729
