@@ -104,3 +104,9 @@ bool is_in( T ele, U & coll )
 {
     return coll.find(ele) != coll.end();
 }
+
+template<typename T>
+bool is_in( T ele, std::vector<T> coll )
+{
+    return std::find( coll.begin(), coll.end(), ele ) != coll.end();
+}
