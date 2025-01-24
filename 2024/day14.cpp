@@ -39,8 +39,8 @@ int HEIGHT=-1;
 
 void printgrid(IntMatrix & data)
 {
-    uint8_t grid[HEIGHT][WIDTH] = {0};
-    bzero( grid, WIDTH*HEIGHT );
+    IntMatrix grid;
+    grid.resize(HEIGHT, vector<int>(WIDTH));
     for( auto & bot : data )
         grid[bot[1]][bot[0]] += 1;
     for( int y=0; y < HEIGHT; y++ )
