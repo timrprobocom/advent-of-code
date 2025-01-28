@@ -78,29 +78,42 @@ def left(pt):
 def right(pt):
     return (-pt[1],pt[0])
 
-def part2(walls):
-    queue = [(0, start, (1,0), [start])]
-    visited = {}
-    best = math.inf
-    seen = set()
+def part1(walls):
+    # Do a simple BFS forward.
+
+    queue = [(0, start, (1,0))]
+    visited = {start: 0}
+
     while queue:
-        score,point,dir,path = heapq.heappop(queue)
+        score, point, dir = queue.pop(0)
         if DEBUG:
             print(score,end='\r')
-        if score > best:
-            break
-        visited[(point,dir)] = score
-        if point == finish:
-            best = score
-            seen = seen.union(path)
         for pain,d2 in (1,dir),(1001,right(dir)),(1001,left(dir)):
             p2 = (point[0]+d2[0],point[1]+d2[1])
-            if p2 not in walls and visited.get((p2,d2),999999) > score+pain:
-                heapq.heappush(queue, (score+pain, p2, d2, path+[p2]))
-    if DEBUG:
-        printgrid(seen)
-    return best,len(seen)
+            if p2 not in walls and visited.get(p2, 999999) > score+pain:
+                visited[p2] = score+pain
+                queue.append( (score+pain, p2, d2 ))
+    return visited
 
-p1,p2 = part2(walls)
-print("Part 1:", p1)
-print("Part 2:", p2)
+def part2(walls, visited):
+    # Do a backwards BFS.
+
+    queue = [
+        (visited[finish], finish, (-1,0)),
+        (visited[finish], finish, (0,1))
+    ]
+    goods = set()
+    goods.add( finish )
+
+    while queue:
+        score,point, dir = queue.pop(0)
+        for pain,d2 in (1,dir),(1001,right(dir)),(1001,left(dir)):
+            p2 = (point[0]+d2[0],point[1]+d2[1])
+            if p2 not in walls and visited[p2] <= score-pain and p2 not in goods:
+                queue.append( (score-pain, p2, d2) )
+                goods.add( p2 )
+    return len(goods)
+
+visited = part1(walls)
+print("Part 1:", visited[finish])
+print("Part 2:", part2(walls, visited))

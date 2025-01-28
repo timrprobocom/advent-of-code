@@ -9,6 +9,11 @@
         "list": "cpp",
         "vector": "cpp",
         "span": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "unordered_map": "cpp",
+        "initializer_list": "cpp",
+        "regex": "cpp",
+        "chrono": "cpp",
+        "format": "cpp"
     }
 }
