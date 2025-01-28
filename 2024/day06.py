@@ -1,8 +1,6 @@
 import os
 import sys
-from collections import defaultdict
-from functools import cmp_to_key
-from pprint import pprint
+import itertools
 
 test = """\
 ....#.....
@@ -29,130 +27,121 @@ else:
 WIDTH = len(data[0])
 HEIGHT = len(data)
 
-data = [list(d) for d in data]
+NORTH = (0,-1)
+WEST = (-1,0)
+SOUTH = (0,1)
+EAST = (1,0)
 
-# Find the guard.
+def turn_right(pt):
+    return (-pt[1],pt[0])
 
-for y,line in enumerate(data):
-    if '^' in line:
-        x = line.index('^')
-        break
+grid = []
 
-GUARD = (x,y)
+GUARD = (-1,-1)
 
-N = (0,-1)
-W = (-1,0)
-S = (0,1)
-E = (1,0)
+walkCounter = itertools.count()
 
-turn = {
-    N:E,
-    E:S,
-    S:W,
-    W:N
-}
+originalPath = [ ]
 
-def part1(data):
-    steps = set()
-    gx,gy = GUARD
-    dir = N
-    while 1:
-        steps.add((gx,gy))
-        nx = gx+dir[0]
-        ny = gy+dir[1]
-        if nx in range(WIDTH) and ny in range(HEIGHT):
-            if data[ny][nx] != '#':
-                gx,gy = nx,ny
-            else:
-                dir = turn[dir]
-        else:
+class Cell:
+    walkId = None
+    blocked = False
+    walked = {}
+    def __init__(self):
+        self.maybeResetCell(0)
+
+    def maybeResetCell(self, walkid):
+        if self.walkId != walkid:
+            self.walkId = walkid
+            self.walked = {d:False for d in (NORTH,SOUTH,EAST,WEST)}
+
+def parseInput():
+    global GUARD
+        
+    for row in range(HEIGHT):
+        gridLine = []
+        grid.append(gridLine)
+        for col in range(WIDTH):
+            cell = Cell()
+            gridLine.append(cell)
+            
+            symbol = data[row][col]
+
+            if symbol == '#':
+                cell.blocked = True
+            elif symbol == '^':
+                GUARD = (col,row)
+
+class PathCell:
+    def __init__(self,row,col,dir):
+        self.x = col
+        self.y = row
+        self.direction = dir
+    def pt(self):
+        return (self.x,self.y)
+
+def add(pt1,pt2):
+    return pt1[0]+pt2[0],pt1[1]+pt2[1]
+
+
+# This is part 1.
+
+def walkOriginalPath():
+    gx, gy = GUARD
+    dir = NORTH
+
+    while True:
+        originalPath.append( PathCell(gy, gx, dir))
+        nx,ny = add((gx,gy),dir)
+        if nx not in range(WIDTH) or ny not in range(HEIGHT):
             break
-    return len(steps)
-
-# If we are facing an empty cell, but there is an already-reached spot to our right, that's a loop.
-
-def follow( x, y, dir, data, seen ):
-    gx = x
-    gy = y
-    while 1:
-        nx = gx+dir[0]
-        ny = gy+dir[1]
-        if (nx,ny) in seen[dir] or (nx,ny) == (x,y):
-            return True
-        if nx in range(WIDTH) and ny in range(HEIGHT):
-            if data[ny][nx] == '#':
-                dir = turn[dir]
-            else:
-                gx,gy = nx,ny
+        if grid[ny][nx].blocked:
+            dir = turn_right(dir)
         else:
+            gx,gy = nx,ny
+
+    return set((pt.x,pt.y) for pt in originalPath)
+
+
+def walkCandidateMap(gx, gy, direction):
+
+    currentWalk = next(walkCounter)
+
+    while True:
+
+# We keep walking until we find a block.
+
+        nx,ny = add((gx,gy),direction)
+        if nx not in range(WIDTH) or ny not in range(HEIGHT):
             break
-    return False
+        if not grid[ny][nx].blocked:
+            gx,gy = nx,ny
+            continue
+        currentCell = grid[gy][gx]
+        currentCell.maybeResetCell(currentWalk)
+        if currentCell.walked[direction]:
+            return 1
+        currentCell.walked[direction] = True
+        direction = turn_right(direction)
+    return 0
 
-def solve(data):
-    steps = set()
-    lines = {N:set(), W:set(), E:set(), S:set()}
-    gx,gy = GUARD
-    dir = N
-    while 1:
-        steps.add((gx,gy))
-        lines[dir].add((gx,gy))
-        nx = gx+dir[0]
-        ny = gy+dir[1]
-        if nx in range(WIDTH) and ny in range(HEIGHT):
-            if (nx,ny) in lines[dir]:
-                return set()
-            elif data[ny][nx] != '#':
-                gx,gy = nx,ny
-            else:
-                dir = turn[dir]
-        else:
-            break
-    return steps
+# This is part 2.  Why is this so danged much faster than my original code?
 
+def walkCandidateMaps():
+    checked = set()
+    checked.add( GUARD )
+    countOfLoopPaths = 0
+    while len(originalPath) > 1:
+        previousCell = originalPath.pop(0)
+        blockingCell = originalPath[0].pt()
+        if blockingCell in checked:
+            continue
+        checked.add( blockingCell )
+        grid[blockingCell[1]][blockingCell[0]].blocked = True
+        countOfLoopPaths += walkCandidateMap(previousCell.x, previousCell.y, previousCell.direction)
+        grid[blockingCell[1]][blockingCell[0]].blocked = False
+    return countOfLoopPaths
 
-def part1(data):
-    return len(solve(data))
-
-# Why doesn't this work?  At each point, if turning right results in us
-# finding a cell we've visited before, then this is a loop.  This comes
-# up with 526, way short of 2262.  Do I have to search around corners?
-
-def part2(data):
-    steps = {N:set(), W:set(), E:set(), S:set()}
-    blocks = set()
-    gx,gy = GUARD
-    dir = N
-
-    while 1:
-        steps[dir].add((gx,gy))
-        nx = gx+dir[0]
-        ny = gy+dir[1]
-        if nx in range(WIDTH) and ny in range(HEIGHT):
-            right = turn[dir]
-            if data[ny][nx] != '#':
-                print('checking',gx,gy,right)
-                if follow( gx, gy, right, data, steps ):
-                    print("Added", nx, ny)
-                    blocks.add( (nx,ny) )
-                gx,gy = nx,ny
-            else:
-                dir = right
-        else:
-            break
-
-    return len(blocks)
-
-# Brute force.  For every spot we visited, if we put an obstacle, do we loop?
-
-def part2(data):
-    visits = solve(data)
-    sumx = 0
-    for x,y in visits:
-        data[y][x] = '#'        
-        sumx += not solve(data)
-        print(sumx,end='\r')
-        data[y][x] = '.'
-    return sumx
-
-print("Part 1:", part1(data))
-print("Part 2:", part2(data))
+parseInput()
+print("Part 1:", len(walkOriginalPath()))
+print("Part 2:", walkCandidateMaps())
