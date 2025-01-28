@@ -72,17 +72,8 @@ def parseInput():
             elif symbol == '^':
                 GUARD = (col,row)
 
-class PathCell:
-    def __init__(self,row,col,dir):
-        self.x = col
-        self.y = row
-        self.direction = dir
-    def pt(self):
-        return (self.x,self.y)
-
 def add(pt1,pt2):
     return pt1[0]+pt2[0],pt1[1]+pt2[1]
-
 
 # This is part 1.
 
@@ -91,7 +82,7 @@ def walkOriginalPath():
     dir = NORTH
 
     while True:
-        originalPath.append( PathCell(gy, gx, dir))
+        originalPath.append( (gx, gy, dir) )
         nx,ny = add((gx,gy),dir)
         if nx not in range(WIDTH) or ny not in range(HEIGHT):
             break
@@ -100,7 +91,7 @@ def walkOriginalPath():
         else:
             gx,gy = nx,ny
 
-    return set((pt.x,pt.y) for pt in originalPath)
+    return set(pt[0:2] for pt in originalPath)
 
 
 def walkCandidateMap(gx, gy, direction):
@@ -109,7 +100,7 @@ def walkCandidateMap(gx, gy, direction):
 
     while True:
 
-# We keep walking until we find a block.
+        # We keep walking until we get blocked.
 
         nx,ny = add((gx,gy),direction)
         if nx not in range(WIDTH) or ny not in range(HEIGHT):
@@ -131,15 +122,17 @@ def walkCandidateMaps():
     checked = set()
     checked.add( GUARD )
     countOfLoopPaths = 0
-    while len(originalPath) > 1:
-        previousCell = originalPath.pop(0)
-        blockingCell = originalPath[0].pt()
-        if blockingCell in checked:
-            continue
-        checked.add( blockingCell )
-        grid[blockingCell[1]][blockingCell[0]].blocked = True
-        countOfLoopPaths += walkCandidateMap(previousCell.x, previousCell.y, previousCell.direction)
-        grid[blockingCell[1]][blockingCell[0]].blocked = False
+    px = None
+    for point in originalPath:
+        if px:
+            block = point[0:2]
+            if block not in checked:
+                checked.add( block )
+                grid[block[1]][block[0]].blocked = True
+                countOfLoopPaths += walkCandidateMap(px, py, pd)
+                grid[block[1]][block[0]].blocked = False
+        px,py,pd = point
+
     return countOfLoopPaths
 
 parseInput()
