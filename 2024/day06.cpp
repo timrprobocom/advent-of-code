@@ -36,68 +36,167 @@ int HEIGHT = -1;
 
 typedef Point<short> point_t;
 
-const point_t directions[] = {    // N  E  S  W
-    point_t({0,-1}),
-    point_t({1,0}),
-    point_t({0,1}),
-    point_t({-1,0})
+point_t NORTH(0,-1);
+point_t EAST(-1,0);
+point_t SOUTH(0,1);
+point_t WEST(1,0);
+
+point_t GUARD(-1,-1);
+
+inline point_t turn_right( const point_t in )
+{
+    return point_t( -in.y, in.x );
+}
+
+struct Cell {
+    int walkId;
+    bool blocked;
+    map<point_t, bool> walked;
+
+    Cell()
+        : walkId( -1 )
+        , blocked( false )
+    {
+        maybeResetCell( 0 );
+    }
+
+    void maybeResetCell(int newwalk)
+    {
+        if( walkId != newwalk )
+        {
+            walkId = newwalk;
+            walked[NORTH] = false;
+            walked[EAST] = false;
+            walked[SOUTH] = false;
+            walked[WEST] = false;
+        }
+    }
 };
 
-point_t find_guard( StringVector& data )
+typedef vector<vector<Cell>> grid_t;
+
+void parseInput( const StringVector & data, grid_t & grid )
 {
+    grid.resize(HEIGHT);
+
     for( int y=0; y < HEIGHT; y++ )
     {
-        int x = data[y].find('^');
-        if( x != string::npos )
-            return point_t(x,y);
+        grid[y].resize(WIDTH);
+        for( int x=0; x < WIDTH; x++ )
+        {
+            char c = data[y][x];
+            if( c == '#' )
+                grid[y][x].blocked = true;
+            else if( c == '^' )
+                GUARD = point_t(x,y);
+        }
     }
-    return point_t(-1,-1);
 }
 
-set<point_t> solve( StringVector & data )
+// A "path" step includes both a coordinate and a direction.
+
+struct step_t
 {
-    set<point_t> steps;
-    set<point_t> lines[4];
-    point_t g = find_guard( data );
-    int dir = 0;
+    point_t pt;
+    point_t dir;
+    bool operator==( step_t & other )
+    {
+        return pt==other.pt && dir==other.dir;
+    }
+    bool operator!=( step_t & other )
+    {
+        return !(*this==other);
+    }
+};
+
+// Ugliness warning -- this gets passed from pass 1 to pass 2.
+
+vector<step_t> g_originalPath;
+
+int part1( StringVector & data, grid_t & grid )
+{
+    point_t gpt = GUARD;
+    point_t dir = NORTH;
+    g_originalPath.clear();
+
     for(;;)
     {
-        steps.insert(g);
-        lines[dir].insert(g);
-        point_t n = g + directions[dir];
-        if( between(0, n.x, WIDTH) && between(0, n.y, HEIGHT) )
-        {
-            if( lines[dir].find(n) != lines[dir].end() )
-                return set<point_t>();
-            else if( data[n.y][n.x] != '#' )
-                g = n;
-            else
-                dir = (dir + 1) % 4;
-        }
-        else
+        g_originalPath.push_back({gpt,dir});
+        point_t npt = gpt + dir;
+        if( !(between(0, npt.x, WIDTH) && between(0, npt.y, HEIGHT)) )
             break;
+        if( grid[npt.y][npt.x].blocked )
+            dir = turn_right(dir);
+        else
+            gpt = npt;
     }
-    return steps;
+
+    // Count the unique cells in the path.
+
+    set<point_t> visited;
+    transform(
+        g_originalPath.begin(),
+        g_originalPath.end(),
+        inserter(visited, visited.begin()),
+        [](step_t & pth) { return pth.pt; }
+    );
+
+    return visited.size();
 }
 
-int part1( StringVector & data )
-{
-    return solve(data).size();
-}
 
-int part2( StringVector & data )
+int walkCandidateMap( grid_t & grid,  step_t & point )
 {
-    set<point_t> visits = solve(data);
-    int sums = 0;
-    for( auto && pt : visits )
+    static int currentWalk = 0;
+    currentWalk++;
+    point_t pt = point.pt;
+    point_t direction = point.dir;
+
+    for(;;)
     {
-        char c = data[pt.y][pt.x];
-        data[pt.y][pt.x] = '#';
-        if( solve(data).empty() )
-            sums ++;
-        data[pt.y][pt.x] = c;
+        // We keep walking until we get blocked.
+        point_t npt = pt + direction;
+        if( !(between(0, npt.x, WIDTH) && between(0, npt.y, HEIGHT)) )
+            break;
+        if( !grid[npt.y][npt.x].blocked )
+        {
+            pt = npt;
+            continue;
+        }
+        Cell & currentCell = grid[pt.y][pt.x];
+        currentCell.maybeResetCell(currentWalk);
+        if( currentCell.walked[direction] )
+            return 1;
+        currentCell.walked[direction] = true;
+        direction = turn_right(direction);
     }
-    return sums;
+    return 0;
+}
+
+
+int part2( StringVector & data, grid_t & grid )
+{
+    set<point_t> checked;
+    checked.insert( GUARD );
+    int countOfLoopPaths = 0;
+    step_t point = g_originalPath[0];
+    for( auto & step : g_originalPath )
+    {
+        if( step != point )
+        {
+            point_t block = step.pt;
+            if( checked.find(block) == checked.end() )
+            {
+                checked.insert( block );
+                grid[block.y][block.x].blocked = true;
+                countOfLoopPaths += walkCandidateMap(grid, point);
+                grid[block.y][block.x].blocked = false;
+            }
+        }
+        point = step;
+    }
+
+    return countOfLoopPaths;
 }
 
 
@@ -118,6 +217,9 @@ int main( int argc, char ** argv )
     WIDTH = data[0].size();
     HEIGHT = data.size();
 
-    cout << "Part 1: " << part1(data) << "\n";
-    cout << "Part 2: " << part2(data) << "\n";
+    vector<vector<Cell>> grid;
+    parseInput( data, grid );
+
+    cout << "Part 1: " << part1(data,grid) << "\n";
+    cout << "Part 2: " << part2(data,grid) << "\n";
 }
