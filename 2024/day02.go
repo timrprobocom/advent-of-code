@@ -3,22 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
-	"sort"
 )
 
-import _ "embed";
-
-var DEBUG bool = false
-var TEST bool = false
-var test = `3   4
-4   3
-2   5
-1   3
-3   9
-3   3`
-
-//go:embed day01.txt
-var live string
+import _ "embed"
 
 // Tools.
 
@@ -33,14 +20,9 @@ func absDiffInt(x, y int) int {
     return x - y
 }
 
-func Count(haystack []int, needle int) int {
-    count := 0
-    for _, i := range haystack {
-        if i == needle {
-           count += 1
-	}
-    }
-    return count
+func remove( row []int, index int ) []int {
+    clone := append( row[:0:0], row...)
+    return append( clone[0:index], clone[index+1:]... )
 }
 
 func setup() string {
@@ -92,42 +74,74 @@ func parse( input string ) [][]int {
         last = c
     }
     if len(row) > 0 {
-        result = append( result, append( row, sign*accum ) )
+        result = append( result, row )
     }
     return result
 }
 
 // End tools.
 
-func part1(one []int, two []int) int {
+var DEBUG bool = false
+var TEST bool = false
+
+var test = `7 6 4 2 1
+1 2 7 8 9
+9 7 6 2 1
+1 3 2 4 5
+8 6 4 4 1
+1 3 6 7 9`
+
+//go:embed day02.txt
+var live string
+
+func is_safe( row []int ) bool {
+    for i := 0; i < len(row)-1; i++ {
+        x := row[i]
+        y := row[i+1]
+        if (y-x) * (row[1]-row[0]) < 0 {
+            return false
+        }
+        if absInt(y-x) < 1 || absInt(y-x) > 3 {
+            return false
+        }
+    }
+    return true
+}
+
+
+func part1( data [][]int  ) int {
     sumx := 0
-    for i, p1 := range one {
-          sumx += absDiffInt(p1, two[i])
+    for _, row := range data {
+        if is_safe(row) {
+            sumx++
+        }
     }
     return sumx
 }
 
-func part2(one []int, two []int) int {
-    sumx := 0
-    for _, p1 := range one {
-        sumx += p1 * Count(two, p1)
+func part2( data [][]int ) int {
+    safe := 0
+    for _, row := range data {
+        if is_safe(row) {
+            safe++
+        } else {
+            for i := 0; i < len(row); i++ {
+                if is_safe(remove(row,i)) {
+                    safe++
+                    break
+                }
+            }
+        }
     }
-    return sumx
+    return safe
 }
+
 
 func main() {
     input := setup()
-    data := parse(input)
 
-    var one []int
-    var two []int
-    for _, row := range data {
-        one = append( one, row[0] )
-        two = append( two, row[1] )
-    }
+    data := parse( input )
 
-    sort.Ints(one)
-    sort.Ints(two)
-    fmt.Println("Part 1:", part1(one, two))
-    fmt.Println("Part 2:", part2(one, two))
+    fmt.Println("Part 1:", part1(data))
+    fmt.Println("Part 2:", part2(data))
 }
