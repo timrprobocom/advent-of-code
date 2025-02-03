@@ -1,24 +1,31 @@
-package main
+package tools
 
-func absInt(x int) int {
-	return absDiffInt(x, 0)
+import "os"
+
+func AbsInt(x int) int {
+    return AbsDiffInt(x, 0)
 }
 
-func absDiffInt(x, y int) int {
-	if x < y {
-		return y - x
-	}
-	return x - y
+func AbsDiffInt(x, y int) int {
+    if x < y {
+        return y - x
+    }
+    return x - y
 }
 
 // golang shock #1:  "append" modifies its parameters.
+// This returns a new slice without that member.
 
-func remove( row []int, index int ) []int {
+func Remove( row []int, index int ) []int {
     clone := append( row[:0:0], row...)
     return append( clone[0:index], clone[index+1:]... )
 }
 
-func setup() string {
+
+func Setup( test string, live string ) (bool,bool,string) {
+    DEBUG := false
+    TEST := false
+
     for _, arg := range os.Args {
         if arg == "debug" {
             DEBUG = true
@@ -28,16 +35,30 @@ func setup() string {
         }
     }
 
+    var input string
     if TEST {
-        return test
+        input = test
     } else {
-        return live
+        input = live
     }
+    return TEST, DEBUG, input
 }
+
+
+func Count(haystack []int, needle int) int {
+    count := 0
+    for _, i := range haystack {
+        if i == needle {
+           count += 1
+       }
+    }
+    return count
+}
+
 
 // Produce a matrix of ints from the input.
 
-func parse( input string ) [][]int {
+func Parse( input string ) [][]int {
     result := make([][]int, 0)
     var row []int
     var accum int

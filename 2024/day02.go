@@ -2,84 +2,11 @@ package main
 
 import (
 	"fmt"
-	"os"
 )
 
 import _ "embed"
 
-// Tools.
-
-func absInt(x int) int {
-    return absDiffInt(x, 0)
-}
-
-func absDiffInt(x, y int) int {
-    if x < y {
-        return y - x
-    }
-    return x - y
-}
-
-func remove( row []int, index int ) []int {
-    clone := append( row[:0:0], row...)
-    return append( clone[0:index], clone[index+1:]... )
-}
-
-func setup() string {
-    for _, arg := range os.Args {
-        if arg == "debug" {
-            DEBUG = true
-        }
-        if arg == "test" {
-            TEST = true
-        }
-    }
-
-    if TEST {
-        return test
-    } else {
-        return live
-    }
-}
-
-// Produce a matrix of ints from the input.
-
-func parse( input string ) [][]int {
-    result := make([][]int, 0)
-    var row []int
-    var accum int
-    sign := 1
-    last := '?'
-    for _, c := range input {
-        switch c {
-        case '\n':
-            row = append( row, sign*accum )
-            result = append( result, row )
-            row = make([]int, 0)
-            accum = 0
-            sign = 1
-        case ' ':
-            if last != ' ' {
-                row = append( row, sign*accum )
-                accum = 0
-                sign = 1
-            }
-        case '-':
-            sign = -1
-        case '0','1','2','3','4','5','6','7','8','9':
-            accum = accum * 10 + int(c) - '0';
-        default:
-            print("Unexpected ", c)
-        }
-        last = c
-    }
-    if len(row) > 0 {
-        result = append( result, row )
-    }
-    return result
-}
-
-// End tools.
+import "aoc/tools"
 
 var DEBUG bool = false
 var TEST bool = false
@@ -101,7 +28,7 @@ func is_safe( row []int ) bool {
         if (y-x) * (row[1]-row[0]) < 0 {
             return false
         }
-        if absInt(y-x) < 1 || absInt(y-x) > 3 {
+        if tools.AbsInt(y-x) < 1 || tools.AbsInt(y-x) > 3 {
             return false
         }
     }
@@ -126,7 +53,7 @@ func part2( data [][]int ) int {
             safe++
         } else {
             for i := 0; i < len(row); i++ {
-                if is_safe(remove(row,i)) {
+                if is_safe(tools.Remove(row,i)) {
                     safe++
                     break
                 }
@@ -138,9 +65,10 @@ func part2( data [][]int ) int {
 
 
 func main() {
-    input := setup()
+    var input string
+    TEST, DEBUG, input = tools.Setup( test, live )
 
-    data := parse( input )
+    data := tools.Parse( input )
 
     fmt.Println("Part 1:", part1(data))
     fmt.Println("Part 2:", part2(data))
