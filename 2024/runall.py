@@ -4,12 +4,14 @@ import time
 
 # python c++ go
 
+# Python is slowest, then unoptimized C++, then go and optimized C++ are about the same.
+
 def fetch(cmd):
     return subprocess.run( cmd, check=True, stdout=subprocess.PIPE).stdout.decode()
 
 def prep(file, ext):
     if ext == '.cpp':
-        subprocess.run(['g++', '--std=c++17', '-o', file, file+ext, '-llapack'])
+        subprocess.run(['g++', '--std=c++17', '-O3', '-o', file, file+ext, '-llapack'])
     elif ext == '.go':
         subprocess.run(['go', 'build', file+ext] )
 
