@@ -1,6 +1,7 @@
 package tools
 
 import "os"
+import "fmt"
 
 func AbsInt(x int) int {
     return AbsDiffInt(x, 0)
@@ -21,11 +22,10 @@ func Remove( row []int, index int ) []int {
     return append( clone[0:index], clone[index+1:]... )
 }
 
+var DEBUG bool = false
+var TEST bool = false
 
 func Setup( test string, live string ) (bool,bool,string) {
-    DEBUG := false
-    TEST := false
-
     for _, arg := range os.Args {
         if arg == "debug" {
             DEBUG = true
@@ -83,7 +83,9 @@ func Parse( input string ) [][]int {
         case '0','1','2','3','4','5','6','7','8','9':
             accum = accum * 10 + int(c) - '0';
         default:
-            print("Unexpected ", c)
+            if DEBUG {
+                fmt.Println("Unexpected ", rune(c))
+            }
         }
         last = c
     }

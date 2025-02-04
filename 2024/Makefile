@@ -21,7 +21,7 @@ SRCS += $(wildcard *.rs)
 OBJS = $(subst .cpp,.$O,$(subst .rs,.$O,$(SRCS)))
 EXES = $(subst .cpp,$(EXE),$(subst .rs,$(EXE),$(SRCS)))
 
-%$(EXE): %.cpp
+%$(EXE): %.cpp utils.h
 	$(COMPILE.cpp) $(OUTPUT_OPTION) $< $(LIBS)
 
 %$(EXE): %.rs

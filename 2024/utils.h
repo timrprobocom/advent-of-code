@@ -13,13 +13,16 @@ typedef std::vector<std::string> StringVector;
 StringVector split( std::string src, std::string delim="\n" )
 {
     StringVector sv;
-    for( int j = src.find(delim); j != -1; )
+    int was = 0;
+    for( 
+        int j = src.find(delim);
+        j != -1;
+        was = j+1, j = src.find(delim, was)
+    )
     {
-        sv.push_back( src.substr(0,j) );
-        src = src.substr(j+delim.size());
-        j = src.find(delim);
+        sv.push_back( src.substr(was, j-was) );
     }
-    sv.push_back(src);
+    sv.push_back(src.substr(was));
     return sv;
 }
 

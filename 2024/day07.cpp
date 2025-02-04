@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <list>
 #include <queue>
 #include <algorithm>
 #include <numeric>
@@ -28,25 +29,10 @@ const string test(
 bool DEBUG = false;
 bool TEST = false;
 
-typedef vector<string> StringVector;
-
-StringVector split( string src, string delim )
-{
-    StringVector sv;
-    for( int j = src.find(delim); j != -1; )
-    {
-        sv.push_back( src.substr(0,j) );
-        src = src.substr(j+delim.size());
-        j = src.find(delim);
-    }
-    sv.push_back(src);
-    return sv;
-}
-
 
 typedef vector<int64_t> LongVector;
 typedef vector<LongVector>  LongBlock;
-typedef set<int64_t>  LongSet;
+typedef list<int64_t>  LongList;
 
 int64_t part1(const LongBlock & data )
 {
@@ -54,26 +40,40 @@ int64_t part1(const LongBlock & data )
     for( auto && row : data )
     {
         int64_t k = -1;
-        LongSet maybe;
+        bool win = false;
+        LongList maybe;
         for( int64_t v1 : row )
         {
             if( k < 0 )
                 k = v1;
             else if( maybe.empty() )
-                maybe.insert( v1 );
+                maybe.push_back( v1 );
             else
             {
-                LongSet next;
+                LongList next;
                 for( auto m : maybe )
                 {
-                    next.insert(m+v1);
+                    int64_t p = m+v1;
+                    win = p == k;
+                    if( win )
+                        break;
+                    next.push_back(m+v1);
+
+                    p = m*v1;
+                    win = p == k;
+                    if( win )
+                        break;
                     if( m*v1 <= k )
-                        next.insert(m*v1);
+                        next.push_back(m*v1);
                 }
+                if( win )
+                    break;
                 maybe.swap( next );
             }
+            if( win )
+                break;
         }
-        if( maybe.find( k ) != maybe.end() )
+        if( win )
             sumx += k;
     }
     return sumx;
@@ -85,30 +85,47 @@ int64_t part2(const LongBlock & data )
     for( auto && row : data )
     {
         int64_t k = -1;
-        LongSet maybe;
+        bool win = false;
+        LongList maybe;
         for( int64_t v1 : row )
         {
             if( k < 0 )
                 k = v1;
             else if( maybe.empty() )
-                maybe.insert( v1 );
+                maybe.push_back( v1 );
             else
             {
-                LongSet next;
+                LongList next;
                 for( auto m : maybe )
                 {
-                    next.insert(m+v1);
-                    int64_t p =  m*v1;
-                    if( p <= k )
-                        next.insert( p );
+                    int64_t p =  m+v1;
+                    win = p == k;
+                    if( win )
+                        break;
+                    next.push_back(p);
+
+                    p =  m*v1;
+                    win = p == k;
+                    if( win )
+                        break;
+                    if( p < k )
+                        next.push_back( p );
+
                     p = stoll(to_string(m)+to_string(v1));
-                    if( p <= k )
-                        next.insert( p );
+                    win = p == k;
+                    if( win )
+                        break;
+                    if( p < k )
+                        next.push_back( p );
                 }
+                if( win )
+                    break;
                 maybe.swap( next );
             }
+            if( win )
+                break;
         }
-        if( maybe.find( k ) !=  maybe.end() )
+        if( win )
             sumx += k;
     }
     return sumx;
