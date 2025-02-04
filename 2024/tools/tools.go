@@ -92,3 +92,15 @@ func Parse( input string ) [][]int {
     }
     return result
 }
+
+// How does the language not already have this?
+
+func Isdigit(s byte) bool {
+    return s >= '0' && s <= '9';
+}
+
+
+func Between[T ~int] (lo T, val T, hi T) bool {
+    return (lo <= val) && (val <= hi)
+}
+

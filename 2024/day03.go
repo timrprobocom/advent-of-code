@@ -30,25 +30,19 @@ func is_safe( row []int ) bool {
     return true
 }
 
-// How does the language not already have this?
-
-func isdigit(s byte) bool {
-    return s >= '0' && s <= '9';
-}
-
 func part1( data string ) int {
     sumx := 0
     for i := 0; i < len(data)-4; i++ {
         if data[i:i+4] == "mul(" {
             i += 4
             a, b := 0, 0
-            for ; isdigit(data[i]); i++  {
+            for ; tools.Isdigit(data[i]); i++  {
                 a = a * 10 + int(data[i]) - '0'
             }
             if data[i] != ',' {
                 continue
             }
-            for i++; isdigit(data[i]); i++  {
+            for i++; tools.Isdigit(data[i]); i++  {
                 b = b * 10 + int(data[i]) - '0'
             }
             if data[i] != ')' {
@@ -73,13 +67,13 @@ func part2( data string ) int {
         } else if yes && data[i:i+4] == "mul(" {
             i += 4
             a, b := 0, 0
-            for ; isdigit(data[i]); i++  {
+            for ; tools.Isdigit(data[i]); i++  {
                 a = a * 10 + int(data[i]) - '0'
             }
             if data[i] != ',' {
                 continue
             }
-            for i++; isdigit(data[i]); i++  {
+            for i++; tools.Isdigit(data[i]); i++  {
                 b = b * 10 + int(data[i]) - '0'
             }
             if data[i] != ')' {
