@@ -17,7 +17,7 @@ StringVector split( std::string src, std::string delim="\n" )
     for( 
         int j = src.find(delim);
         j != -1;
-        was = j+1, j = src.find(delim, was)
+        was = j+delim.size(), j = src.find(delim, was)
     )
     {
         sv.push_back( src.substr(was, j-was) );
