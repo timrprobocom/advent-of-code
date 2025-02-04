@@ -101,8 +101,9 @@ func Isdigit(s byte) bool {
     return s >= '0' && s <= '9';
 }
 
+// Is val within [lo,hi)?  Uses Python concept.
 
 func Between[T ~int] (lo T, val T, hi T) bool {
-    return (lo <= val) && (val <= hi)
+    return (lo <= val) && (val < hi)
 }
 

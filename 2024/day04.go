@@ -58,7 +58,7 @@ func part1(data []string) int {
 			for _, c := range []byte("MAS") {
 				pt.x += dir.x
 				pt.y += dir.y
-				if !(tools.Between(0, pt.x, WIDTH-1) && tools.Between(0, pt.y, HEIGHT-1) && data[pt.y][pt.x] == c) {
+				if !(tools.Between(0, pt.x, WIDTH) && tools.Between(0, pt.y, HEIGHT) && data[pt.y][pt.x] == c) {
 					winner--
 					break
 				}
@@ -71,8 +71,8 @@ func part1(data []string) int {
 func part2(data []string) int {
 	winner := 0
 	for _, pt := range findall(data, 'A') {
-		if tools.Between(1, pt.x, WIDTH-2) &&
-			tools.Between(1, pt.y, HEIGHT-2) &&
+		if tools.Between(1, pt.x, WIDTH-1) &&
+			tools.Between(1, pt.y, HEIGHT-1) &&
 			((data[pt.y-1][pt.x-1] == 'M' && data[pt.y+1][pt.x+1] == 'S') ||
 				(data[pt.y-1][pt.x-1] == 'S' && data[pt.y+1][pt.x+1] == 'M')) &&
 			((data[pt.y-1][pt.x+1] == 'M' && data[pt.y+1][pt.x-1] == 'S') ||
