@@ -148,11 +148,12 @@ func walkCandidateMap(grid [][]Cell, point Step) int {
 			pt = npt
 			continue
 		}
-		grid[pt.y][pt.x].maybeResetCell(currentWalk)
-		if grid[pt.y][pt.x].walked[direction] {
+		currentCell := &grid[pt.y][pt.x]
+		currentCell.maybeResetCell(currentWalk)
+		if currentCell.walked[direction] {
 			return 1
 		}
-		grid[pt.y][pt.x].walked[direction] = true
+		currentCell.walked[direction] = true
 		direction = direction.turn_right()
 	}
 	return 0
