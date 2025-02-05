@@ -24,6 +24,7 @@ def run(file, ext):
         return fetch(['./'+fn])
 
 print('Python'.ljust(30), 'C++'.ljust(30), 'Go')
+print('-'*92)
 
 for day in range(1,26):
     fn = f'day{day:02d}'
@@ -31,6 +32,7 @@ for day in range(1,26):
     times = []
     for lang in '.py','.cpp','.go':
         if os.path.exists(fn+lang):
+            print(lang,end=' \r')
             prep( fn, lang )
             before = time.time()
             s = run( fn, lang )
@@ -40,9 +42,9 @@ for day in range(1,26):
     print(fn)
     for lns in zip(*gather):
         for ln in lns:
-            print(ln.ljust(30),end='')
+            print(ln.ljust(31),end='')
         print()
     for t in times:
-        print( ('%10.3f'%t).ljust(30), end='')
+        print( ('%10.3f'%t).ljust(31), end='')
     print()
 
