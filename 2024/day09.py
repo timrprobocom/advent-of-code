@@ -56,23 +56,25 @@ def part1(data):
 
 def coalesce( space, start, size ):
     newspace = []
-    while space:
-        sstart, ssize = space.pop(0)
-        if not ssize:
+    done = False
+    for sstart, ssize in space:
+        if done:
+            newspace.append( [sstart, ssize] )
+        elif not ssize:
             continue
         elif start > sstart+ssize:
             newspace.append( [sstart, ssize] )
         elif start+size == sstart:
             newspace.append( [start, size+ssize] )
-            break
+            done = True
         elif sstart+ssize == start:
             newspace.append( [sstart, size+ssize] )
-            break
+            done = True
         elif sstart > start+size:
             newspace.append( (start, size) )
             newspace.append( [sstart, ssize] )
-            break
-    return newspace+space
+            done = True
+    return newspace
 
 # Find the first hold large enough to hold this file.
 
