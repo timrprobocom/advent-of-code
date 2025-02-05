@@ -20,24 +20,15 @@ var WIDTH = -1
 var HEIGHT = -1
 
 
-func repeat[T any]( val T, count int ) []T {
-	result := make([]T, count, count)
-	for i := 0; i < count; i++ {
-		result[i] = val
-	}
-	return result
-}
-
-
 func part1(data []int) int64 {
     idn := 0
     var disk []int
 
 	for i, size := range data {
 		if i % 2 > 0 {
-			disk = append( disk, repeat(-1, size)...)
+			disk = append( disk, tools.Repeat(-1, size)...)
 		} else {
-			disk = append( disk, repeat(idn, size)...)
+			disk = append( disk, tools.Repeat(idn, size)...)
 			idn++
 		}
 	}

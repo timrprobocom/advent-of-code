@@ -107,3 +107,11 @@ func Between[T ~int] (lo T, val T, hi T) bool {
     return (lo <= val) && (val < hi)
 }
 
+
+func Repeat[T any]( val T, count int ) []T {
+	result := make([]T, count, count)
+	for i := 0; i < count; i++ {
+		result[i] = val
+	}
+	return result
+}
