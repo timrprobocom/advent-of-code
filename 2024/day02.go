@@ -11,12 +11,13 @@ import "aoc/tools"
 var DEBUG bool = false
 var TEST bool = false
 
-var test = `7 6 4 2 1
+var test = `
+7 6 4 2 1
 1 2 7 8 9
 9 7 6 2 1
 1 3 2 4 5
 8 6 4 4 1
-1 3 6 7 9`
+1 3 6 7 9`[1:]
 
 //go:embed day02.txt
 var live string

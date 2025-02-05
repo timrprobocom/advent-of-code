@@ -13,7 +13,8 @@ import (
 var DEBUG bool = false
 var TEST bool = false
 
-var test = `47|53
+var test = `
+47|53
 97|13
 97|61
 97|47
@@ -40,7 +41,7 @@ var test = `47|53
 75,29,13
 75,97,47,61,53
 61,13,29
-97,13,75,29,47`
+97,13,75,29,47`[1:]
 
 //go:embed day05.txt
 var live string

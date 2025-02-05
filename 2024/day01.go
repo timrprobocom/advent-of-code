@@ -10,12 +10,13 @@ import (
 
 var DEBUG bool = false
 var TEST bool = false
-var test = `3   4
+var test = `
+3   4
 4   3
 2   5
 1   3
 3   9
-3   3`
+3   3`[1:]
 
 //go:embed day01.txt
 var live string

@@ -2,11 +2,9 @@ package main
 
 import (
     "fmt"
+    _ "embed"
+	"aoc/tools"
 )
-
-import _ "embed"
-
-import "aoc/tools"
 
 var DEBUG bool = false
 var TEST bool = false

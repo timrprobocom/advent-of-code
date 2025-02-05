@@ -11,7 +11,8 @@ import (
 var DEBUG bool = false
 var TEST bool = false
 
-var test = `MMMSXXMASM
+var test = `
+MMMSXXMASM
 MSAMXMSMSA
 AMXSXMAAMM
 MSAMASMSMX
@@ -20,7 +21,7 @@ XXAMMXXAMA
 SMSMSASXSS
 SAXAMASAAA
 MAMMMXMMMM
-MXMXAXMASX`
+MXMXAXMASX`[1:]
 
 //go:embed day04.txt
 var live string
