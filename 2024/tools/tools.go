@@ -72,7 +72,7 @@ func Parse( input string ) [][]int {
             row = make([]int, 0)
             accum = 0
             sign = 1
-        case ' ':
+        case ' ',',':
             if last != ' ' {
                 row = append( row, sign*accum )
                 accum = 0
