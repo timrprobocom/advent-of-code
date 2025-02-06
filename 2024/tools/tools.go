@@ -78,7 +78,9 @@ func Parse( input string ) [][]int {
                 accum = 0
                 sign = 1
             }
-        case '-':
+        case '+':
+		    sign = 1
+		case '-':
             sign = -1
         case '0','1','2','3','4','5','6','7','8','9':
             accum = accum * 10 + int(c) - '0';
