@@ -46,12 +46,14 @@ var directions []Point
 
 // Cutesy hint:  map[X]bool is a cute way of doing set<X>.
 
+type PointSet = map[Point]bool
+
 // We have a lot of support functions in this one.
 
-func getregion(region map[Point]bool, xy Point) map[Point]bool {
+func getregion(region PointSet, xy Point) map[Point]bool {
 	var queue []Point
 	queue = append(queue, xy)
-	found := make(map[Point]bool)
+	found := make(PointSet)
 	found[xy] = true
 
 	for len(queue) > 0 {
@@ -76,12 +78,12 @@ func firstkey[T comparable, U any](mapx map[T]U) T {
 	return xy
 }
 
-func distinctsets(regionIn []Point) []map[Point]bool {
-	region := make(map[Point]bool)
+func distinctsets(regionIn []Point) []PointSet {
+	region := make(PointSet)
 	for _, xy := range regionIn {
 		region[xy] = true
 	}
-	var regions []map[Point]bool
+	var regions []PointSet
 	for len(region) > 0 {
 		xy := firstkey(region)
 		newreg := getregion(region, xy)
@@ -95,7 +97,7 @@ func distinctsets(regionIn []Point) []map[Point]bool {
 
 // Return the sum of points in the region that have a neighbor NOT in the region.
 
-func perimeter(region map[Point]bool) int64 {
+func perimeter(region PointSet) int64 {
 	sum := 0
 	for xy, _ := range region {
 		for _, dxy := range directions {
@@ -115,7 +117,7 @@ type PointDir struct {
 	dir Point
 }
 
-func find_border(region map[Point]bool) map[PointDir]bool {
+func find_border(region PointSet) map[PointDir]bool {
 	border := make(map[PointDir]bool)
 	for xy, _ := range region {
 		for _, dxy := range directions {
@@ -147,7 +149,7 @@ func sides(border map[PointDir]bool) int64 {
 	return int64(sides)
 }
 
-func part1(regions []map[Point]bool) int64 {
+func part1(regions []PointSet) int64 {
 	var sum int64 = 0
 	for _, region := range regions {
 		sum += int64(len(region)) * perimeter(region)
@@ -155,7 +157,7 @@ func part1(regions []map[Point]bool) int64 {
 	return sum
 }
 
-func part2(regions []map[Point]bool) int64 {
+func part2(regions []PointSet) int64 {
 	var sum int64 = 0
 	for _, region := range regions {
 		border := find_border(region)
@@ -190,7 +192,7 @@ func main() {
 		fmt.Println(stats)
 	}
 
-	var regions []map[Point]bool
+	var regions []PointSet
 	for _, region := range stats {
 		for _, s := range distinctsets(region) {
 			regions = append(regions, s)

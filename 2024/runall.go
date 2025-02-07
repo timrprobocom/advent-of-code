@@ -8,6 +8,9 @@ import (
 )
 
 func ljust( s string, w int ) string {
+	if len(s) >= w { 
+		return s 
+	}
 	return s + strings.Repeat(" ", w-len(s))
 }
 
