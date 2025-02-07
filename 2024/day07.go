@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 
 	"aoc/tools"
@@ -28,14 +29,12 @@ var live string
 // Yes, I use a goto here.  I need to break out of three levels of for loop.
 // It can be done with extra "if win", but this reads OK.
 
-func part1(data [][]int) int64 {
+func part1(data [][]int64) int64 {
 	var sumx int64 = 0
 	for _, row := range data {
 		var k int64 = -1
-		win := false
 		var maybe []int64
-		for _, v0 := range row {
-			v1 := int64(v0)
+		for _, v1 := range row {
 			if k < 0 {
 				k = v1
 			} else if len(maybe) == 0 {
@@ -44,38 +43,31 @@ func part1(data [][]int) int64 {
 				var next []int64
 				for _, m := range maybe {
 					p := m + v1
-					win = p == k
-					if win {
-						goto win
+					if p <= k {
+						next = append(next, p)
 					}
-					next = append(next, p)
 
 					p = m * v1
-					win = p == k
-					if win {
-						goto win
+					if p <= k {
+						next = append(next, p)
 					}
-					next = append(next, p)
 				}
 				maybe = next
 			}
 		}
-	win:
-		if win {
+		if slices.Contains(maybe, k) {
 			sumx += k
 		}
 	}
 	return sumx
 }
 
-func part2(data [][]int) int64 {
+func part2(data [][]int64) int64 {
 	var sumx int64 = 0
 	for _, row := range data {
 		var k int64 = -1
-		win := false
 		var maybe []int64
-		for _, v0 := range row {
-			v1 := int64(v0)
+		for _, v1 := range row {
 			if k < 0 {
 				k = v1
 			} else if len(maybe) == 0 {
@@ -84,31 +76,24 @@ func part2(data [][]int) int64 {
 				var next []int64
 				for _, m := range maybe {
 					p := m + v1
-					win = p == k
-					if win {
-						goto win
+					if p <= k {
+						next = append(next, p)
 					}
-					next = append(next, p)
 
 					p = m * v1
-					win = p == k
-					if win {
-						goto win
+					if p <= k {
+						next = append(next, p)
 					}
-					next = append(next, p)
 
-					p, _ = strconv.ParseInt(strconv.FormatInt(m, 10)+strconv.FormatInt(v1, 10), 10, 0)
-					win = p == k
-					if win {
-						goto win
+					p, _ = strconv.ParseInt(fmt.Sprintf("%d%d", m, v1), 10, 64)
+					if p <= k {
+						next = append(next, p)
 					}
-					next = append(next, p)
 				}
 				maybe = next
 			}
 		}
-	win:
-		if win {
+		if slices.Contains(maybe, k) {
 			sumx += k
 		}
 	}
@@ -118,7 +103,7 @@ func part2(data [][]int) int64 {
 func main() {
 	var input string
 	TEST, DEBUG, input = tools.Setup(test, live)
-	data := tools.Parse(input)
+	data := tools.Parse64(input)
 
 	fmt.Println("Part 1:", part1(data))
 	fmt.Println("Part 2:", part2(data))

@@ -54,17 +54,12 @@ int64_t part1(const LongBlock & data )
                 for( auto m : maybe )
                 {
                     int64_t p = m+v1;
-                    win = p == k;
-                    if( win )
-                        break;
-                    next.push_back(m+v1);
+                    if( p <= k )
+                        next.push_back(p);
 
                     p = m*v1;
-                    win = p == k;
-                    if( win )
-                        break;
-                    if( m*v1 <= k )
-                        next.push_back(m*v1);
+                    if( p <= k )
+                        next.push_back(p);
                 }
                 if( win )
                     break;
@@ -73,7 +68,7 @@ int64_t part1(const LongBlock & data )
             if( win )
                 break;
         }
-        if( win )
+        if( find( maybe.begin(), maybe.end(), k) != maybe.end() )
             sumx += k;
     }
     return sumx;
@@ -99,33 +94,21 @@ int64_t part2(const LongBlock & data )
                 for( auto m : maybe )
                 {
                     int64_t p =  m+v1;
-                    win = p == k;
-                    if( win )
-                        break;
-                    next.push_back(p);
+                    if( p <= k )
+                        next.push_back(p);
 
                     p =  m*v1;
-                    win = p == k;
-                    if( win )
-                        break;
-                    if( p < k )
+                    if( p <= k )
                         next.push_back( p );
 
                     p = stoll(to_string(m)+to_string(v1));
-                    win = p == k;
-                    if( win )
-                        break;
-                    if( p < k )
+                    if( p <= k )
                         next.push_back( p );
                 }
-                if( win )
-                    break;
                 maybe.swap( next );
             }
-            if( win )
-                break;
         }
-        if( win )
+        if( find( maybe.begin(), maybe.end(), k) != maybe.end() )
             sumx += k;
     }
     return sumx;
