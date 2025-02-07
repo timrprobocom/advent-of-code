@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-  	"gonum.org/v1/gonum/stat"
 	"aoc/tools"
 	_ "embed"
+	"gonum.org/v1/gonum/stat"
 )
 
 var DEBUG bool = false
@@ -31,27 +31,26 @@ var live string
 var WIDTH int = -1
 var HEIGHT int = -1
 
-
-func printgrid( data [][]int ) {
-    grid := make([][]byte, HEIGHT)
+func printgrid(data [][]int) {
+	grid := make([][]byte, HEIGHT)
 	for y := 0; y < HEIGHT; y++ {
 		grid[y] = make([]byte, WIDTH)
 	}
 
-	for _, bot := range(data) {
-        grid[bot[1]][bot[0]] ++
+	for _, bot := range data {
+		grid[bot[1]][bot[0]]++
 	}
 
-    for _, row := range grid {
+	for _, row := range grid {
 		var s string
-        for _, c := range row {
+		for _, c := range row {
 			s += string(".1234"[c])
 		}
-        fmt.Println(s)
+		fmt.Println(s)
 	}
 }
 
-func move( data [][]int) {
+func move(data [][]int) {
 	for i := 0; i < len(data); i++ {
 		data[i][0] = (data[i][0] + data[i][2] + WIDTH) % WIDTH
 		data[i][1] = (data[i][1] + data[i][3] + HEIGHT) % HEIGHT
@@ -61,32 +60,32 @@ func move( data [][]int) {
 // The tree is solid, so the standard deviation of the coordinates goes WAY down.
 // Tpyical is 30, tree gets 19.
 
-func detect_tree( data [][]int ) bool {
+func detect_tree(data [][]int) bool {
 	var x []float64
 	var y []float64
-	for _,bot := range data {
+	for _, bot := range data {
 		x = append(x, float64(bot[0]))
 		y = append(y, float64(bot[1]))
 	}
-    stx := stat.StdDev(x, nil)
-    sty := stat.StdDev(y, nil)
-    if stx < 20 && sty < 20 {
-        if DEBUG {
-            printgrid(data)
+	stx := stat.StdDev(x, nil)
+	sty := stat.StdDev(y, nil)
+	if stx < 20 && sty < 20 {
+		if DEBUG {
+			printgrid(data)
 		}
-        return true
+		return true
 	}
 	return false
 }
 
-func part1( data [][]int ) int {
+func part1(data [][]int) int {
 	for i := 0; i < 100; i++ {
-        move(data)
+		move(data)
 	}
 
-    hw := WIDTH/2
-    hh := HEIGHT/2
-	k1,k2,k3,k4 := 0,0,0,0
+	hw := WIDTH / 2
+	hh := HEIGHT / 2
+	k1, k2, k3, k4 := 0, 0, 0, 0
 
 	for _, bot := range data {
 		if bot[0] < hw && bot[1] < hh {
@@ -102,20 +101,19 @@ func part1( data [][]int ) int {
 			k4++
 		}
 	}
-    return k1*k2*k3*k4 
+	return k1 * k2 * k3 * k4
 }
 
-func part2( data [][]int ) int {
+func part2(data [][]int) int {
 	var i int
 	for i = 100; i < 10000; i++ {
-        move(data)
-        if detect_tree(data) {
-            break
+		move(data)
+		if detect_tree(data) {
+			break
 		}
 	}
-	return i+1
+	return i + 1
 }
-
 
 func main() {
 	var input string
@@ -130,7 +128,7 @@ func main() {
 		HEIGHT = 103
 	}
 
-    if DEBUG {
+	if DEBUG {
 		printgrid(data)
 	}
 

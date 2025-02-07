@@ -47,7 +47,6 @@ var test string = `
 #S#.............#
 #################`[1:]
 
-
 //go:embed day16.txt
 var live string
 
@@ -69,13 +68,12 @@ func (pt Point) sub(p2 Point) Point {
 }
 
 func (pt Point) left() Point {
-	return Point{pt.y,-pt.x}
+	return Point{pt.y, -pt.x}
 }
 
 func (pt Point) right() Point {
-	return Point{-pt.y,pt.x}
+	return Point{-pt.y, pt.x}
 }
-
 
 type PointSet = map[Point]bool
 
@@ -85,22 +83,22 @@ var finish Point
 type Queue struct {
 	score int
 	point Point
-	dir Point
+	dir   Point
 }
 
-func part1( data []string, walls PointSet ) map[Point]int {
-    // Do a simple BFS forward.
+func part1(data []string, walls PointSet) map[Point]int {
+	// Do a simple BFS forward.
 
-	queue := []Queue{ {0, start, Point{1,0}} }
+	queue := []Queue{{0, start, Point{1, 0}}}
 
-    visited := make(map[Point]int)
+	visited := make(map[Point]int)
 	visited[start] = 0
 
 	for len(queue) > 0 {
 		e := queue[0]
 		queue = queue[1:]
-        if DEBUG {
-            fmt.Print(e.score)
+		if DEBUG {
+			fmt.Print(e.score)
 		}
 
 		for _, d2 := range []Point{e.dir, e.dir.right(), e.dir.left()} {
@@ -108,58 +106,58 @@ func part1( data []string, walls PointSet ) map[Point]int {
 			if d2 == e.dir {
 				pain = 1
 			}
-			p2 := e.point.add( d2 )
+			p2 := e.point.add(d2)
 			if !walls[p2] && (visited[p2] == 0 || visited[p2] > e.score+pain) {
-				visited[p2] = e.score+pain
-				queue = append( queue, Queue{e.score+pain, p2, d2} )
+				visited[p2] = e.score + pain
+				queue = append(queue, Queue{e.score + pain, p2, d2})
 			}
 		}
 	}
-    return visited
+	return visited
 }
 
-func part2( walls PointSet, visited map[Point]int ) int {
-    // Do a backwards BFS.
+func part2(walls PointSet, visited map[Point]int) int {
+	// Do a backwards BFS.
 
-    queue := []Queue{
-		{visited[finish], finish, Point{-1,0}},
-		{visited[finish], finish, Point{0,1}},
+	queue := []Queue{
+		{visited[finish], finish, Point{-1, 0}},
+		{visited[finish], finish, Point{0, 1}},
 	}
 
-    goods := make(PointSet)
-    goods[finish] = true
+	goods := make(PointSet)
+	goods[finish] = true
 
 	for len(queue) > 0 {
-        e := queue[0]
+		e := queue[0]
 		queue = queue[1:]
 		for _, d2 := range []Point{e.dir, e.dir.right(), e.dir.left()} {
 			pain := 1001
 			if d2 == e.dir {
 				pain = 1
 			}
-			p2 := e.point.add( d2 )
+			p2 := e.point.add(d2)
 			if !walls[p2] && visited[p2] <= e.score-pain && !goods[p2] {
-                queue= append( queue, Queue{e.score-pain, p2, d2} )
-                goods[p2] = true
+				queue = append(queue, Queue{e.score - pain, p2, d2})
+				goods[p2] = true
 			}
 		}
 	}
-    return len(goods)
+	return len(goods)
 }
 
 func main() {
 	var input string
 	TEST, DEBUG, input = tools.Setup(test, live)
-	data := strings.Split(input,"\n")
+	data := strings.Split(input, "\n")
 	walls := make(PointSet)
-	for y,row := range strings.Split(input,"\n") {
-		for x,c := range row {
+	for y, row := range strings.Split(input, "\n") {
+		for x, c := range row {
 			if c == '#' {
-				walls[Point{x,y}] = true
+				walls[Point{x, y}] = true
 			} else if c == 'S' {
-				start = Point{x,y}
+				start = Point{x, y}
 			} else if c == 'E' {
-				finish = Point{x,y}
+				finish = Point{x, y}
 			}
 		}
 	}
@@ -168,4 +166,3 @@ func main() {
 	fmt.Println("Part 1:", visited[finish])
 	fmt.Println("Part 2:", part2(walls, visited))
 }
-
