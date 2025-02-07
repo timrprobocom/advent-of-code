@@ -115,7 +115,6 @@ func part1( data []string, walls PointSet ) map[Point]int {
 			}
 		}
 	}
-	printgrid(data, visited)
     return visited
 }
 
