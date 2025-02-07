@@ -69,7 +69,7 @@ func main() {
     var input string
     TEST, DEBUG, input = tools.Setup( test, live )
 
-    data := tools.Parse( input )
+	data := tools.Parse[int](input)
 
     fmt.Println("Part 1:", part1(data))
     fmt.Println("Part 2:", part2(data))

@@ -58,57 +58,22 @@ func Count(haystack []int, needle int) int {
 
 // Produce a matrix of ints from the input.
 
-func Parse(input string) [][]int {
-	result := make([][]int, 0)
-	var row []int
-	var accum int
-	sign := 1
-	last := '?'
-	for _, c := range input {
-		switch c {
-		case '\n':
-			row = append(row, sign*accum)
-			result = append(result, row)
-			row = make([]int, 0)
-			accum = 0
-			sign = 1
-		case ' ', ',':
-			if last != ' ' {
-				row = append(row, sign*accum)
-				accum = 0
-				sign = 1
-			}
-		case '+':
-			sign = 1
-		case '-':
-			sign = -1
-		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			accum = accum*10 + int(c) - '0'
-		default:
-			if DEBUG {
-				fmt.Println("Unexpected ", rune(c))
-			}
-		}
-		last = c
-	}
-	if len(row) > 0 {
-		result = append(result, append(row, sign*accum))
-	}
-	return result
+type Number interface {
+	int | int8 | int16 | int32 | int64
 }
 
-func Parse64(input string) [][]int64 {
-	result := make([][]int64, 0)
-	var row []int64
-	var accum int64
-	var sign int64 = 1
+func Parse[T Number](input string) [][]T {
+	result := make([][]T, 0)
+	var row []T
+	var accum T
+	var sign T = 1
 	last := '?'
 	for _, c := range input {
 		switch c {
 		case '\n':
 			row = append(row, sign*accum)
 			result = append(result, row)
-			row = make([]int64, 0)
+			row = make([]T, 0)
 			accum = 0
 			sign = 1
 		case ' ', ',':
@@ -122,7 +87,7 @@ func Parse64(input string) [][]int64 {
 		case '-':
 			sign = -1
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			accum = accum*10 + int64(c) - '0'
+			accum = accum*10 + T(c) - '0'
 		default:
 			if DEBUG {
 				fmt.Println("Unexpected ", rune(c))

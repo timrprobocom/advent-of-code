@@ -103,7 +103,7 @@ func part2(data [][]int64) int64 {
 func main() {
 	var input string
 	TEST, DEBUG, input = tools.Setup(test, live)
-	data := tools.Parse64(input)
+	data := tools.Parse[int64](input)
 
 	fmt.Println("Part 1:", part1(data))
 	fmt.Println("Part 2:", part2(data))
