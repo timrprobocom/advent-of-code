@@ -83,7 +83,7 @@ def part2(walls):
             minx = mid+1
             if DEBUG:
                 print(mid, "passes")
-    return walls[mid-1]
+    return ','.join(map(str,walls[mid-1]))
 
 print("Part 1:", part1(grid))
 print("Part 2:", part2(grid))
