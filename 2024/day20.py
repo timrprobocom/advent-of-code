@@ -1,6 +1,7 @@
 import os
 import sys
 import math
+import numpy as np
 from collections import Counter
 from itertools import permutations
 
@@ -66,25 +67,21 @@ def makemap(walls):
     mapx[end] = len(mapx)
     return mapx
 
-normal = makemap(walls)
+path = makemap(walls)
 
-def mandist(pt1,pt2):
-    x1,y1 = pt1
-    x2,y2 = pt2
-    return abs(x2-x1)+abs(y2-y1)
-
-def part2(normal, cheat, crit):
+def part2(path, cheat, crit):
     sumx = 0
     counter = Counter()
+    apath = np.array(list(path.keys()))
     # For each pair of points, how much would be gained by shortcutting them?
-    for a,b in permutations(normal.keys(), 2):
-        if normal[a] >= normal[b]:
-            continue
-        # Compute manhattan distance
-        md = mandist(a,b)
-        if md <= cheat:
-            ad = normal[b]-normal[a]
-            gain = ad-md
+    for i,a in enumerate(path.keys()):
+        mandist = np.abs(apath[i+1:,0]-a[0]) + np.abs(apath[i+1:,1]-a[1])
+        for n in np.argwhere(mandist <= cheat):
+            # I don't understand why I need the [0] here.  apath[i+1+n] should return
+            # [11,22] but it returns [[11,22]].
+            op = tuple(apath[i+1+n][0])
+            ad = path[op] - path[a]
+            gain = ad-mandist[n][0]
             if gain >= crit:
                 counter[gain] += 1
                 sumx += 1
@@ -92,5 +89,5 @@ def part2(normal, cheat, crit):
         print(counter)
     return sumx
 
-print("Part 1:", part2(normal,  2, 20 if TEST else 100))
-print("Part 2:", part2(normal, 20, 50 if TEST else 100))
+print("Part 1:", part2(path,  2, 20 if TEST else 100))
+print("Part 2:", part2(path, 20, 50 if TEST else 100))
