@@ -78,7 +78,7 @@ def part2(normal, cheat, crit):
     counter = Counter()
     # For each pair of points, how much would be gained by shortcutting them?
     for a,b in permutations(normal.keys(), 2):
-        if normal[a] > normal[b]:
+        if normal[a] >= normal[b]:
             continue
         # Compute manhattan distance
         md = mandist(a,b)
