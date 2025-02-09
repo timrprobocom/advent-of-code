@@ -64,8 +64,9 @@ func main() {
 		}
 
 		fmt.Println(fn)
+		pad := ""
 		for i := 0; i < len(gather[0]); i++ {
-			pad := ""
+			pad = ""
 			if len(gather[0][i]) < 1 {
 				break
 			}
@@ -85,6 +86,8 @@ func main() {
 			fmt.Printf("%10.3f", d.Seconds())
 			fmt.Print(strings.Repeat(" ", 20))
 		}
-		fmt.Println()
+		if len(pad) == 0 {
+			fmt.Println()
+		}
 	}
 }

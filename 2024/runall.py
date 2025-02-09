@@ -40,9 +40,16 @@ for day in range(1,26):
             gather.append( s.splitlines() )
 
     print(fn)
+    pad = ''
     for lns in zip(*gather):
-        for ln in lns:
-            print(ln.ljust(31),end='')
+        for i,ln in enumerate(lns):
+            print(pad,end='')
+            if len(ln) > 30:
+                print(ln)
+                pad = ' '*(31*(i+1))
+            else:
+                print(ln.ljust(31),end='')
+                pad = ''
         print()
     for t in times:
         print( ('%10.3f'%t).ljust(31), end='')
