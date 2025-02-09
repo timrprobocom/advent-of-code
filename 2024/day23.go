@@ -49,13 +49,10 @@ td-yn`[1:]
 //go:embed day23.txt
 var live string
 
-
-
-
-func part1( data []string ) int {
+func part1(data []string) int {
 	connx := make(map[string]map[string]bool)
 
-	for _,line := range data {
+	for _, line := range data {
 		a := line[0:2]
 		b := line[3:]
 		if connx[a] == nil {
@@ -64,28 +61,28 @@ func part1( data []string ) int {
 		if connx[b] == nil {
 			connx[b] = make(map[string]bool)
 		}
-        connx[a][b] = true
-        connx[b][a] = true
+		connx[a][b] = true
+		connx[b][a] = true
 	}
-    
+
 	uniq := make(map[string]bool)
-	for k,v := range connx {
-        for v1,_ := range v {
-			for v2,_ := range v {
-                if k[0] == 't' || v1[0] == 't' || v2[0] == 't' {
-                    if v1 != v2 && connx[v2][k] && connx[v2][v1] {
-						makeme := []string{k,v1,v2}
+	for k, v := range connx {
+		for v1, _ := range v {
+			for v2, _ := range v {
+				if k[0] == 't' || v1[0] == 't' || v2[0] == 't' {
+					if v1 != v2 && connx[v2][k] && connx[v2][v1] {
+						makeme := []string{k, v1, v2}
 						slices.Sort(makeme)
-						uniq[strings.Join(makeme,"-")] = true
+						uniq[strings.Join(makeme, "-")] = true
 					}
 				}
 			}
 		}
 	}
-    return len(uniq)
+	return len(uniq)
 }
 
-func intersect( m1 map[string]bool, m2 map[string]bool ) map[string]bool {
+func intersect(m1 map[string]bool, m2 map[string]bool) map[string]bool {
 	newx := make(map[string]bool)
 	for k := range m1 {
 		if m2[k] {
@@ -95,10 +92,10 @@ func intersect( m1 map[string]bool, m2 map[string]bool ) map[string]bool {
 	return newx
 }
 
-func part2( data []string ) string {
+func part2(data []string) string {
 	connx := make(map[string]map[string]bool)
 
-	for _,line := range data {
+	for _, line := range data {
 		a := line[0:2]
 		b := line[3:]
 		if connx[a] == nil {
@@ -107,75 +104,73 @@ func part2( data []string ) string {
 		if connx[b] == nil {
 			connx[b] = make(map[string]bool)
 		}
-        connx[a][a] = true
-        connx[a][b] = true
-        connx[b][a] = true
-        connx[b][b] = true
+		connx[a][a] = true
+		connx[a][b] = true
+		connx[b][a] = true
+		connx[b][b] = true
 	}
-   
-    // Make an intersection of all permutations.
+
+	// Make an intersection of all permutations.
 
 	matches := []map[string]bool{}
-	for _,a := range connx {
-		for _,b := range connx {
-			matches = append( matches, intersect(a, b) )
+	for _, a := range connx {
+		for _, b := range connx {
+			matches = append(matches, intersect(a, b))
 		}
 	}
 
-    // For all the players in those matches, find the intersection 
+	// For all the players in those matches, find the intersection
 	// of all of its followers and count how many times each combo
 	// appears.
 
-    poss := make(map[string]int)
-	for _,m := range matches {
+	poss := make(map[string]int)
+	for _, m := range matches {
 		if len(m) < 3 {
 			continue
 		}
 
 		base := m
 		for n := range m {
-			base = intersect( base, connx[n] )
+			base = intersect(base, connx[n])
 		}
 
 		if len(base) > 1 {
 			names := []string{}
 			for k := range base {
-				names = append( names, k )
+				names = append(names, k)
 			}
 			slices.Sort(names)
-			poss[strings.Join(names, ",")] ++
+			poss[strings.Join(names, ",")]++
 		}
 	}
 
-    // Return the most common subset found.
+	// Return the most common subset found.
 
-    type SortHelper struct {
+	type SortHelper struct {
 		count int
-		name string
+		name  string
 	}
 
-    sortme := []SortHelper{}
-	for k,v := range poss {
-		sortme = append( sortme, SortHelper{v,k} )
+	sortme := []SortHelper{}
+	for k, v := range poss {
+		sortme = append(sortme, SortHelper{v, k})
 	}
 	slices.SortFunc(sortme, func(a, b SortHelper) int { return b.count - a.count })
 
-    if DEBUG {
-		for _,top := range sortme {
+	if DEBUG {
+		for _, top := range sortme {
 			fmt.Println(top)
 		}
 	}
-    return sortme[0].name
+	return sortme[0].name
 }
-
 
 func main() {
 	var input string
 	TEST, DEBUG, input = tools.Setup(test, live)
 
-	data := strings.Split(input,"\n") 
+	data := strings.Split(input, "\n")
 
 	fmt.Println("Part 1:", part1(data))
 	fmt.Println("Part 2:", part2(data))
 }
-

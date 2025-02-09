@@ -28,7 +28,7 @@ var live string
 
 var towels []string
 
-func possible( need, sofar string ) bool {
+func possible(need, sofar string) bool {
 	if need == sofar {
 		return true
 	}
@@ -49,19 +49,19 @@ func part1(needs []string) int {
 			sum++
 		}
 	}
-    return sum
+	return sum
 }
 
 type Cache struct {
-	need string
+	need  string
 	sofar string
 }
 
 var cache map[Cache]int
 var hits int = 0
 
-func howmany( need, sofar string ) int {
-	c := Cache{need,sofar}
+func howmany(need, sofar string) int {
+	c := Cache{need, sofar}
 	if cache[c] > 0 {
 		hits++
 		return cache[c]
@@ -72,7 +72,7 @@ func howmany( need, sofar string ) int {
 	}
 
 	sum := 0
-	for _,t := range towels {
+	for _, t := range towels {
 		if strings.HasPrefix(need, sofar+t) {
 			sum += howmany(need, sofar+t)
 		}
@@ -87,7 +87,7 @@ func part2(needs []string) int {
 	for _, need := range needs {
 		sum += howmany(need, "")
 	}
-    return sum
+	return sum
 }
 
 func main() {
@@ -104,4 +104,3 @@ func main() {
 		fmt.Println("Cache:", len(cache), "hits", hits)
 	}
 }
-
