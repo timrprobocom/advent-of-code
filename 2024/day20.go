@@ -36,11 +36,11 @@ type Point struct {
 	y int
 }
 
-func (pt Point) actuald(p2 Point) Point {
+func (pt Point) add(p2 Point) Point {
 	return Point{pt.x + p2.x, pt.y + p2.y}
 }
 
-func (pt Point) actualdi(dx int, dy int) Point {
+func (pt Point) addi(dx int, dy int) Point {
 	return Point{pt.x + dx, pt.y + dy}
 }
 
