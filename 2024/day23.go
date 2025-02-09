@@ -137,7 +137,7 @@ func part2( data []string ) string {
 			base = intersect( base, connx[n] )
 		}
 
-		if len(base) > 0 {
+		if len(base) > 1 {
 			names := []string{}
 			for k := range base {
 				names = append( names, k )
@@ -161,7 +161,7 @@ func part2( data []string ) string {
 	slices.SortFunc(sortme, func(a, b SortHelper) int { return b.count - a.count })
 
     if DEBUG {
-		for _,top := range sortme[:5] {
+		for _,top := range sortme {
 			fmt.Println(top)
 		}
 	}
