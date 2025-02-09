@@ -48,6 +48,8 @@ func run(file string, ext string) string {
 const FIELD int = 40
 
 func main() {
+	stats_csv, _ := os.Create("times.csv")
+	defer stats_csv.Close()
 	fmt.Println(ljust("Python", FIELD), ljust("C++", FIELD), "Go")
 	fmt.Println(strings.Repeat("-", 3*FIELD))
 
@@ -91,13 +93,18 @@ func main() {
 			sums[i] += d.Seconds()
 			fmt.Printf("%10.3f", d.Seconds())
 			fmt.Print(strings.Repeat(" ", FIELD-10))
+			if i > 0 {
+				stats_csv.Write([]byte(","))
+			}
+			fmt.Fprint(stats_csv, d.Seconds())
 		}
 		fmt.Println()
+		stats_csv.Write([]byte("\n"))
 	}
     fmt.Println("\nTotals:")
 	for _, d := range sums {
 		fmt.Printf("%10.3f s", d)
-		fmt.Print(strings.Repeat(" ", FIELD-8))
+		fmt.Print(strings.Repeat(" ", FIELD-12))
 	}
 	fmt.Println()
 }
