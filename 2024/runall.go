@@ -45,10 +45,13 @@ func run(file string, ext string) string {
 	return s
 }
 
-func main() {
-	fmt.Println(ljust("Python", 30), ljust("C++", 30), "Go")
-	fmt.Println(strings.Repeat("-", 90))
+const FIELD int = 40
 
+func main() {
+	fmt.Println(ljust("Python", FIELD), ljust("C++", FIELD), "Go")
+	fmt.Println(strings.Repeat("-", 3*FIELD))
+
+	sums := []float64{0,0,0}
 	for day := 1; day <= 25; day++ {
 		fn := fmt.Sprintf("day%02d", day)
 		var gather [][]string
@@ -72,22 +75,29 @@ func main() {
 			}
 			for j, ln := range gather {
 				fmt.Print(pad)
-				if len(ln[i]) > 30 {
+				if len(ln[i]) > FIELD {
 					fmt.Println(ln[i])
-					pad = strings.Repeat(" ", (j+1)*30)
+					pad = strings.Repeat(" ", (j+1)*FIELD)
 				} else {
-					fmt.Print(ljust(ln[i], 30))
+					fmt.Print(ljust(ln[i], FIELD))
 					pad = ""
 				}
 			}
-			fmt.Println()
+			if len(pad) == 0 {
+				fmt.Println()
+			}
 		}
-		for _, d := range times {
+		for i, d := range times {
+			sums[i] += d.Seconds()
 			fmt.Printf("%10.3f", d.Seconds())
-			fmt.Print(strings.Repeat(" ", 20))
+			fmt.Print(strings.Repeat(" ", FIELD-10))
 		}
-		if len(pad) == 0 {
-			fmt.Println()
-		}
+		fmt.Println()
 	}
+    fmt.Println("\nTotals:")
+	for _, d := range sums {
+		fmt.Printf("%10.3f s", d)
+		fmt.Print(strings.Repeat(" ", FIELD-8))
+	}
+	fmt.Println()
 }
