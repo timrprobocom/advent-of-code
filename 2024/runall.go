@@ -65,11 +65,19 @@ func main() {
 
 		fmt.Println(fn)
 		for i := 0; i < len(gather[0]); i++ {
+			pad := ""
 			if len(gather[0][i]) < 1 {
 				break
 			}
-			for _, ln := range gather {
-				fmt.Print(ljust(ln[i], 30))
+			for j, ln := range gather {
+				fmt.Print(pad)
+				if len(ln[i]) > 30 {
+					fmt.Println(ln[i])
+					pad = strings.Repeat(" ", (j+1)*30)
+				} else {
+					fmt.Print(ljust(ln[i], 30))
+					pad = ""
+				}
 			}
 			fmt.Println()
 		}
