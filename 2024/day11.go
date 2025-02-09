@@ -64,7 +64,7 @@ func part1(data []int, N int) int64 {
 func main() {
 	var input string
 	TEST, DEBUG, input = tools.Setup(test, live)
-	data := tools.Parse[int](input)[0]
+	data := tools.GetNumbers[int](input)[0]
 	cache = make(map[pair]int64)
 
 	fmt.Println("Part 1:", part1(data, 25))

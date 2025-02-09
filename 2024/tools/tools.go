@@ -62,7 +62,7 @@ type Number interface {
 	int | int8 | int16 | int32 | int64
 }
 
-func Parse[T Number](input string) [][]T {
+func GetNumbers[T Number](input string) [][]T {
 	result := make([][]T, 0)
 	var row []T
 	var accum T
@@ -119,4 +119,23 @@ func Repeat[T any](val T, count int) []T {
 		result[i] = val
 	}
 	return result
+}
+
+// Convert digits until we get a non-number.
+
+func StrToInt( s string ) int {
+	accum := 0
+	sign := 1
+	for _,c := range s {
+		if c == '+' {
+			sign = 1
+		} else if c == '-' {
+			sign = -1
+		} else if Isdigit(byte(c)) {
+			accum = accum*10 + int(c) - '0'
+		} else {
+			break
+		}
+	}
+	return sign * accum
 }

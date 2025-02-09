@@ -40,7 +40,7 @@ func part2(one []int, two []int) int {
 func main() {
 	var input string
 	TEST, DEBUG, input = tools.Setup(test, live)
-	data := tools.Parse[int](input)
+	data := tools.GetNumbers[int](input)
 
 	var one []int
 	var two []int

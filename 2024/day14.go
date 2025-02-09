@@ -118,7 +118,7 @@ func part2(data [][]int) int {
 func main() {
 	var input string
 	TEST, DEBUG, input = tools.Setup(test, live)
-	data := tools.Parse[int](input)
+	data := tools.GetNumbers[int](input)
 
 	if TEST {
 		WIDTH = 7
