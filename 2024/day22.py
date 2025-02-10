@@ -61,6 +61,12 @@ def sequence(secret):
         secret = news
     return prices, deltas
 
+def make4key( deltas ):
+    res = 0
+    for t in deltas:
+        res = res * 100 + t + 9
+    return res
+
 # Generate all of the 4-tuples from the deltas and the price at the end.
 
 def part2(data):
@@ -69,7 +75,7 @@ def part2(data):
         prices,deltas = sequence(secret)
         seen = set()
         for i in range(len(prices)-4):
-            key = tuple(deltas[i:i+4])
+            key = make4key(deltas[i:i+4])
             if key not in seen:
                 fours[key] += prices[i+3]
                 seen.add( key )
