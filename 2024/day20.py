@@ -77,11 +77,10 @@ def part2(path, cheat, crit):
     for i,a in enumerate(path.keys()):
         mandist = np.abs(apath[i+1:,0]-a[0]) + np.abs(apath[i+1:,1]-a[1])
         for n in np.argwhere(mandist <= cheat):
-            # I don't understand why I need the [0] here.  apath[i+1+n] should return
-            # [11,22] but it returns [[11,22]].
-            op = tuple(apath[i+1+n][0])
+            n = n[0]
+            op = tuple(apath[i+1+n])
             ad = path[op] - path[a]
-            gain = ad-mandist[n][0]
+            gain = ad - mandist[n]
             if gain >= crit:
                 counter[gain] += 1
                 sumx += 1
