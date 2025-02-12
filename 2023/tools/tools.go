@@ -101,8 +101,7 @@ func GetNumbers[T Number](input string) [][]T {
 	return result
 }
 
-// How does the language not already have this?
-
+// How does the language not already have this
 func Isdigit(s byte) bool {
 	return s >= '0' && s <= '9'
 }
@@ -138,4 +137,12 @@ func StrToInt( s string ) int {
 		}
 	}
 	return sign * accum
+}
+
+func Sum[T ~int]( set []T ) T {
+	var sum T
+	for _,n := range set {
+		sum += n
+	}
+	return sum
 }
