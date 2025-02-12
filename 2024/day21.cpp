@@ -140,7 +140,9 @@ struct cache_t {
 
     bool operator<(const cache_t & other) const
     {
-        return pt0 < other.pt0 || pt1 < other.pt1 || robots < other.robots;
+          return pt0 < other.pt0 || 
+                 (pt0==other.pt0 && pt1 < other.pt1) || 
+                 ((pt0==other.pt0 && pt1==other.pt1) && robots < other.robots);
     }
 };
 
@@ -171,11 +173,11 @@ int64_t cheapestAuxPad( point_t pt0, point_t pt1, int robots )
             continue;
         if( getx(xy) < getx(pt1) )
             q.push( pair(make_point(getx(xy)+1, gety(xy)), s+">"));
-        if( getx(xy) > getx(pt1) )
+        else if( getx(xy) > getx(pt1) )
             q.push( pair(make_point(getx(xy)-1, gety(xy)), s+"<"));
         if( gety(xy) < gety(pt1) )
             q.push( pair(make_point(getx(xy), gety(xy)+1), s+"v"));
-        if( gety(xy) > gety(pt1) )
+        else if( gety(xy) > gety(pt1) )
             q.push( pair(make_point(getx(xy), gety(xy)-1), s+"^"));
     }
     cache[me] = res;
