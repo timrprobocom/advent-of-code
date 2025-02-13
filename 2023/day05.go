@@ -52,7 +52,11 @@ var live string
 type OneMap struct {
 	dest int64
 	src  int64
-	len  int64
+	size int64
+}
+
+func (om OneMap) endof() int64 {
+	return om.src+om.size
 }
 
 // Convert the input into a list of seed numbers, and a
@@ -83,7 +87,7 @@ func convert(data []string) (seeds []int64, maps [][]OneMap) {
 
 func mapping(mapx []OneMap, value int64) int64 {
 	for _, om := range mapx {
-		if tools.Between(om.src, value, om.src+om.len+1) {
+		if tools.Between(om.src, value, om.endof()+1) {
 			return value - om.src + om.dest
 		}
 	}
@@ -144,8 +148,8 @@ func maprange(mapx []OneMap, rng Range) []Range {
 	// We now know that rnglo is at or beyond the first map.
 
 	for _, m := range mapx {
-		if rnglo <= m.src+m.len {
-			take := min(rnghi, m.src+m.len) - rnglo
+		if rnglo <= m.endof() {
+			take := min(rnghi, m.endof()) - rnglo
 			res = append(res, Range{rnglo - m.src + m.dest, take})
 			rnglo += take
 		}
@@ -178,23 +182,16 @@ func doallmapranges(maps [][]OneMap, rngs []Range) []Range {
 	return rngs
 }
 
-func part1x(seeds []int64, maps [][]OneMap) int64 {
+func part2(part int, seeds []int64, maps [][]OneMap) int64 {
 	var ranges []Range
-	for _, s := range seeds {
-		ranges = append(ranges, Range{s, 1})
-	}
-	ranges = doallmapranges(maps, ranges)
-	minval := ranges[0].lo
-	for _, a := range ranges {
-		minval = min(minval, a.lo)
-	}
-	return minval
-}
-
-func part2(seeds []int64, maps [][]OneMap) int64 {
-	var ranges []Range
-	for i := 0; i < len(seeds); i += 2 {
-		ranges = append(ranges, Range{seeds[i], seeds[i+1]})
+	if part == 1 {
+		for _, s := range seeds {
+			ranges = append(ranges, Range{s, 1})
+		}
+	} else {
+		for i := 0; i < len(seeds); i += 2 {
+			ranges = append(ranges, Range{seeds[i], seeds[i+1]})
+		}
 	}
 	ranges = doallmapranges(maps, ranges)
 	minval := ranges[0].lo
@@ -217,6 +214,6 @@ func main() {
 	}
 
 	//fmt.Println("Part 1:", part1(seeds, maps))
-	fmt.Println("Part 1:", part1x(seeds, maps))
-	fmt.Println("Part 2:", part2(seeds, maps))
+	fmt.Println("Part 1:", part2(1, seeds, maps))
+	fmt.Println("Part 2:", part2(2, seeds, maps))
 }
