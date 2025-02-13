@@ -3,6 +3,8 @@ package tools
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 )
 
 func AbsInt(x int) int {
@@ -109,7 +111,7 @@ func Isdigit(s byte) bool {
 
 // Is val within [lo,hi)?  Uses Python concept.
 
-func Between[T ~int](lo T, val T, hi T) bool {
+func Between[T Number](lo T, val T, hi T) bool {
 	return (lo <= val) && (val < hi)
 }
 
@@ -123,10 +125,10 @@ func Repeat[T any](val T, count int) []T {
 
 // Convert digits until we get a non-number.
 
-func StrToInt( s string ) int {
+func StrToInt(s string) int {
 	accum := 0
 	sign := 1
-	for _,c := range s {
+	for _, c := range s {
 		if c == '+' {
 			sign = 1
 		} else if c == '-' {
@@ -140,9 +142,36 @@ func StrToInt( s string ) int {
 	return sign * accum
 }
 
-func Sum[T ~int]( set []T ) T {
+// Convert a set of digits to a slice;
+
+func SplitInt(s string) []int {
+	var res []int
+	for _, w := range strings.Split(s, " ") {
+		if len(w) == 0 || !Isdigit(byte(w[0])) {
+			continue
+		} else {
+			res = append(res, StrToInt(w))
+		}
+	}
+	return res
+}
+
+func SplitInt64(s string) []int64 {
+	var res []int64
+	for _, w := range strings.Split(s, " ") {
+		if len(w) == 0 || !Isdigit(byte(w[0])) {
+			continue
+		} else {
+			n, _ := strconv.ParseInt(w, 10, 64)
+			res = append(res, n)
+		}
+	}
+	return res
+}
+
+func Sum[T ~int](set []T) T {
 	var sum T
-	for _,n := range set {
+	for _, n := range set {
 		sum += n
 	}
 	return sum
