@@ -102,6 +102,7 @@ func GetNumbers[T Number](input string) [][]T {
 }
 
 // How does the language not already have this
+
 func Isdigit(s byte) bool {
 	return s >= '0' && s <= '9'
 }
@@ -145,4 +146,16 @@ func Sum[T ~int]( set []T ) T {
 		sum += n
 	}
 	return sum
+}
+
+// Set intersection.
+
+func Intersect[T comparable](m1 map[T]bool, m2 map[T]bool) map[T]bool {
+	newx := make(map[T]bool)
+	for k := range m1 {
+		if m2[k] {
+			newx[k] = true
+		}
+	}
+	return newx
 }

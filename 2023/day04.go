@@ -21,16 +21,6 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11`[1:]
 //go:embed day04.txt
 var live string
 
-func intersect[T comparable](m1 map[T]bool, m2 map[T]bool) map[T]bool {
-	newx := make(map[T]bool)
-	for k := range m1 {
-		if m2[k] {
-			newx[k] = true
-		}
-	}
-	return newx
-}
-
 func wins(row string) int {
 	phase := 0
 	wins := make(map[int]bool)
@@ -48,7 +38,7 @@ func wins(row string) int {
 			mine[tools.StrToInt(w)] = true
 		}
 	}
-	return len(intersect(mine, wins))
+	return len(tools.Intersect(mine, wins))
 }
 
 func part1(data []string) int {

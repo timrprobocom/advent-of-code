@@ -82,16 +82,6 @@ func part1(data []string) int {
 	return len(uniq)
 }
 
-func intersect(m1 map[string]bool, m2 map[string]bool) map[string]bool {
-	newx := make(map[string]bool)
-	for k := range m1 {
-		if m2[k] {
-			newx[k] = true
-		}
-	}
-	return newx
-}
-
 func part2(data []string) string {
 	connx := make(map[string]map[string]bool)
 
@@ -115,7 +105,7 @@ func part2(data []string) string {
 	matches := []map[string]bool{}
 	for _, a := range connx {
 		for _, b := range connx {
-			matches = append(matches, intersect(a, b))
+			matches = append(matches, tools.Intersect(a, b))
 		}
 	}
 
@@ -131,7 +121,7 @@ func part2(data []string) string {
 
 		base := m
 		for n := range m {
-			base = intersect(base, connx[n])
+			base = tools.Intersect(base, connx[n])
 		}
 
 		if len(base) > 1 {
