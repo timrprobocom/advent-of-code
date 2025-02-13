@@ -142,7 +142,7 @@ func StrToInt(s string) int {
 	return sign * accum
 }
 
-// Convert a set of digits to a slice;
+// Convert a set of numbers to a slice.
 
 func SplitInt(s string) []int {
 	var res []int
