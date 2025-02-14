@@ -3,13 +3,19 @@ package tools
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 )
 
-func AbsInt(x int) int {
+type Number interface {
+	int | int8 | int16 | int32 | int64
+}
+
+func AbsInt[T Number](x T) T {
 	return AbsDiffInt(x, 0)
 }
 
-func AbsDiffInt(x, y int) int {
+func AbsDiffInt[T Number](x, y T) T {
 	if x < y {
 		return y - x
 	}
@@ -58,10 +64,6 @@ func Count(haystack []int, needle int) int {
 
 // Produce a matrix of ints from the input.
 
-type Number interface {
-	int | int8 | int16 | int32 | int64
-}
-
 func GetNumbers[T Number](input string) [][]T {
 	result := make([][]T, 0)
 	var row []T
@@ -109,7 +111,7 @@ func Isdigit(s byte) bool {
 
 // Is val within [lo,hi)?  Uses Python concept.
 
-func Between[T ~int](lo T, val T, hi T) bool {
+func Between[T Number](lo T, val T, hi T) bool {
 	return (lo <= val) && (val < hi)
 }
 
@@ -123,10 +125,10 @@ func Repeat[T any](val T, count int) []T {
 
 // Convert digits until we get a non-number.
 
-func StrToInt( s string ) int {
+func StrToInt(s string) int {
 	accum := 0
 	sign := 1
-	for _,c := range s {
+	for _, c := range s {
 		if c == '+' {
 			sign = 1
 		} else if c == '-' {
@@ -140,9 +142,36 @@ func StrToInt( s string ) int {
 	return sign * accum
 }
 
-func Sum[T ~int]( set []T ) T {
+// Convert a set of numbers to a slice.
+
+func SplitInt(s string) []int {
+	var res []int
+	for _, w := range strings.Split(s, " ") {
+		if len(w) == 0 || !Isdigit(byte(w[0])) {
+			continue
+		} else {
+			res = append(res, StrToInt(w))
+		}
+	}
+	return res
+}
+
+func SplitInt64(s string) []int64 {
+	var res []int64
+	for _, w := range strings.Split(s, " ") {
+		if len(w) == 0 || !Isdigit(byte(w[0])) {
+			continue
+		} else {
+			n, _ := strconv.ParseInt(w, 10, 64)
+			res = append(res, n)
+		}
+	}
+	return res
+}
+
+func Sum[T ~int](set []T) T {
 	var sum T
-	for _,n := range set {
+	for _, n := range set {
 		sum += n
 	}
 	return sum
@@ -158,4 +187,52 @@ func Intersect[T comparable](m1 map[T]bool, m2 map[T]bool) map[T]bool {
 		}
 	}
 	return newx
+}
+
+// Python map tools.
+
+/*
+type Pair struct {
+	K any
+	V any
+}
+
+func Items[K comparable, V any]( m map[K]V ) []Pair {
+	res := []Pair{}
+	for k,v := range m {
+		res = append( res, Pair{k,v} )
+	}
+	return res
+}
+*/
+
+func Keys[K comparable, V any]( m map[K]V ) []K {
+	res := []K{}
+	for k,_ := range m {
+		res = append( res, k )
+	}
+	return res
+}
+
+func Values[K comparable, V any]( m map[K]V ) []V {
+	res := []V{}
+	for _,v := range m {
+		res = append( res, v )
+	}
+	return res
+}
+
+// Recursive finds and returns the greatest common divisor of a given integer.
+
+func Gcd(a, b int64) int64 {
+	if b == 0 {
+		return a
+	}
+	return Gcd(b, a%b)
+}
+
+// Lcm returns the lcm of two numbers using the fact that lcm(a,b) * gcd(a,b) = | a * b |
+
+func Lcm(a, b int64) int64 {
+	return AbsInt(a * b / Gcd(a,b))
 }

@@ -7,11 +7,15 @@ import (
 	"strings"
 )
 
-func AbsInt(x int) int {
+type Number interface {
+	int | int8 | int16 | int32 | int64
+}
+
+func AbsInt[T Number](x T) T {
 	return AbsDiffInt(x, 0)
 }
 
-func AbsDiffInt(x, y int) int {
+func AbsDiffInt[T Number](x, y T) T {
 	if x < y {
 		return y - x
 	}
@@ -59,10 +63,6 @@ func Count(haystack []int, needle int) int {
 }
 
 // Produce a matrix of ints from the input.
-
-type Number interface {
-	int | int8 | int16 | int32 | int64
-}
 
 func GetNumbers[T Number](input string) [][]T {
 	result := make([][]T, 0)
@@ -220,4 +220,19 @@ func Values[K comparable, V any]( m map[K]V ) []V {
 		res = append( res, v )
 	}
 	return res
+}
+
+// Recursive finds and returns the greatest common divisor of a given integer.
+
+func Gcd(a, b int64) int64 {
+	if b == 0 {
+		return a
+	}
+	return Gcd(b, a%b)
+}
+
+// Lcm returns the lcm of two numbers using the fact that lcm(a,b) * gcd(a,b) = | a * b |
+
+func Lcm(a, b int64) int64 {
+	return AbsInt(a * b / Gcd(a,b))
 }
