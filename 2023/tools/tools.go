@@ -188,3 +188,36 @@ func Intersect[T comparable](m1 map[T]bool, m2 map[T]bool) map[T]bool {
 	}
 	return newx
 }
+
+// Python map tools.
+
+/*
+type Pair struct {
+	K any
+	V any
+}
+
+func Items[K comparable, V any]( m map[K]V ) []Pair {
+	res := []Pair{}
+	for k,v := range m {
+		res = append( res, Pair{k,v} )
+	}
+	return res
+}
+*/
+
+func Keys[K comparable, V any]( m map[K]V ) []K {
+	res := []K{}
+	for k,_ := range m {
+		res = append( res, k )
+	}
+	return res
+}
+
+func Values[K comparable, V any]( m map[K]V ) []V {
+	res := []V{}
+	for _,v := range m {
+		res = append( res, v )
+	}
+	return res
+}
