@@ -46,7 +46,7 @@ type Cache struct {
 func hash(nums []int) uint64 {
 	var h uint64 = 0
 	for _, i := range nums {
-		h = h*13 + uint64(i)
+		h = h*12 + uint64(i)
 	}
 	return h
 }
