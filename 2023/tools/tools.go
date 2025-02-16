@@ -144,9 +144,9 @@ func StrToInt(s string) int {
 
 // Convert a set of numbers to a slice.
 
-func SplitInt(s string) []int {
+func SplitIntBy(s string, sep string) []int {
 	var res []int
-	for _, w := range strings.Split(s, " ") {
+	for _, w := range strings.Split(s, sep) {
 		if len(w) == 0 || !Isdigit(byte(w[0])) {
 			continue
 		} else {
@@ -154,6 +154,10 @@ func SplitInt(s string) []int {
 		}
 	}
 	return res
+}
+
+func SplitInt(s string) []int {
+	return SplitIntBy(s, " ")
 }
 
 func SplitInt64(s string) []int64 {
@@ -169,7 +173,7 @@ func SplitInt64(s string) []int64 {
 	return res
 }
 
-func Sum[T ~int](set []T) T {
+func Sum[T Number](set []T) T {
 	var sum T
 	for _, n := range set {
 		sum += n
@@ -206,18 +210,18 @@ func Items[K comparable, V any]( m map[K]V ) []Pair {
 }
 */
 
-func Keys[K comparable, V any]( m map[K]V ) []K {
+func Keys[K comparable, V any](m map[K]V) []K {
 	res := []K{}
-	for k,_ := range m {
-		res = append( res, k )
+	for k, _ := range m {
+		res = append(res, k)
 	}
 	return res
 }
 
-func Values[K comparable, V any]( m map[K]V ) []V {
+func Values[K comparable, V any](m map[K]V) []V {
 	res := []V{}
-	for _,v := range m {
-		res = append( res, v )
+	for _, v := range m {
+		res = append(res, v)
 	}
 	return res
 }
@@ -234,5 +238,5 @@ func Gcd(a, b int64) int64 {
 // Lcm returns the lcm of two numbers using the fact that lcm(a,b) * gcd(a,b) = | a * b |
 
 func Lcm(a, b int64) int64 {
-	return AbsInt(a * b / Gcd(a,b))
+	return AbsInt(a * b / Gcd(a, b))
 }
