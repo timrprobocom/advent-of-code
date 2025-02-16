@@ -94,9 +94,13 @@ Direction N({0,-1});
 Direction W({-1,0});
 Direction S({0,1});
 Direction E({1,0});
-Direction nil({0,0});
 
-map<char,array<Direction,2>> dirs;
+struct TwoPoint {
+    Direction p0;
+    Direction p1;
+};
+
+map<char,TwoPoint> dirs;
 int X = 0;
 int Y = 0;
 int WIDTH = 0;
@@ -104,18 +108,18 @@ int HEIGHT = 0;
 
 void Initialize(StringVector & lines)
 {
-    dirs['|'][0] = N;
-    dirs['|'][1] = S;
-    dirs['-'][0] = E;
-    dirs['-'][1] = W;
-    dirs['F'][0] = S,
-    dirs['F'][1] = E,
-    dirs['L'][0] = N;
-    dirs['L'][1] = E;
-    dirs['J'][0] = N;
-    dirs['J'][1] = W;
-    dirs['7'][0] = S;
-    dirs['7'][1] = W;
+    dirs['|'].p0 = N;
+    dirs['|'].p1 = S;
+    dirs['-'].p0 = E;
+    dirs['-'].p1 = W;
+    dirs['F'].p0 = S,
+    dirs['F'].p1 = E,
+    dirs['L'].p0 = N;
+    dirs['L'].p1 = E;
+    dirs['J'].p0 = N;
+    dirs['J'].p1 = W;
+    dirs['7'].p0 = S;
+    dirs['7'].p1 = W;
 
     WIDTH = lines[0].size();
     HEIGHT = lines.size();
@@ -135,32 +139,32 @@ void Initialize(StringVector & lines)
     if( Y > 1 )
     {
         char c = lines[Y-1][X];
-        if( dirs[c][0] == S || dirs[c][1] == S )
+        if( dirs[c].p0 == S || dirs[c].p1 == S )
             poss.push_back(N);
     }
     if( Y < HEIGHT-1 )
     {
         char c = lines[Y+1][X];
-        if( dirs[c][0] == N || dirs[c][1] == N )
+        if( dirs[c].p0 == N || dirs[c].p1 == N )
             poss.push_back(S);
     }
     if( X < WIDTH-1 )
     {
         char c = lines[Y][X+1];
-        if( dirs[c][0] == W || dirs[c][1] == W )
+        if( dirs[c].p0 == W || dirs[c].p1 == W )
             poss.push_back(E);
     }
     if( X > 1 )
     {
         char c = lines[Y][X-1];
-        if( dirs[c][0] == E || dirs[c][1] == E )
+        if( dirs[c].p0 == E || dirs[c].p1 == E )
             poss.push_back(W);
     }
 
     char base = '?';
     for( auto & d : dirs )
     {
-        if( d.second[0] == poss[0] && d.second[1] == poss[1] )
+        if( d.second.p0 == poss[0] && d.second.p1 == poss[1] )
         {
             base = d.first;
             break;
@@ -212,10 +216,10 @@ int part1(StringVector & lines, Path & found)
         pending.pop_front();
         found[Point({p.x,p.y})] = p.c;
         char ch = lines[p.y][p.x];
-        for( int i = 0; i < 2; i++ )
+        for( auto dxy : {dirs[ch].p0, dirs[ch].p1} )
         {
-            int x0 = p.x + dirs[ch][i].dx;
-            int y0 = p.y + dirs[ch][i].dy;
+            int x0 = p.x + dxy.dx;
+            int y0 = p.y + dxy.dy;
             if( 0 <= x0 && x0 < WIDTH && 
                 0 <= y0 && y0 < HEIGHT &&
                 found.find(Point({x0,y0})) == found.end()
