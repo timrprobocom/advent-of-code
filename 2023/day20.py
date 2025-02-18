@@ -40,6 +40,8 @@ class Part:
         return []
     def output(self,state):
         return [(self, o, state) for o in self.outputs]
+    def __repr__(self):
+        return f'{self.__class__}: {self.name} {self.state}'
 
 class Broadcast(Part):
     def input(self):

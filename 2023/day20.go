@@ -10,14 +10,14 @@ import (
 
 var DEBUG bool = false
 var TEST bool = false
-var test = `
+var test1 = `
 broadcaster -> a, b, c
 %a -> b
 %b -> c
 %c -> inv
 &inv -> a`[1:]
 
-var test2 = `
+var test = `
 broadcaster -> a
 %a -> inv, con
 &inv -> b
@@ -27,199 +27,173 @@ broadcaster -> a
 //go:embed day20.txt
 var live string
 
-
 type Output struct {
-	gate Gate
+	gate   string
 	output string
-	state bool
+	state  byte
 }
 
+// go's class/object system is half-assed.	It obviously was not in there from
+// the start, and was slapped on.  There's just no way to do the kind of simple
+// derived type classes that make this easy in Python.
 
-type Gate interface {
-    addinput(inp string)
-	reset()
-	input(inp string, signal bool) []Output
-	output(state bool) []Output
-}
+const GATE = 0
+const BROADCAST = 1
+const FLIPFLOP = 2
+const NAND = 3
 
-type Broadcast struct {
-	name string
-	inputs map[string]bool
+type Gate struct {
+	kind    int
+	name    string
+	inputs  map[string]byte
 	outputs []string
-	state bool
+	state   byte
 }
 
-type FlipFlop struct {
-	name string
-	inputs map[string]bool
-	outputs []string
-	state bool
-}
-
-type Nand struct {
-	name string
-	inputs map[string]bool
-	outputs []string
-	state bool
-}
-
-// Broadcast.
-
-func createBroadcast( name string, outputs []string ) Broadcast {
-	return Broadcast{
+func createGate(kind int, name string, outputs []string) *Gate {
+	return &Gate{
+		kind,
 		name,
-		make(map[string]bool),
+		make(map[string]byte),
 		outputs,
-		false,
+		0,
 	}
 }
 
-func (g Broadcast) addinput( inp string ) {
-	g.inputs[inp] = false
+func (g *Gate) addinput(inp string) {
+	g.inputs[inp] = 0
 }
 
-func (g Broadcast) reset() {
-	g.state = false
-}
-
-func (g Broadcast) input( inp string, signal bool ) []Output {
-	return g.output(false)
-}
-
-func (g Broadcast) output( state bool ) []Output {
-	res := []Output{}
-	for _, o := range g.outputs {
-		res = append( res, Output{ g, o, g.state } )
-	}
-    return res
-}
-
-// FlipFlop.
-
-func createFlipFlop( name string, outputs []string ) FlipFlop {
-	return FlipFlop{
-		name,
-		make(map[string]bool),
-		outputs,
-		false,
-	}
-}
-
-func (g FlipFlop) addinput( inp string ) {
-	g.inputs[inp] = false
-}
-
-func (g FlipFlop) reset() {
-	g.state = false
-}
-
-func (g FlipFlop) input( inp string, signal bool ) []Output {
-    if signal {
-		g.state = !g.state
-		return g.output(g.state)
-	}
-	return []Output{}
-}
-
-func (g FlipFlop) output( state bool ) []Output {
-	res := []Output{}
-	for _, o := range g.outputs {
-		res = append( res, Output{ g, o, g.state } )
-	}
-    return res
-}
-
-// Nand.
-
-func createNand( name string, outputs []string ) Nand {
-	return Nand{
-		name,
-		make(map[string]bool),
-		outputs,
-		false,
-	}
-}
-
-func (g Nand) addinput( inp string ) {
-	g.inputs[inp] = false
-}
-
-func (g Nand) reset() {
-	for k := range g.inputs {
-		g.inputs[k] = false
-	}
-}
-
-func (g Nand) input( inp string, signal bool ) []Output {
-	g.inputs[inp] = signal
-	for _, v := range g.inputs {
-		if !v {
-			return g.output(true)
+func (g *Gate) reset() {
+	if g.kind == NAND {
+		for k := range g.inputs {
+			g.inputs[k] = 0
 		}
 	}
-	return g.output(false)
+	g.state = 0
 }
 
-func (g Nand) output( state bool ) []Output {
-	res := []Output{}
-	for _, o := range g.outputs {
-		res = append( res, Output{ g, o, g.state } )
-	}
-    return res
-}
-
-	
-func part1 ( circuit map[string]Output ) int {
-    // Push da button
-	signals := []int{0,0}
-    
-	for range 1000 {
-        // Account for the button.
-        signals[0] += 1
-        todo := circuit["broadcaster"].input()
-        for len(todo) > 0 {
-			o := todo[0]
-			todo = todo[1:]
-            signals[o.state] += 1
-			dst, ok := circuit[o.dst]
-            if ok {
-				todo = append( todo, dst.gate.input(o.src.name, o.state)... )
+func (g *Gate) input(inp string, signal byte) []Output {
+	switch g.kind {
+	case FLIPFLOP:
+		if signal > 0 {
+			return []Output{}
+		}
+		g.state = 1 - g.state
+	case NAND:
+		g.inputs[inp] = signal
+		g.state = 0
+		for _, v := range g.inputs {
+			if v == 0 {
+				g.state = 1
+				break
 			}
 		}
 	}
-    if DEBUG {
-        fmt.Println(signals[0],signals[1])
-	}
-    return signals[0]*signals[1]
+	return g.output(g.state)
 }
 
+func (g Gate) output(state byte) []Output {
+	res := []Output{}
+	for _, o := range g.outputs {
+		res = append(res, Output{g.name, o, g.state})
+	}
+	return res
+}
 
+func part1(circuit map[string]*Gate) int {
+	// Push da button
+	signals := []int{0, 0}
 
+	for range 1000 {
+		// Account for the button.
+		signals[0] += 1
+		todo := circuit["broadcaster"].output(0)
+		for len(todo) > 0 {
+			o := todo[0]
+			todo = todo[1:]
+			signals[o.state] += 1
+			dst, ok := circuit[o.output]
+			if ok {
+				todo = append(todo, dst.input(o.gate, o.state)...)
+			}
+		}
+	}
+	if DEBUG {
+		fmt.Println(signals[0], signals[1])
+	}
+	return signals[0] * signals[1]
+}
+
+func part2(circuit map[string]*Gate) int64 {
+
+	// Reset the circuit.
+
+	for _, v := range circuit {
+		v.reset()
+	}
+
+	// Now we have to find the cycles.
+	// rx is fed by zh in my sample, and zh is fed by sx, jt, kb, ks.
+	// rx only goes LOW (the target) when zh sends a HIGH, which only
+	// happens when the four inputs go LOW.  So, find the cycles.
+
+	check := make(map[string]bool)
+	first := ""
+	for first = range circuit["rx"].inputs {
+	}
+	for o := range circuit[first].inputs {
+		check[o] = true
+	}
+
+	cycles := []int64{}
+	prev := make(map[string][]int)
+	t := 0
+	for len(cycles) < 4 {
+		todo := circuit["broadcaster"].output(0)
+		for len(todo) > 0 {
+			o := todo[0]
+			todo = todo[1:]
+			if check[o.output] && o.state == 0 {
+				if len(prev[o.output]) == 1 {
+					cycles = append(cycles, int64(t-prev[o.output][0]))
+				}
+				prev[o.output] = append(prev[o.output], t)
+			}
+			todo = append(todo, circuit[o.output].input(o.gate, o.state)...)
+		}
+		t++
+	}
+	if DEBUG {
+		fmt.Println(cycles)
+		fmt.Println(prev)
+	}
+	return cycles[0] * cycles[1] * cycles[2] * cycles[3]
+}
 
 func main() {
 	var input string
 	TEST, DEBUG, input = tools.Setup(test, live)
 
-	circuit := make(map[string]Gate)
+	circuit := make(map[string]*Gate)
 
 	for _, row := range strings.Split(input, "\n") {
-		l,r,_ := strings.Cut(row ," -> ")
+		l, r, _ := strings.Cut(row, " -> ")
 		right := strings.Split(r, ", ")
 
 		if l == "broadcaster" {
-			circuit[l] = createBroadcast(l,right)
+			circuit[l] = createGate(BROADCAST, l, right)
 		} else if l[0] == '%' {
-			circuit[l[1:]] = createFlipFlop(l[1:],right)
+			circuit[l[1:]] = createGate(FLIPFLOP, l[1:], right)
 		} else if l[0] == '&' {
-			circuit[l[1:]] = createNand(l[1:],right)
+			circuit[l[1:]] = createGate(NAND, l[1:], right)
 		}
 	}
 
-//	circuit["rx"] = Part("rx",[])
-	circuit["rx"] = createBroadcast("rx",[]string{})
+	circuit["rx"] = createGate(GATE, "rx", []string{})
 
-	for name,part := range circuit {
-		for _, n := range part.outputs {	// I neet Gate.Output to return outputs.
+	for name, part := range circuit {
+		for _, n := range part.outputs {
 			cir, ok := circuit[n]
 			if ok {
 				cir.addinput(name)
@@ -227,45 +201,12 @@ func main() {
 		}
 	}
 
+	if DEBUG {
+		fmt.Println(circuit)
+	}
+
 	fmt.Println("Part 1:", part1(circuit))
 	if !TEST {
-//		fmt.Println("Part 2:", part2(circuit))
+		fmt.Println("Part 2:", part2(circuit))
 	}
 }
-
-
-/*
-def part2(circuit):
-
-    # Reset the circuit.
-
-    for p in circuit.values():
-        if not isinstance(p,int):
-            p.reset()
-
-    # Now we have to find the cycles.
-    # rx is fed by zh in my sample, and zh is fed by sx, jt, kb, ks.
-    # rx only goes LOW (the target) when zh sends a HIGH, which only
-    # happens when the four inputs go LOW.  So, find the cycles.
-
-    check = list(circuit[list(circuit['rx'].inputs)[0]].inputs)
-    if DEBUG:
-        print(check)
-    cycles = []
-    prev = collections.defaultdict(list)
-    t = 0
-    while len(cycles) < 4:
-        todo = circuit['broadcaster'].input()
-        while todo:
-            src,dst,state = todo.pop(0)                
-            if dst in check and not state:
-                if len(prev[dst]) == 1:
-                    cycles.append( t - prev[dst][0] )
-                prev[dst].append( t )
-            todo.extend( circuit[dst].input(src.name, state))
-        t += 1
-    if DEBUG:
-        print(cycles)
-        print(prev)
-    return math.prod(cycles)
-	*/
