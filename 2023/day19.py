@@ -31,7 +31,7 @@ else:
 
 work,rating = data.split('\n\n')
 
-match1 = re.compile("([xmas])=(\d+)")
+match1 = re.compile(r"([xmas])=(\d+)")
 
 parts = [
     {p1:int(p2) for p1,p2 in match1.findall(s) }
