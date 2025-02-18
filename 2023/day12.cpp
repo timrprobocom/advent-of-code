@@ -57,7 +57,7 @@ void parse( string & line, string & maps, IntVector & nums )
 
 // Does chk match the first pat of pat?
 
-bool match( string & pat,  string & chk )
+bool match( string & pat, string & chk )
 {
     int m = min(pat.size(), chk.size());
     for( int i = 0; i < m; i++ )
@@ -71,7 +71,7 @@ struct std::hash<IntVector>
 {
     size_t operator() (IntVector& n)
     {
-        int64_t h;
+        int64_t h = 0;
         for( auto i : n )
             h = h*12 + i;
         return h;
@@ -156,8 +156,9 @@ int64_t part2( StringVector & lines )
         parse( s, pat, nums );
         int n = nums.size();
         pat = pat + "?" + pat + "?" + pat + "?" + pat + "?" + pat;
-        for( int i = 0; i < n * 4; i++ )
-            nums.push_back( nums[i] );
+        nums.resize( n*5 );
+        for( int i = n; i < n * 5; i++ )
+            nums[i] = nums[i-n];
         sumx += count_matches( pat, nums );
     }
     return sumx;
