@@ -30,9 +30,6 @@ HEIGHT = len(data)
 DEBUG = 'debug' in sys.argv
 
 N,E,S,W = (0,-1),(1,0),(0,1),(-1,0)
-U,R,D,L = N,E,S,W
-dirs = {'R':R, 'L':L, 'U':U, 'D':D,
-        '0':R, '1':D, '2':L, '3':U }
 
 rocks = set()
 origin = None
@@ -71,8 +68,7 @@ def part1(rocks):
     queue.add(origin)
     for _ in range(steps):
         newq = set()
-        while queue:
-            x,y = queue.pop()
+        for x,y in queue:
             for dx,dy in N,E,W,S:
                 x1 = x+dx
                 y1 = y+dy
@@ -123,8 +119,7 @@ def part2(rocks):
             if len(diff2) > 1 and diff2[-1] == diff2[-2]:
                 break
         newq = set()
-        while queue:
-            x,y = queue.pop()
+        for x,y in queue:
             for dx,dy in N,E,W,S:
                 x1 = x+dx
                 y1 = y+dy

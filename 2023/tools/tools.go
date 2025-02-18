@@ -240,3 +240,13 @@ func Gcd(a, b int64) int64 {
 func Lcm(a, b int64) int64 {
 	return AbsInt(a * b / Gcd(a, b))
 }
+
+// How can this be so broken?
+
+func Mod [T Number](a, b T) T {
+	m := a % b
+	if m < 0 {
+		return b + m
+	}
+	return m
+}
