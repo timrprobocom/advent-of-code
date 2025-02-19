@@ -88,8 +88,7 @@ def optimize_graph(graph):
     for hx,hy in hubs:
         adj = []
         queue = [(hx,hy,1,set())]
-        while queue:
-            x,y,l,seen = queue.pop()
+        for x,y,l,seen in queue:
             if (x,y) in seen:
                 continue
             seen = seen.union([(x,y)])
