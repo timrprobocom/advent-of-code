@@ -23,16 +23,20 @@ def run(file, ext):
     else:
         return fetch(['./'+fn])
 
+names = {'.py':'Python', '.cpp':'C++   ', '.go':'Go    '}
+
 print('Python'.ljust(30), 'C++'.ljust(30), 'Go')
 print('-'*92)
 
-for day in range(1,26):
+sums = [0,0,0]
+
+for day in range(20,26):
     fn = f'day{day:02d}'
     gather = []
     times = []
     for lang in '.py','.cpp','.go':
         if os.path.exists(fn+lang):
-            print(lang,end=' \r')
+            print(names[lang],end=' \r')
             prep( fn, lang )
             before = time.time()
             s = run( fn, lang )
@@ -51,7 +55,17 @@ for day in range(1,26):
                 print(ln.ljust(31),end='')
                 pad = ''
         print()
-    for t in times:
+    if ''.join(gather[0]) != ''.join(gather[1]):
+        print("##### Python and C++ results do not match. *****")
+    if ''.join(gather[0]) != ''.join(gather[2]):
+        print("##### Python and Go results do not match. *****")
+    for i,t in enumerate(times):
+        sums[i] += t
         print( ('%10.3f'%t).ljust(31), end='')
     print()
+
+print("\nTotal times")
+for t in sums:
+    print( ('%10.3fs'%t).ljust(31), end='')
+print()
 

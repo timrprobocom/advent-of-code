@@ -89,6 +89,12 @@ func main() {
 				fmt.Println()
 			}
 		}
+		if strings.Join(gather[0],"") != strings.Join(gather[1],"") {
+			fmt.Println("#### Python and C++ results do not match ####")
+		}
+		if strings.Join(gather[0],"") != strings.Join(gather[2],"") {
+			fmt.Println("#### Python and Go results do not match ####")
+		}
 		for i, d := range times {
 			sums[i] += d.Seconds()
 			fmt.Printf("%10.3f", d.Seconds())

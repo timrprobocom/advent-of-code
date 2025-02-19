@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <cstring>
+#include <cstdint>
 #include <vector>
 #include <map>
 #include <set>
