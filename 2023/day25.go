@@ -47,24 +47,32 @@ func make_graph( data string ) Graph {
 	return graph
 }
 
-func reachableNodes( graph Graph, start string ) map[string]bool {
-	seen := make(map[string]bool)
-	seen[start] = true
-	queue := []string{start}
-	for len(queue) > 0 {
-		v := queue[0]
-		queue = queue[1:]
-        seen[v] = true
-		for _, edge := range graph[v] {
-            if !seen[edge] {
-				queue = append( queue, edge )
-			}
-		}
-    }
-    return seen
+func encode( node string ) int16 {
+	return ((int16(node[0]) - 'a') * 26 + (int16(node[1]) - 'a')) * 26 + int16(node[2]) - 'a'
 }
 
-func shortestPath( graph Graph, v1 string, v2 string ) string {
+func reachableMore( graph Graph, node string, seen []int16 ) {
+	for _, edge := range graph[node] {
+        h := encode(edge)
+        if seen[h] == 0 {
+            seen[h] = 1
+            reachableMore( graph, edge, seen )
+        }
+    }
+}
+
+func reachableNodes( graph Graph, start string ) int {
+	seen := make([]int16, 26*26*26)
+    seen[encode(start)] = 1
+    reachableMore( graph, start, seen );
+    count := 0
+    for _, s := range seen {
+        count += int(s)
+	}
+    return count
+}
+
+func int16estPath( graph Graph, v1 string, v2 string ) string {
 	queue := []string{v1}
 	seen := make(map[string]bool)
 	for len(queue) > 0 {
@@ -85,7 +93,7 @@ func shortestPath( graph Graph, v1 string, v2 string ) string {
 }
 
 
-// We repeatedly pick two random vertices and find the shortest path between them via BFS.
+// We repeatedly pick two random vertices and find the int16est path between them via BFS.
 // Then pick the top k most travelled edges and remove these from the graph and
 // check if we have succesfully made a k cut. If so return it, if not we continue
 //
@@ -104,7 +112,7 @@ func minimumCut( graph Graph, noCrossings int, cut int ) int {
 		for range noCrossings {
 			v1 := keys[rand.Intn(len(keys))]
 			v2 := keys[rand.Intn(len(keys))]
-			path := shortestPath(graph, v1, v2)
+			path := int16estPath(graph, v1, v2)
 
             for j := 4; j < len(path); j += 4 {
                 p1 := path[j-4:j-1]
@@ -145,8 +153,8 @@ func minimumCut( graph Graph, noCrossings int, cut int ) int {
         }
 
         canReach := reachableNodes(g2, keys[0])
-		if len(canReach) < len(graph) {
-            return len(canReach)
+		if canReach < len(graph) {
+            return canReach
 		}
     }
 

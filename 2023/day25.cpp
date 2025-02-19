@@ -57,23 +57,33 @@ void make_graph( string & data, Graph & graph )
     }
 }
 
-
-set<string> reachableNodes( Graph & graph, string start )
+short encode( string node )
 {
-    set<string> seen;
-    deque<string> queue;
-    seen.insert(start);
-    queue.push_back(start);
-    while( !queue.empty() )
+    return ((node[0]-'a')*26 + (node[1]-'a')) * 26 + node[2] - 'a';
+}
+
+void reachableMore( Graph & graph, string node, short * seen )
+{
+    for( string edge : graph[node] )
     {
-        string v = queue.front();
-        queue.pop_front();
-        seen.insert(v);
-        for( string edge : graph[v] )
-            if( seen.find(edge) == seen.end() )
-                queue.push_back(edge);
+        auto h = encode(edge);
+        if( !seen[h]) {
+            seen[h] = 1;
+            reachableMore( graph, edge, seen );
+        }
     }
-    return seen;
+}
+
+int reachableNodes( Graph & graph, string start )
+{
+    short seen[26*26*26] = { 0 };
+
+    seen[encode(start)] = 1;
+    reachableMore( graph, start, seen );
+    int count = 0;
+    for( auto s : seen )
+        count += s;
+    return count;
 }
             
 
@@ -165,8 +175,8 @@ int minimumCut( Graph & graph, int noCrossings, int cut=3 )
         }
 
         auto canReach = reachableNodes(g2, keys[0]);
-        if( canReach.size() < graph.size() )
-            return canReach.size();
+        if( canReach < graph.size() )
+            return canReach;
     }
 
     return 0;
