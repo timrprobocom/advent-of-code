@@ -3,9 +3,11 @@
 #include <sstream>
 #include <string>
 #include <cstring>
+#include <cstdint>
 #include <vector>
 #include <map>
 #include <set>
+#include <array>
 #include <queue>
 #include <algorithm>
 #include <numeric>
@@ -20,7 +22,6 @@ typedef vector<int> IntVector;
 typedef vector<int64_t> LongVector;
 typedef vector<vector<uint8_t>> ByteGrid;
 
-// I have replaced the backslashes with % here to avoid nonsense.
 
 const string test(
 "2413432311323\n"
