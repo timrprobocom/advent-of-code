@@ -118,13 +118,16 @@ def find_rock_vel(vectors):
         np.cross(p2.pos-p3.pos,p2.dt-p3.dt),
         np.cross(p3.pos-p1.pos,p3.dt-p1.dt)
     ])
-    if DEBUG:
-        print(sys)
     equals = np.array([
         np.dot(sys[0],p2.dt),
         np.dot(sys[1],p3.dt),
         np.dot(sys[2],p1.dt)
     ])
+    if DEBUG:
+        print("sys")
+        print(sys)
+        print("equals")
+        print(equals)
     return np.linalg.solve(np.array(sys), equals).round().astype(int)
 
 # Given the velocity of the rock, find the initial position.
@@ -154,6 +157,8 @@ def find_rock_pos(vectors, drock):
     # At these times:
     ta = int((x - p1.pos[0]) / p1.dt[0])
     tb = int((x - p2.pos[0]) / p2.dt[0])
+    if DEBUG:
+        print("rock",drock,"x,y",x,y,"ta,tb",ta,tb)
 
     # And what is that location in 3D?
     return p1.at(ta)
