@@ -3,9 +3,11 @@
 #include <sstream>
 #include <string>
 #include <cstring>
+#include <cstdint>
 #include <vector>
 #include <map>
 #include <set>
+#include <array>
 #include <queue>
 #include <algorithm>
 #include <numeric>
@@ -67,7 +69,7 @@ Direction backward( Direction d )
     return makedir(-dx,-dy);
 }
 
-array<Direction,4> directions({U,L,D,R});
+array<Direction,4> directions{U,L,D,R};
 
 enum {
     UU = 1,
@@ -82,7 +84,7 @@ struct Point {
 
     bool operator==(const Point & other)
     {
-        return x==other.x & y == other.y;
+        return x==other.x && y == other.y;
     }
 };
 

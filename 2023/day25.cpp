@@ -135,12 +135,13 @@ int minimumCut( Graph & graph, int noCrossings, int cut=3 )
 
         // Convert the crossing counters to something that can be sorted.
 
-        typedef tuple<int,string> IntString;
+        typedef pair<int,string> IntString;
         vector<IntString> cross2;
+        cross2.reserve( crossingCounts.size() );
         for( auto & kv : crossingCounts )
-            cross2.push_back( make_tuple( kv.second, kv.first ) );
+            cross2.emplace_back( kv.second, kv.first );
         sort( cross2.begin(), cross2.end(), [](auto & a, auto & b) {
-            return get<0>(a) > get<0>(b);
+            return a.first > b.first;
         });
 
         // Remove the 3 edges that we are guessing make the min cut.
@@ -151,10 +152,10 @@ int minimumCut( Graph & graph, int noCrossings, int cut=3 )
         for( auto & kv : graph )
             copy( kv.second.begin(), kv.second.end(), back_inserter(g2[kv.first]) );
 
-        for( auto [n,key] : cross2 )
+        for( auto & c : cross2 )
         {
-            string key0 = key.substr(0,3);
-            string key1 = key.substr(3,3);
+            string key0 = c.second.substr(0,3);
+            string key1 = c.second.substr(3,3);
             auto p = find(g2[key0].begin(), g2[key0].end(), key1);
             if( p != g2[key0].end() )
                 g2[key0].erase( p );
