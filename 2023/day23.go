@@ -156,7 +156,6 @@ func make_graph( data []string, valid ValidMap ) AdjacencyGraph {
 type Tracking struct {
 	pt      Point
 	length  int
-	seen    map[Point]bool
 }
 
 // Optimize the graph by just connecting the places where multiple paths join.
@@ -181,20 +180,20 @@ func optimize_graph( graph AdjacencyGraph ) AdjacencyGraph {
 	for hub := range hubs {
 		adj := make(PathMap)
 		queue := []Tracking{}
-		queue = append( queue, Tracking{hub,1,make(map[Point]bool)} )
+		queue = append( queue, Tracking{hub,1} )
+		seen := make(map[Point]bool)
 
 		for len(queue) > 0 {
 			t := queue[0]
 			queue = queue[1:]
 
-			seen := t.seen
 			seen[t.pt] = true
 			for pt2,_ := range graph[t.pt] {
 				if !seen[pt2] {
 					if hubs[pt2] {
 						adj[pt2] = t.length
 					} else {
-						queue = append( queue, Tracking{pt2,t.length+1,seen} )
+						queue = append( queue, Tracking{pt2,t.length+1} )
 					}
 				}
 			}
