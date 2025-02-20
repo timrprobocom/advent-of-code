@@ -70,9 +70,8 @@ def make_graph(data):
 # Then pick the top k most travelled edges and remove these from the graph and
 # check if we have succesfully made a k cut. If so return it, if not we continue
 #
-# <param name="noCrossings">How many crossings to collect statistics on per attempt</param>
-# <param name="k">Stop when we find a k-cut</param>
-# <returns>One of the partitions</returns>
+# noCrossings is how many crossings to collect statistics on per attempt
+# k is stop when we find a k-cut
 
 def minimumCut( graph, noCrossings, cut=3 ):
     canReach = set()
@@ -110,7 +109,7 @@ def minimumCut( graph, noCrossings, cut=3 ):
 
 def part1(data):
     graph = make_graph(data)
-    _,one = minimumCut( graph, 20, 3 )
+    one = minimumCut( graph, 20, 3 )
     one = len(one)
     two = len(graph) - one
     return one*two
