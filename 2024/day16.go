@@ -50,30 +50,7 @@ var test string = `
 //go:embed day16.txt
 var live string
 
-type Point struct {
-	x int
-	y int
-}
-
-func (pt Point) add(p2 Point) Point {
-	return Point{pt.x + p2.x, pt.y + p2.y}
-}
-
-func (pt Point) addi(dx int, dy int) Point {
-	return Point{pt.x + dx, pt.y + dy}
-}
-
-func (pt Point) sub(p2 Point) Point {
-	return Point{pt.x - p2.x, pt.y - p2.y}
-}
-
-func (pt Point) left() Point {
-	return Point{pt.y, -pt.x}
-}
-
-func (pt Point) right() Point {
-	return Point{-pt.y, pt.x}
-}
+type Point = tools.Point
 
 type PointSet = map[Point]bool
 
@@ -101,12 +78,12 @@ func part1(data []string, walls PointSet) map[Point]int {
 			fmt.Print(e.score)
 		}
 
-		for _, d2 := range []Point{e.dir, e.dir.right(), e.dir.left()} {
+		for _, d2 := range []Point{e.dir, e.dir.Right(), e.dir.Left()} {
 			pain := 1001
 			if d2 == e.dir {
 				pain = 1
 			}
-			p2 := e.point.add(d2)
+			p2 := e.point.Add(d2)
 			if !walls[p2] && (visited[p2] == 0 || visited[p2] > e.score+pain) {
 				visited[p2] = e.score + pain
 				queue = append(queue, Queue{e.score + pain, p2, d2})
@@ -130,12 +107,12 @@ func part2(walls PointSet, visited map[Point]int) int {
 	for len(queue) > 0 {
 		e := queue[0]
 		queue = queue[1:]
-		for _, d2 := range []Point{e.dir, e.dir.right(), e.dir.left()} {
+		for _, d2 := range []Point{e.dir, e.dir.Right(), e.dir.Left()} {
 			pain := 1001
 			if d2 == e.dir {
 				pain = 1
 			}
-			p2 := e.point.add(d2)
+			p2 := e.point.Add(d2)
 			if !walls[p2] && visited[p2] <= e.score-pain && !goods[p2] {
 				queue = append(queue, Queue{e.score - pain, p2, d2})
 				goods[p2] = true

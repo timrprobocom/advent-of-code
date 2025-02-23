@@ -31,38 +31,23 @@ var live string
 var WIDTH = -1
 var HEIGHT = -1
 
-type Point struct {
-	x int
-	y int
-}
-
-func (pt Point) add(p2 Point) Point {
-	return Point{pt.x + p2.x, pt.y + p2.y}
-}
-
-func (pt Point) sub(p2 Point) Point {
-	return Point{pt.x - p2.x, pt.y - p2.y}
-}
+type Point = tools.Point
 
 func part1(spots map[byte][]Point) int {
 	antinodes := make(map[Point]bool)
 	for _, v := range spots {
 		for i1 := 0; i1 < len(v); i1++ {
 			for i2 := i1 + 1; i2 < len(v); i2++ {
-				dxy := v[i2].sub(v[i1])
-				antinodes[v[i1].sub(dxy)] = true
-				antinodes[v[i2].add(dxy)] = true
+				dxy := v[i2].Sub(v[i1])
+				antinodes[v[i1].Sub(dxy)] = true
+				antinodes[v[i2].Add(dxy)] = true
 			}
 		}
 	}
 
-	sum := 0
-	for pt := range antinodes {
-		if tools.Between(0, pt.x, WIDTH) && tools.Between(0, pt.y, HEIGHT) {
-			sum++
-		}
-	}
-	return sum
+    return tools.CountIf( tools.Keys(antinodes), func(pt Point) bool {
+		return tools.Between(0, pt.X, WIDTH) && tools.Between(0, pt.Y, HEIGHT) 
+	})
 }
 
 func part2(spots map[byte][]Point) int {
@@ -72,14 +57,14 @@ func part2(spots map[byte][]Point) int {
 			for i2 := i1 + 1; i2 < len(v); i2++ {
 				xy0 := v[i1]
 				xy1 := v[i2]
-				dxy := xy1.sub(xy0)
-				for tools.Between(0, xy0.x, WIDTH) && tools.Between(0, xy0.y, HEIGHT) {
+				dxy := xy1.Sub(xy0)
+				for xy0.InRange(WIDTH, HEIGHT) {
 					antinodes[xy0] = true
-					xy0 = xy0.sub(dxy)
+					xy0 = xy0.Sub(dxy)
 				}
-				for tools.Between(0, xy1.x, WIDTH) && tools.Between(0, xy1.y, HEIGHT) {
+				for xy1.InRange(WIDTH, HEIGHT) {
 					antinodes[xy1] = true
-					xy1 = xy1.add(dxy)
+					xy1 = xy1.Add(dxy)
 				}
 			}
 		}

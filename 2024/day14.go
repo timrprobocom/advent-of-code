@@ -51,9 +51,9 @@ func printgrid(data [][]int) {
 }
 
 func move(data [][]int) {
-	for i := 0; i < len(data); i++ {
-		data[i][0] = (data[i][0] + data[i][2] + WIDTH) % WIDTH
-		data[i][1] = (data[i][1] + data[i][3] + HEIGHT) % HEIGHT
+	for _, row := range data {
+		row[0] = (row[0] + row[2] + WIDTH) % WIDTH
+		row[1] = (row[1] + row[3] + HEIGHT) % HEIGHT
 	}
 }
 
@@ -69,17 +69,11 @@ func detect_tree(data [][]int) bool {
 	}
 	stx := stat.StdDev(x, nil)
 	sty := stat.StdDev(y, nil)
-	if stx < 20 && sty < 20 {
-		if DEBUG {
-			printgrid(data)
-		}
-		return true
-	}
-	return false
+	return stx < 20 && sty < 20 
 }
 
 func part1(data [][]int) int {
-	for i := 0; i < 100; i++ {
+	for range 100 {
 		move(data)
 	}
 
@@ -109,6 +103,9 @@ func part2(data [][]int) int {
 	for i = 100; i < 10000; i++ {
 		move(data)
 		if detect_tree(data) {
+			if DEBUG {
+				printgrid(data)
+			}
 			break
 		}
 	}

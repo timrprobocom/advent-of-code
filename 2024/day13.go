@@ -32,25 +32,6 @@ Prize: X=18641, Y=10279`[1:]
 //go:embed day13.txt
 var live string
 
-// Convert until we can't no more.
-
-func stol(s string) int {
-	sign := 1
-	accum := 0
-	for _, c := range s {
-		switch c {
-		case '-':
-			sign = -1
-		case '+':
-			sign = +1
-		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			accum = accum*10 + int(byte(c)) - '0'
-		default:
-			return sign * accum
-		}
-	}
-	return sign * accum
-}
 
 func part1(data [][]int) int64 {
 	var sum int64 = 0
@@ -131,8 +112,8 @@ func main() {
 			i++
 			j++
 		}
-		row = append(row, stol(line[i+1:]))
-		row = append(row, stol(line[j+1:]))
+		row = append(row, tools.StrToInt(line[i+1:]))
+		row = append(row, tools.StrToInt(line[j+1:]))
 	}
 	data = append(data, row)
 

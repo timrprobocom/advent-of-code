@@ -52,22 +52,7 @@ var live string
 var WIDTH int = -1
 var HEIGHT int = -1
 
-type Point struct {
-	x int
-	y int
-}
-
-func (pt Point) add(p2 Point) Point {
-	return Point{pt.x + p2.x, pt.y + p2.y}
-}
-
-func (pt Point) addi(dx int, dy int) Point {
-	return Point{pt.x + dx, pt.y + dy}
-}
-
-func (pt Point) sub(p2 Point) Point {
-	return Point{pt.x - p2.x, pt.y - p2.y}
-}
+type Point = tools.Point
 
 var directions = map[byte]Point{
 	'<': Point{-1, 0},
@@ -93,18 +78,18 @@ func printgrid(grid Grid) {
 
 func can_we_move(grid Grid, pt Point, dir Point) bool {
 	affected := []Point{pt}
-	c := grid[pt.y][pt.x]
-	if dir.y != 0 {
+	c := grid[pt.Y][pt.X]
+	if dir.Y != 0 {
 		if c == '[' {
-			affected = append(affected, pt.addi(1, 0))
+			affected = append(affected, pt.Addi(1, 0))
 		} else if c == ']' {
-			affected = append(affected, pt.addi(-1, 0))
+			affected = append(affected, pt.Addi(-1, 0))
 		}
 	}
 
 	for _, pt := range affected {
-		npt := pt.add(dir)
-		switch grid[npt.y][npt.x] {
+		npt := pt.Add(dir)
+		switch grid[npt.Y][npt.X] {
 		case '.':
 			continue
 		case '#':
@@ -123,19 +108,19 @@ func do_a_move(grid Grid, pt Point, dir Point) bool {
 		return false
 	}
 	affected := []Point{pt}
-	c := grid[pt.y][pt.x]
-	if dir.y != 0 {
+	c := grid[pt.Y][pt.X]
+	if dir.Y != 0 {
 		if c == '[' {
-			affected = append(affected, pt.addi(1, 0))
+			affected = append(affected, pt.Addi(1, 0))
 		} else if c == ']' {
-			affected = append(affected, pt.addi(-1, 0))
+			affected = append(affected, pt.Addi(-1, 0))
 		}
 	}
 
 	for _, pt := range affected {
-		c := grid[pt.y][pt.x]
-		npt := pt.add(dir)
-		dc := grid[npt.y][npt.x]
+		c := grid[pt.Y][pt.X]
+		npt := pt.Add(dir)
+		dc := grid[npt.Y][npt.X]
 		if dc == '#' {
 			// Should not happen.
 			printgrid(grid)
@@ -146,8 +131,8 @@ func do_a_move(grid Grid, pt Point, dir Point) bool {
 		if dc != '.' {
 			do_a_move(grid, npt, dir)
 		}
-		grid[pt.y][pt.x] = '.'
-		grid[npt.y][npt.x] = c
+		grid[pt.Y][pt.X] = '.'
+		grid[npt.Y][npt.X] = c
 	}
 	return true
 }
@@ -160,8 +145,8 @@ func part1(moves string, grid Grid, robot Point) int {
 	for _, c := range moves {
 		dir := directions[byte(c)]
 		if do_a_move(grid, robot, dir) {
-			robot = robot.add(dir)
-			if grid[robot.y][robot.x] != '@' {
+			robot = robot.Add(dir)
+			if grid[robot.Y][robot.X] != '@' {
 				printgrid(grid)
 				fmt.Println(robot)
 				panic("Robot didn't move")

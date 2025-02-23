@@ -29,14 +29,7 @@ var live string
 var WIDTH int = -1
 var HEIGHT int = -1
 
-type Point struct {
-	x int
-	y int
-}
-
-func (pt Point) add(p2 Point) Point {
-	return Point{pt.x + p2.x, pt.y + p2.y}
-}
+type Point = tools.Point
 
 var NORTH Point = Point{0, -1}
 var EAST Point = Point{-1, 0}
@@ -44,10 +37,6 @@ var SOUTH Point = Point{0, 1}
 var WEST Point = Point{1, 0}
 
 var GUARD Point = Point{-1, -1}
-
-func (in Point) turn_right() Point {
-	return Point{-in.y, in.x}
-}
 
 type Cell struct {
 	walkId  int
@@ -110,12 +99,12 @@ func part1(grid [][]Cell) int {
 
 	for {
 		g_originalPath = append(g_originalPath, Step{gpt, dir})
-		npt := gpt.add(dir)
-		if !(tools.Between(0, npt.x, WIDTH) && tools.Between(0, npt.y, HEIGHT)) {
+		npt := gpt.Add(dir)
+		if !npt.InRange(WIDTH, HEIGHT) {
 			break
 		}
-		if grid[npt.y][npt.x].blocked {
-			dir = dir.turn_right()
+		if grid[npt.Y][npt.X].blocked {
+			dir = dir.Right()
 		} else {
 			gpt = npt
 		}
@@ -140,21 +129,21 @@ func walkCandidateMap(grid [][]Cell, point Step) int {
 
 	for {
 		// We keep walking until we get blocked.
-		npt := pt.add(direction)
-		if !(tools.Between(0, npt.x, WIDTH) && tools.Between(0, npt.y, HEIGHT)) {
+		npt := pt.Add(direction)
+		if !npt.InRange(WIDTH, HEIGHT) {
 			break
 		}
-		if !grid[npt.y][npt.x].blocked {
+		if !grid[npt.Y][npt.X].blocked {
 			pt = npt
 			continue
 		}
-		currentCell := &grid[pt.y][pt.x]
+		currentCell := &grid[pt.Y][pt.X]
 		currentCell.maybeResetCell(currentWalk)
 		if currentCell.walked[direction] {
 			return 1
 		}
 		currentCell.walked[direction] = true
-		direction = direction.turn_right()
+		direction = direction.Right()
 	}
 	return 0
 }
@@ -169,9 +158,9 @@ func part2(grid [][]Cell) int {
 			block := step.pt
 			if !checked[block] {
 				checked[block] = true
-				grid[block.y][block.x].blocked = true
+				grid[block.Y][block.X].blocked = true
 				countOfLoopPaths += walkCandidateMap(grid, point)
-				grid[block.y][block.x].blocked = false
+				grid[block.Y][block.X].blocked = false
 			}
 		}
 		point = step

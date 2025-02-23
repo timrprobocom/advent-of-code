@@ -29,30 +29,7 @@ var live string = `
 //  //go:embed day20.txt
 //  var live string
 
-type Point struct {
-	x int
-	y int
-}
-
-func (pt Point) add(p2 Point) Point {
-	return Point{pt.x + p2.x, pt.y + p2.y}
-}
-
-func (pt Point) addi(dx int, dy int) Point {
-	return Point{pt.x + dx, pt.y + dy}
-}
-
-func (pt Point) sub(p2 Point) Point {
-	return Point{pt.x - p2.x, pt.y - p2.y}
-}
-
-func (pt Point) left() Point {
-	return Point{pt.y, -pt.x}
-}
-
-func (pt Point) right() Point {
-	return Point{-pt.y, pt.x}
-}
+type Point = tools.Point
 
 // This is faster than a map<char,point_t>.
 
@@ -147,17 +124,17 @@ func cheapestAuxPad(pt0 Point, pt1 Point, robots int) int64 {
 		if entry.pt == dirpad('X') {
 			continue
 		}
-		if entry.pt.x < pt1.x {
-			queue = append(queue, Queue{entry.pt.add(Point{1, 0}), entry.s + ">"})
+		if entry.pt.X < pt1.X {
+			queue = append(queue, Queue{entry.pt.Add(Point{1, 0}), entry.s + ">"})
 		}
-		if entry.pt.x > pt1.x {
-			queue = append(queue, Queue{entry.pt.add(Point{-1, 0}), entry.s + "<"})
+		if entry.pt.X > pt1.X {
+			queue = append(queue, Queue{entry.pt.Add(Point{-1, 0}), entry.s + "<"})
 		}
-		if entry.pt.y < pt1.y {
-			queue = append(queue, Queue{entry.pt.add(Point{0, 1}), entry.s + "v"})
+		if entry.pt.Y < pt1.Y {
+			queue = append(queue, Queue{entry.pt.Add(Point{0, 1}), entry.s + "v"})
 		}
-		if entry.pt.y > pt1.y {
-			queue = append(queue, Queue{entry.pt.add(Point{0, -1}), entry.s + "^"})
+		if entry.pt.Y > pt1.Y {
+			queue = append(queue, Queue{entry.pt.Add(Point{0, -1}), entry.s + "^"})
 		}
 	}
 	cache[nugget] = res
@@ -193,17 +170,17 @@ func cheapest(pt0 Point, pt1 Point, botcount int) int64 {
 		if entry.pt == buttons('X') {
 			continue
 		}
-		if entry.pt.x < pt1.x {
-			queue = append(queue, Queue{entry.pt.add(Point{1, 0}), entry.s + ">"})
+		if entry.pt.X < pt1.X {
+			queue = append(queue, Queue{entry.pt.Add(Point{1, 0}), entry.s + ">"})
 		}
-		if entry.pt.x > pt1.x {
-			queue = append(queue, Queue{entry.pt.add(Point{-1, 0}), entry.s + "<"})
+		if entry.pt.X > pt1.X {
+			queue = append(queue, Queue{entry.pt.Add(Point{-1, 0}), entry.s + "<"})
 		}
-		if entry.pt.y < pt1.y {
-			queue = append(queue, Queue{entry.pt.add(Point{0, 1}), entry.s + "v"})
+		if entry.pt.Y < pt1.Y {
+			queue = append(queue, Queue{entry.pt.Add(Point{0, 1}), entry.s + "v"})
 		}
-		if entry.pt.y > pt1.y {
-			queue = append(queue, Queue{entry.pt.add(Point{0, -1}), entry.s + "^"})
+		if entry.pt.Y > pt1.Y {
+			queue = append(queue, Queue{entry.pt.Add(Point{0, -1}), entry.s + "^"})
 		}
 	}
 	return res

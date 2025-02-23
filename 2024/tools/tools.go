@@ -62,6 +62,17 @@ func Count(haystack []int, needle int) int {
 	return count
 }
 
+func CountIf[T any](haystack []T, criteria func(T)bool) int {
+	count := 0
+	for _, p := range haystack {
+		if criteria(p) {
+			count++
+		}
+	}
+	return count
+}
+
+
 // Produce a matrix of ints from the input.
 
 func GetNumbers[T Number](input string) [][]T {
@@ -222,7 +233,7 @@ func Values[K comparable, V any]( m map[K]V ) []V {
 	return res
 }
 
-// Recursive finds and returns the greatest common divisor of a given integer.
+// Recursively finds and returns the greatest common divisor of a given integer.
 
 func Gcd(a, b int64) int64 {
 	if b == 0 {
@@ -235,4 +246,43 @@ func Gcd(a, b int64) int64 {
 
 func Lcm(a, b int64) int64 {
 	return AbsInt(a * b / Gcd(a,b))
+}
+
+
+
+type Point struct {
+	X int
+	Y int
+}
+
+func (pt Point) Add(p2 Point) Point {
+	return Point{pt.X + p2.X, pt.Y + p2.Y}
+}
+
+func (pt Point) Addi(dx int, dy int) Point {
+	return Point{pt.X + dx, pt.Y + dy}
+}
+
+func (pt Point) Sub(p2 Point) Point {
+	return Point{pt.X - p2.X, pt.Y - p2.Y}
+}
+
+func (pt Point) Left() Point {
+	return Point{pt.Y, -pt.X}
+}
+
+func (pt Point) Right() Point {
+	return Point{-pt.Y, pt.X}
+}
+
+func (pt Point) Back() Point {
+	return Point{-pt.X, -pt.Y}
+}
+
+func Mandist( pt1, pt2 Point ) int {
+	return AbsInt(pt1.X-pt2.X) + AbsInt(pt1.Y-pt2.Y)
+}
+
+func (pt Point) InRange(width int, height int) bool {
+	return Between(0, pt.X, width) && Between(0, pt.Y, height)
 }

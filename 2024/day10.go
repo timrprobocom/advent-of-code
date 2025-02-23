@@ -27,18 +27,7 @@ var live string
 var WIDTH = -1
 var HEIGHT = -1
 
-type Point struct {
-	x int
-	y int
-}
-
-func (pt Point) add(p2 Point) Point {
-	return Point{pt.x + p2.x, pt.y + p2.y}
-}
-
-func (pt Point) sub(p2 Point) Point {
-	return Point{pt.x - p2.x, pt.y - p2.y}
-}
+type Point = tools.Point
 
 func part1(data [][]int) (int, int) {
 	// Find the zeros.
@@ -69,8 +58,8 @@ func part1(data [][]int) (int, int) {
 			queue = queue[1:]
 			c := next.cost + 1
 			for _, dxy := range directions {
-				pxy := next.pt.add(dxy)
-				if tools.Between(0, pxy.x, WIDTH) && tools.Between(0, pxy.y, HEIGHT) && data[pxy.y][pxy.x] == c {
+				pxy := next.pt.Add(dxy)
+				if pxy.InRange(WIDTH, HEIGHT) && data[pxy.Y][pxy.X] == c {
 					if c == 9 {
 						part2++
 						solutions[pxy] = true

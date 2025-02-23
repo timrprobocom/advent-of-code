@@ -29,18 +29,7 @@ var live string
 var WIDTH = -1
 var HEIGHT = -1
 
-type Point struct {
-	x int
-	y int
-}
-
-func (pt Point) add(p2 Point) Point {
-	return Point{pt.x + p2.x, pt.y + p2.y}
-}
-
-func (pt Point) sub(p2 Point) Point {
-	return Point{pt.x - p2.x, pt.y - p2.y}
-}
+type Point = tools.Point
 
 var directions []Point
 
@@ -57,15 +46,17 @@ func getregion(region PointSet, xy Point) map[Point]bool {
 	found[xy] = true
 
 	for len(queue) > 0 {
-		xy := queue[0]
-		queue = queue[1:]
-		for _, dxy := range directions {
-			xy0 := xy.add(dxy)
-			if region[xy0] && !found[xy0] {
-				found[xy0] = true
-				queue = append(queue, xy0)
+		var more []Point
+		for _, xy := range queue {
+			for _, dxy := range directions {
+				xy0 := xy.Add(dxy)
+				if region[xy0] && !found[xy0] {
+					found[xy0] = true
+					more = append(more, xy0)
+				}
 			}
 		}
+		queue = more
 	}
 	return found
 }
@@ -78,21 +69,20 @@ func firstkey[T comparable, U any](mapx map[T]U) T {
 	return xy
 }
 
-func distinctsets(regionIn []Point) []PointSet {
+func distinctsets(res chan PointSet, regionIn []Point) {
 	region := make(PointSet)
 	for _, xy := range regionIn {
 		region[xy] = true
 	}
-	var regions []PointSet
-	for len(region) > 0 {
-		xy := firstkey(region)
+	for xy,v := range region {
+		if !v { continue }
 		newreg := getregion(region, xy)
-		regions = append(regions, newreg)
+		res <- newreg
 		for pt := range newreg {
-			delete(region, pt)
+			region[pt] = false
 		}
 	}
-	return regions
+	close(res)
 }
 
 // Return the sum of points in the region that have a neighbor NOT in the region.
@@ -101,7 +91,7 @@ func perimeter(region PointSet) int64 {
 	sum := 0
 	for xy, _ := range region {
 		for _, dxy := range directions {
-			if !region[xy.add(dxy)] {
+			if !region[xy.Add(dxy)] {
 				sum++
 			}
 		}
@@ -121,7 +111,7 @@ func find_border(region PointSet) map[PointDir]bool {
 	border := make(map[PointDir]bool)
 	for xy, _ := range region {
 		for _, dxy := range directions {
-			if tools.Between(0, xy.x, WIDTH) && tools.Between(0, xy.y, HEIGHT) && !region[xy.add(dxy)] {
+			if xy.InRange(WIDTH, HEIGHT) && !region[xy.Add(dxy)] {
 				border[PointDir{xy, dxy}] = true
 			}
 		}
@@ -137,11 +127,11 @@ func sides(border map[PointDir]bool) int64 {
 	for pair, _ := range border {
 		xy := pair.pt
 		dxy := pair.dir
-		for _, pdxy := range []Point{Point{-dxy.y, dxy.x}, Point{dxy.y, -dxy.x}} {
-			xy0 := PointDir{xy.add(pdxy), dxy}
+		for _, pdxy := range []Point{Point{-dxy.Y, dxy.X}, Point{dxy.Y, -dxy.X}} {
+			xy0 := PointDir{xy.Add(pdxy), dxy}
 			for border[xy0] {
 				delete(border, xy0)
-				xy0.pt = xy0.pt.add(pdxy)
+				xy0.pt = xy0.pt.Add(pdxy)
 			}
 		}
 		sides++
@@ -194,7 +184,9 @@ func main() {
 
 	var regions []PointSet
 	for _, region := range stats {
-		for _, s := range distinctsets(region) {
+		sets :=  make(chan PointSet)
+		go distinctsets(sets, region)
+		for s := range sets {
 			regions = append(regions, s)
 		}
 	}

@@ -31,30 +31,7 @@ var test string = `
 //go:embed day20.txt
 var live string
 
-type Point struct {
-	x int
-	y int
-}
-
-func (pt Point) add(p2 Point) Point {
-	return Point{pt.x + p2.x, pt.y + p2.y}
-}
-
-func (pt Point) addi(dx int, dy int) Point {
-	return Point{pt.x + dx, pt.y + dy}
-}
-
-func (pt Point) sub(p2 Point) Point {
-	return Point{pt.x - p2.x, pt.y - p2.y}
-}
-
-func (pt Point) left() Point {
-	return Point{pt.y, -pt.x}
-}
-
-func (pt Point) right() Point {
-	return Point{-pt.y, pt.x}
-}
+type Point = tools.Point
 
 type PointSet = map[Point]bool
 
@@ -72,8 +49,8 @@ func makemap(grid []string) map[Point]int {
 	for point != finish {
 		mapx[point] = len(mapx) + 1
 		for _, dir := range directions {
-			npt := point.actuald(dir)
-			if grid[npt.y][npt.x] != '#' && mapx[npt] == 0 {
+			npt := point.Add(dir) 
+			if grid[npt.Y][npt.X] != '#' && mapx[npt] == 0 {
 				point = npt
 				break
 			}
@@ -82,10 +59,6 @@ func makemap(grid []string) map[Point]int {
 
 	mapx[finish] = len(mapx) + 1
 	return mapx
-}
-
-func mandist(pt1, pt2 Point) int {
-	return tools.AbsInt(pt2.x-pt1.x) + tools.AbsInt(pt2.y-pt1.y)
 }
 
 func part2(path map[Point]int, cheat int, crit int) int {
@@ -100,7 +73,7 @@ func part2(path map[Point]int, cheat int, crit int) int {
 			}
 			// Compute Manhattan distance.
 
-			manhattan := mandist(k1, k2)
+			manhattan := tools.Mandist(k1, k2)
 			if manhattan <= cheat {
 				actual := v2 - v1
 				gain := actual - manhattan

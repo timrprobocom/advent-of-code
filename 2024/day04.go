@@ -31,10 +31,7 @@ var HEIGHT int = -1
 
 // Find all occurrances of c.
 
-type Point struct {
-	x int
-	y int
-}
+type Point = tools.Point
 
 func findall(data []string, c rune) []Point {
 	var result []Point
@@ -57,9 +54,9 @@ func part1(data []string) int {
 			var pt = point
 			winner++
 			for _, c := range []byte("MAS") {
-				pt.x += dir.x
-				pt.y += dir.y
-				if !(tools.Between(0, pt.x, WIDTH) && tools.Between(0, pt.y, HEIGHT) && data[pt.y][pt.x] == c) {
+				pt.X += dir.X
+				pt.Y += dir.Y
+				if pt.InRange(WIDTH, HEIGHT) && data[pt.Y][pt.X] == c {
 					winner--
 					break
 				}
@@ -72,12 +69,12 @@ func part1(data []string) int {
 func part2(data []string) int {
 	winner := 0
 	for _, pt := range findall(data, 'A') {
-		if tools.Between(1, pt.x, WIDTH-1) &&
-			tools.Between(1, pt.y, HEIGHT-1) &&
-			((data[pt.y-1][pt.x-1] == 'M' && data[pt.y+1][pt.x+1] == 'S') ||
-				(data[pt.y-1][pt.x-1] == 'S' && data[pt.y+1][pt.x+1] == 'M')) &&
-			((data[pt.y-1][pt.x+1] == 'M' && data[pt.y+1][pt.x-1] == 'S') ||
-				(data[pt.y-1][pt.x+1] == 'S' && data[pt.y+1][pt.x-1] == 'M')) {
+		if tools.Between(1, pt.X, WIDTH-1) &&
+			tools.Between(1, pt.Y, HEIGHT-1) &&
+			((data[pt.Y-1][pt.X-1] == 'M' && data[pt.Y+1][pt.X+1] == 'S') ||
+				(data[pt.Y-1][pt.X-1] == 'S' && data[pt.Y+1][pt.X+1] == 'M')) &&
+			((data[pt.Y-1][pt.X+1] == 'M' && data[pt.Y+1][pt.X-1] == 'S') ||
+				(data[pt.Y-1][pt.X+1] == 'S' && data[pt.Y+1][pt.X-1] == 'M')) {
 			winner++
 		}
 	}
