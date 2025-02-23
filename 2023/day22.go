@@ -24,38 +24,7 @@ var test = `
 var live string
 
 
-type Point struct {
-	x int
-	y int
-}
-
-func (pt Point) add(p2 Point) Point {
-	return Point{pt.x + p2.x, pt.y + p2.y}
-}
-
-func (pt Point) addi(dx int, dy int) Point {
-	return Point{pt.x + dx, pt.y + dy}
-}
-
-func (pt Point) sub(p2 Point) Point {
-	return Point{pt.x - p2.x, pt.y - p2.y}
-}
-
-func (pt Point) left() Point {
-	return Point{pt.y, -pt.x}
-}
-
-func (pt Point) right() Point {
-	return Point{-pt.y, pt.x}
-}
-
-func (pt Point) backward() Point {
-	return Point{-pt.x, -pt.y}
-}
-
-func manhattan(pt1, pt2 Point) int {
-	return tools.AbsInt(pt2.x-pt1.x) + tools.AbsInt(pt2.y-pt1.y)
-}
+type Point = tools.Point
 
 
 type Brick struct {

@@ -39,39 +39,7 @@ var test = `
 var live string
 
 
-type Point struct {
-	x int
-	y int
-}
-
-func (pt Point) add(p2 Point) Point {
-	return Point{pt.x + p2.x, pt.y + p2.y}
-}
-
-func (pt Point) addi(dx int, dy int) Point {
-	return Point{pt.x + dx, pt.y + dy}
-}
-
-func (pt Point) sub(p2 Point) Point {
-	return Point{pt.x - p2.x, pt.y - p2.y}
-}
-
-func (pt Point) left() Point {
-	return Point{pt.y, -pt.x}
-}
-
-func (pt Point) right() Point {
-	return Point{-pt.y, pt.x}
-}
-
-func (pt Point) backward() Point {
-	return Point{-pt.x, -pt.y}
-}
-
-func manhattan(pt1, pt2 Point) int {
-	return tools.AbsInt(pt2.x-pt1.x) + tools.AbsInt(pt2.y-pt1.y)
-}
-
+type Point = tools.Point
 
 var directions []Point = []Point{
 	Point{0,-1},	// U
@@ -79,7 +47,6 @@ var directions []Point = []Point{
 	Point{0,1},		// D
 	Point{1,0},		// R
 }
-
 
 var WIDTH = -1
 var HEIGHT = -1
@@ -91,7 +58,6 @@ const RR = 8
 
 var START Point
 var TARGET Point
-
 
 type ValidMap map[Point]byte 
 
@@ -118,8 +84,7 @@ func parse( grid []string ) (ValidMap, ValidMap) {
 	WIDTH = len(grid[0])
 	HEIGHT = len(grid)
 	START = Point{1,0}
-	TARGET.x = WIDTH-2
-	TARGET.y = HEIGHT-1
+	TARGET = Point{WIDTH-2, HEIGHT-1}
 	return valid1, valid2
 }
 
@@ -139,7 +104,7 @@ func make_graph( data []string, valid ValidMap ) AdjacencyGraph {
 				adj := make(PathMap)
 				for i := range 4 {
 					if possible & (1<<i) > 0 {
-						pt1 := pt.add(directions[i])
+						pt1 := pt.Add(directions[i])
 						if valid[pt1] > 0 {
 							adj[pt1] = 1
 						}

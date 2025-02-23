@@ -25,34 +25,7 @@ var test = `
 //go:embed day11.txt
 var live string
 
-type Point struct {
-	x int
-	y int
-}
-
-func (pt Point) add(p2 Point) Point {
-	return Point{pt.x + p2.x, pt.y + p2.y}
-}
-
-func (pt Point) addi(dx int, dy int) Point {
-	return Point{pt.x + dx, pt.y + dy}
-}
-
-func (pt Point) sub(p2 Point) Point {
-	return Point{pt.x - p2.x, pt.y - p2.y}
-}
-
-func (pt Point) left() Point {
-	return Point{pt.y, -pt.x}
-}
-
-func (pt Point) right() Point {
-	return Point{-pt.y, pt.x}
-}
-
-func manhattan(pt1, pt2 Point) int {
-	return tools.AbsInt(pt2.x-pt1.x) + tools.AbsInt(pt2.y-pt1.y)
-}
+type Point = tools.Point
 
 var nogrow map[int]bool
 var nogcol map[int]bool
@@ -82,7 +55,7 @@ func part1(data []string, delta int) int {
 	mandist := 0
 	for i := 0; i < len(stars)-1; i++ {
 		for j := i; j < len(stars); j++ {
-			mandist += manhattan(stars[i], stars[j])
+			mandist += tools.Mandist(stars[i], stars[j])
 		}
 	}
 	return mandist

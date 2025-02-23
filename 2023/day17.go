@@ -31,38 +31,7 @@ var live string
 var WIDTH = -1
 var HEIGHT = -1
 
-type Point struct {
-	x int
-	y int
-}
-
-func (pt Point) add(p2 Point) Point {
-	return Point{pt.x + p2.x, pt.y + p2.y}
-}
-
-func (pt Point) addi(dx int, dy int) Point {
-	return Point{pt.x + dx, pt.y + dy}
-}
-
-func (pt Point) sub(p2 Point) Point {
-	return Point{pt.x - p2.x, pt.y - p2.y}
-}
-
-func (pt Point) left() Point {
-	return Point{pt.y, -pt.x}
-}
-
-func (pt Point) right() Point {
-	return Point{-pt.y, pt.x}
-}
-
-func (pt Point) backward() Point {
-	return Point{-pt.x, -pt.y}
-}
-
-func manhattan(pt1, pt2 Point) int {
-	return tools.AbsInt(pt2.x-pt1.x) + tools.AbsInt(pt2.y-pt1.y)
-}
+type Point = tools.Point
 
 var N Point = Point{0, -1}
 var E Point = Point{1, 0}
@@ -138,7 +107,7 @@ func part1(grid [][]byte, mind int, maxd int) int {
 		val := q.value
 
 		// If we hit the exit, yahoo.
-		if val.pt.x == WIDTH-1 && val.pt.y == HEIGHT-1 {
+		if val.pt.X == WIDTH-1 && val.pt.Y == HEIGHT-1 {
 			break
 		}
 
@@ -154,17 +123,17 @@ func part1(grid [][]byte, mind int, maxd int) int {
 		// Check all possible directions.  We can't go the way we were going,
 		// and we can't go back the way we came.
 		for _, direction := range []Point{N, E, S, W} {
-			if direction == val.dir || direction == val.dir.backward() {
+			if direction == val.dir || direction == val.dir.Back() {
 				continue
 			}
 			dcost := 0
 			npt := val.pt
 			for distance := 1; distance <= maxd; distance++ {
-				npt = npt.add(direction)
-				if !tools.Between(0, npt.x, WIDTH) || !tools.Between(0, npt.y, HEIGHT) {
+				npt = npt.Add(direction)
+				if !npt.InRange(WIDTH, HEIGHT) {
 					break
 				}
-				dcost += int(grid[npt.y][npt.x])
+				dcost += int(grid[npt.Y][npt.X])
 				if distance >= mind {
 					heap.Push(&points, &Item{
 						priority: cost + dcost,

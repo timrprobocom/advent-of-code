@@ -25,10 +25,7 @@ var test = `
 //go:embed day03.txt
 var live string
 
-type Point struct {
-	x int
-	y int
-}
+type Point = tools.Point
 
 type Number struct {
 	x int
@@ -72,8 +69,8 @@ func part2( part int, numbers []Number, symbols []Point ) int {
 	for _, spt := range symbols {
 		var nums []int
 		for _, num := range numbers {
-			if num.y-1 <= spt.y && spt.y <= num.y+1 &&
-				num.x-1 <= spt.x && spt.x <= num.x+num.length {
+			if num.y-1 <= spt.Y && spt.Y <= num.y+1 &&
+				num.x-1 <= spt.X && spt.X <= num.x+num.length {
 				nums = append( nums, num.value )
 			}
 		}

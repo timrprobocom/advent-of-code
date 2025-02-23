@@ -28,34 +28,7 @@ var live string
 var WIDTH = -1
 var HEIGHT = -1
 
-type Point struct {
-	x int
-	y int
-}
-
-func (pt Point) add(p2 Point) Point {
-	return Point{pt.x + p2.x, pt.y + p2.y}
-}
-
-func (pt Point) addi(dx int, dy int) Point {
-	return Point{pt.x + dx, pt.y + dy}
-}
-
-func (pt Point) sub(p2 Point) Point {
-	return Point{pt.x - p2.x, pt.y - p2.y}
-}
-
-func (pt Point) left() Point {
-	return Point{pt.y, -pt.x}
-}
-
-func (pt Point) right() Point {
-	return Point{-pt.y, pt.x}
-}
-
-func manhattan(pt1, pt2 Point) int {
-	return tools.AbsInt(pt2.x-pt1.x) + tools.AbsInt(pt2.y-pt1.y)
-}
+type Point = tools.Point
 
 var N Point = Point{0, -1}
 var E Point = Point{1, 0}
@@ -65,15 +38,15 @@ var W Point = Point{-1, 0}
 func change( c byte, dir Point ) Point {
 	if c == '/' {
 		if dir == N || dir == S {
-			return dir.right()
+			return dir.Right()
 		} else {
-			return dir.left()
+			return dir.Left()
 		}
 	} else if c == '\\' {
 		if dir == N || dir == S {
-			return dir.left()
+			return dir.Left()
 		} else {
-			return dir.right()
+			return dir.Right()
 		}
 	}
 	panic("What?")
@@ -91,7 +64,7 @@ func printg(seen map[TwoPoint]bool) {
 		grid = append(grid, tools.Repeat('.', WIDTH))
 	}
 	for s := range seen {
-		grid[s.pt.y][s.pt.x] = '#'
+		grid[s.pt.Y][s.pt.X] = '#'
 	}
 	for _, row := range grid {
 		fmt.Println(string(row))
@@ -112,22 +85,22 @@ func process(grid []string, start TwoPoint) int {
 		seen[tpt] = true
 
 		dir := tpt.dir
-		c := grid[tpt.pt.y][tpt.pt.x]
+		c := grid[tpt.pt.Y][tpt.pt.X]
 		if c == '/' || c == '\\' {
 			dir = change(c, dir)
 		} else if c == '|' && (dir == E || dir == W) {
-			if tpt.pt.y > 0 {
-				beams = append(beams, TwoPoint{tpt.pt.add(N), N})
+			if tpt.pt.Y > 0 {
+				beams = append(beams, TwoPoint{tpt.pt.Add(N), N})
 			}
 			dir = S
 		} else if c == '-' && (dir == N || dir == S) {
-			if tpt.pt.x > 0 {
-				beams = append(beams, TwoPoint{tpt.pt.add(W), W})
+			if tpt.pt.X > 0 {
+				beams = append(beams, TwoPoint{tpt.pt.Add(W), W})
 			}
 			dir = E
 		}
-		pt := tpt.pt.add(dir)
-		if tools.Between(0, pt.x, WIDTH) && tools.Between(0, pt.y, HEIGHT) {
+		pt := tpt.pt.Add(dir)
+		if pt.InRange(WIDTH, HEIGHT) {
 			beams = append(beams, TwoPoint{pt, dir})
 		}
 	}

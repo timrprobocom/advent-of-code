@@ -3,7 +3,6 @@ package tools
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -152,31 +151,55 @@ func StrToInt(s string) int {
 	return sign * accum
 }
 
+func StrToInt64(s string) int64 {
+	var accum int64 = 0
+	sign := 1
+	for _, c := range s {
+		if c == '+' {
+			sign = 1
+		} else if c == '-' {
+			sign = -1
+		} else if Isdigit(byte(c)) {
+			accum = accum*10 + int64(c) - '0'
+		} else {
+			break
+		}
+	}
+	return int64(sign) * accum
+}
+
 // Convert a set of numbers to a slice.
 
-func SplitInt(s string) []int {
+func SplitIntBy(s string, sep string) []int {
 	var res []int
-	for _, w := range strings.Split(s, " ") {
-		if len(w) == 0 || !Isdigit(byte(w[0])) {
-			continue
-		} else {
-			res = append(res, StrToInt(w))
+	for _, w := range strings.Split(s, sep) {
+		if len(w) > 0 {
+			if w[0] == '-' || Isdigit(byte(w[0])) {
+				res = append(res, StrToInt(w))
+			}
 		}
 	}
 	return res
 }
 
-func SplitInt64(s string) []int64 {
+func SplitInt64By(s string, sep string) []int64 {
 	var res []int64
-	for _, w := range strings.Split(s, " ") {
-		if len(w) == 0 || !Isdigit(byte(w[0])) {
-			continue
-		} else {
-			n, _ := strconv.ParseInt(w, 10, 64)
-			res = append(res, n)
+	for _, w := range strings.Split(s, sep) {
+		if len(w) > 0 {
+			if w[0] == '-' || Isdigit(byte(w[0])) {
+				res = append(res, StrToInt64(w))
+			}
 		}
 	}
 	return res
+}
+
+func SplitInt(s string) []int {
+	return SplitIntBy(s, " ")
+}
+
+func SplitInt64(s string) []int64 {
+	return SplitInt64By(s, " ")
 }
 
 func Sum[T ~int](set []T) T {
@@ -245,6 +268,16 @@ func Gcd(a, b int64) int64 {
 
 func Lcm(a, b int64) int64 {
 	return AbsInt(a * b / Gcd(a, b))
+}
+
+// How can this be so broken?
+
+func Mod [T Number](a, b T) T {
+	m := a % b
+	if m < 0 {
+		return b + m
+	}
+	return m
 }
 
 type Point struct {

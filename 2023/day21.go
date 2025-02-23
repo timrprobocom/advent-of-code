@@ -27,38 +27,7 @@ var test = `
 var live string
 
 
-type Point struct {
-	x int
-	y int
-}
-
-func (pt Point) add(p2 Point) Point {
-	return Point{pt.x + p2.x, pt.y + p2.y}
-}
-
-func (pt Point) addi(dx int, dy int) Point {
-	return Point{pt.x + dx, pt.y + dy}
-}
-
-func (pt Point) sub(p2 Point) Point {
-	return Point{pt.x - p2.x, pt.y - p2.y}
-}
-
-func (pt Point) left() Point {
-	return Point{pt.y, -pt.x}
-}
-
-func (pt Point) right() Point {
-	return Point{-pt.y, pt.x}
-}
-
-func (pt Point) backward() Point {
-	return Point{-pt.x, -pt.y}
-}
-
-func manhattan(pt1, pt2 Point) int {
-	return tools.AbsInt(pt2.x-pt1.x) + tools.AbsInt(pt2.y-pt1.y)
-}
+type Point = tools.Point
 
 var N Point = Point{0, -1}
 var E Point = Point{1, 0}
@@ -78,9 +47,10 @@ func printgrid( s map[Point]bool, d Point ) int {
 	}
 
     for pt := range s {
-		if tools.Between(0, pt.x-d.x, WIDTH) && tools.Between(0, pt.y-d.y, HEIGHT) {
+		npt := pt.Sub(d)
+		if npt.InRange(WIDTH, HEIGHT) {
 			sum++
-            grid[pt.y-d.y][pt.x-d.x] = 'O'
+            grid[npt.Y][npt.X] = 'O'
 		}
 	}
 	for _,row := range grid {
@@ -93,7 +63,8 @@ func printgrid( s map[Point]bool, d Point ) int {
 func countgrid( s map[Point]bool, d Point ) int {
     sum := 0
 	for pt := range s {
-		if tools.Between(0, pt.x-d.x, WIDTH) && tools.Between(0, pt.y-d.y, HEIGHT) {
+		npt := pt.Sub(d)
+		if npt.InRange(WIDTH, HEIGHT) {
             sum++
 		}
 	}
@@ -111,8 +82,8 @@ func part1(rocks map[Point]bool) int {
 		newq := make(map[Point]bool)
 		for pt := range queue {
 			for _, delta := range []Point{N,E,W,S} {
-				npt := pt.add(delta)
-				if tools.Between(0, npt.x, WIDTH) && tools.Between(0, npt.y, HEIGHT) && !rocks[npt] {
+				npt := pt.Add(delta)
+				if npt.InRange(WIDTH, HEIGHT) && !rocks[npt] {
 					newq[npt] = true
 				}
 			}
@@ -175,8 +146,8 @@ func part2( rocks map[Point]bool ) int {
         newq := make(map[Point]bool)
         for pt := range queue {
 			for _, delta := range []Point{N,E,W,S} {
-				npt := pt.add(delta)
-				nptm := Point{ tools.Mod(npt.x, WIDTH), tools.Mod(npt.y, HEIGHT)}
+				npt := pt.Add(delta)
+				nptm := Point{ tools.Mod(npt.X, WIDTH), tools.Mod(npt.Y, HEIGHT)}
 				if !rocks[nptm] {
 					newq[npt] = true
 				}
