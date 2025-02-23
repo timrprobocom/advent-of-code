@@ -90,7 +90,7 @@ four_t make4tuple( vector<int>::pointer begin, vector<int>::pointer end )
 {
     four_t res = 0;
     for( ; begin != end; begin++ )
-        res = res * 100 + *begin + 9;
+        res = res * 20 + *begin + 9;
     return res;
 }
 
