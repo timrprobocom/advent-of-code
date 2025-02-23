@@ -27,10 +27,16 @@ func fetch(cmd string, args ...string) string {
 
 func prep(file string, ext string) {
 	if ext == ".cpp" {
+		os.Remove(file)
 		sub := exec.Command("g++", "--std=c++17", "-O3", "-o", file, file+ext, "-llapack")
+		sub.Stdout = os.Stdout
+		sub.Stderr = os.Stderr
 		sub.Run()
 	} else if ext == ".go" {
+		os.Remove(file)
 		sub := exec.Command("go", "build", file+ext)
+		sub.Stdout = os.Stdout
+		sub.Stderr = os.Stderr
 		sub.Run()
 	}
 }
@@ -56,6 +62,8 @@ func main() {
 	sums := []float64{0,0,0}
 	for day := 1; day <= 25; day++ {
 		fn := fmt.Sprintf("day%02d", day)
+		fmt.Println(fn)
+
 		var gather [][]string
 		var times []time.Duration
 		for _, lang := range []string{".py", ".cpp", ".go"} {
@@ -68,7 +76,6 @@ func main() {
 			}
 		}
 
-		fmt.Println(fn)
 		pad := ""
 		for i := 0; i < len(gather[0]); i++ {
 			pad = ""
@@ -77,7 +84,9 @@ func main() {
 			}
 			for j, ln := range gather {
 				fmt.Print(pad)
-				if len(ln[i]) > FIELD {
+				if i >= len(ln) {
+					fmt.Print(strings.Repeat(" ", FIELD))
+				} else if len(ln[i]) > FIELD {
 					fmt.Println(ln[i])
 					pad = strings.Repeat(" ", (j+1)*FIELD)
 				} else {
