@@ -56,7 +56,7 @@ func part1(data []string) int {
 			for _, c := range []byte("MAS") {
 				pt.X += dir.X
 				pt.Y += dir.Y
-				if pt.InRange(WIDTH, HEIGHT) && data[pt.Y][pt.X] == c {
+				if !(pt.InRange(WIDTH, HEIGHT) && data[pt.Y][pt.X] == c) {
 					winner--
 					break
 				}
