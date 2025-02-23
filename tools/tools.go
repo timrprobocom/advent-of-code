@@ -3,6 +3,7 @@ package tools
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -56,6 +57,16 @@ func Count(haystack []int, needle int) int {
 	for _, i := range haystack {
 		if i == needle {
 			count += 1
+		}
+	}
+	return count
+}
+
+func CountIf[T any](haystack []T, criteria func(T) bool) int {
+	count := 0
+	for _, p := range haystack {
+		if criteria(p) {
+			count++
 		}
 	}
 	return count
@@ -141,58 +152,34 @@ func StrToInt(s string) int {
 	return sign * accum
 }
 
-func StrToInt64(s string) int64 {
-	var accum int64 = 0
-	sign := 1
-	for _, c := range s {
-		if c == '+' {
-			sign = 1
-		} else if c == '-' {
-			sign = -1
-		} else if Isdigit(byte(c)) {
-			accum = accum*10 + int64(c) - '0'
-		} else {
-			break
-		}
-	}
-	return int64(sign) * accum
-}
-
 // Convert a set of numbers to a slice.
 
-func SplitIntBy(s string, sep string) []int {
-	var res []int
-	for _, w := range strings.Split(s, sep) {
-		if len(w) > 0 {
-			if w[0] == '-' || Isdigit(byte(w[0])) {
-				res = append(res, StrToInt(w))
-			}
-		}
-	}
-	return res
-}
-
-func SplitInt64By(s string, sep string) []int64 {
-	var res []int64
-	for _, w := range strings.Split(s, sep) {
-		if len(w) > 0 {
-			if w[0] == '-' || Isdigit(byte(w[0])) {
-				res = append(res, StrToInt64(w))
-			}
-		}
-	}
-	return res
-}
-
 func SplitInt(s string) []int {
-	return SplitIntBy(s, " ")
+	var res []int
+	for _, w := range strings.Split(s, " ") {
+		if len(w) == 0 || !Isdigit(byte(w[0])) {
+			continue
+		} else {
+			res = append(res, StrToInt(w))
+		}
+	}
+	return res
 }
 
 func SplitInt64(s string) []int64 {
-	return SplitInt64By(s, " ")
+	var res []int64
+	for _, w := range strings.Split(s, " ") {
+		if len(w) == 0 || !Isdigit(byte(w[0])) {
+			continue
+		} else {
+			n, _ := strconv.ParseInt(w, 10, 64)
+			res = append(res, n)
+		}
+	}
+	return res
 }
 
-func Sum[T Number](set []T) T {
+func Sum[T ~int](set []T) T {
 	var sum T
 	for _, n := range set {
 		sum += n
@@ -245,7 +232,7 @@ func Values[K comparable, V any](m map[K]V) []V {
 	return res
 }
 
-// Recursive finds and returns the greatest common divisor of a given integer.
+// Recursively finds and returns the greatest common divisor of a given integer.
 
 func Gcd(a, b int64) int64 {
 	if b == 0 {
@@ -260,12 +247,39 @@ func Lcm(a, b int64) int64 {
 	return AbsInt(a * b / Gcd(a, b))
 }
 
-// How can this be so broken?
+type Point struct {
+	X int
+	Y int
+}
 
-func Mod [T Number](a, b T) T {
-	m := a % b
-	if m < 0 {
-		return b + m
-	}
-	return m
+func (pt Point) Add(p2 Point) Point {
+	return Point{pt.X + p2.X, pt.Y + p2.Y}
+}
+
+func (pt Point) Addi(dx int, dy int) Point {
+	return Point{pt.X + dx, pt.Y + dy}
+}
+
+func (pt Point) Sub(p2 Point) Point {
+	return Point{pt.X - p2.X, pt.Y - p2.Y}
+}
+
+func (pt Point) Left() Point {
+	return Point{pt.Y, -pt.X}
+}
+
+func (pt Point) Right() Point {
+	return Point{-pt.Y, pt.X}
+}
+
+func (pt Point) Back() Point {
+	return Point{-pt.X, -pt.Y}
+}
+
+func Mandist(pt1, pt2 Point) int {
+	return AbsInt(pt1.X-pt2.X) + AbsInt(pt1.Y-pt2.Y)
+}
+
+func (pt Point) InRange(width int, height int) bool {
+	return Between(0, pt.X, width) && Between(0, pt.Y, height)
 }
