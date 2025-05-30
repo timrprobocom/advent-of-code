@@ -122,6 +122,6 @@ func main() {
 	}
 
 	fmt.Println("Part 1:", part1(data))
-	fmt.Println("Part 2:", part2(data, 0))
+	fmt.Println("Part 1:", part2(data, 0))
 	fmt.Println("Part 2:", part2(data, 1e13))
 }

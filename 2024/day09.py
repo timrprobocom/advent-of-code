@@ -76,7 +76,7 @@ def coalesce( space, start, size ):
             done = True
     return newspace
 
-# Find the first hold large enough to hold this file.
+# Find the first hole large enough to hold this file.
 
 def find_hole_below( space, start, size ):
     for i,s in enumerate(space):
