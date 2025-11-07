@@ -90,7 +90,7 @@ int part1()
 
 int64_t lcm( int64_t a, int64_t b )
 {
-    return a * b / __gcd(a,b);
+    return a * b / gcd(a,b);
 }
 
 

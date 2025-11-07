@@ -1,5 +1,5 @@
 import sys
-moves = open('../Downloads/day1.txt').read().split(',')
+moves = open('day1.txt').read().split(',')
 x,y = (0,0)
 face = 0
 hits = {}
@@ -23,9 +23,9 @@ for m in moves:
         else:
             x -= 1
         if (x,y) in hits: 
-            print x, y, abs(x)+abs(y)
+            print(x, y, abs(x)+abs(y))
             sys.exit(1)
         hits[(x,y)]=1
-    print direc, count, x, y
-print x, y
-print abs(x)+abs(y)
+    print(direc, count, x, y)
+print(x, y)
+print(abs(x)+abs(y))
