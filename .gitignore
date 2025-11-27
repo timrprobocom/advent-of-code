@@ -1,6 +1,7 @@
 day??
 runall
 __pycache__
+*.csv
 *.swp
 *.map
 *.dSYM
