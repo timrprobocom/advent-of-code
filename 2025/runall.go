@@ -59,10 +59,9 @@ func main() {
 	fmt.Println(ljust("Python", FIELD), ljust("C++", FIELD), "Go")
 	fmt.Println(strings.Repeat("-", 3*FIELD))
 
-	sums := []float64{0,0,0}
+	sums := []float64{0, 0, 0}
 	for day := 1; day <= 25; day++ {
 		fn := fmt.Sprintf("day%02d", day)
-		fmt.Println(fn)
 
 		var gather [][]string
 		var times []time.Duration
@@ -75,6 +74,12 @@ func main() {
 				gather = append(gather, strings.Split(s, "\n"))
 			}
 		}
+
+		if len(gather) == 0 {
+			continue
+		}
+
+		fmt.Println(fn)
 
 		pad := ""
 		for i := 0; i < len(gather[0]); i++ {
@@ -98,10 +103,10 @@ func main() {
 				fmt.Println()
 			}
 		}
-		if strings.Join(gather[0],"") != strings.Join(gather[1],"") {
+		if strings.Join(gather[0], "") != strings.Join(gather[1], "") {
 			fmt.Println("#### Python and C++ results do not match ####")
 		}
-		if strings.Join(gather[0],"") != strings.Join(gather[2],"") {
+		if strings.Join(gather[0], "") != strings.Join(gather[2], "") {
 			fmt.Println("#### Python and Go results do not match ####")
 		}
 		for i, d := range times {
@@ -116,7 +121,7 @@ func main() {
 		fmt.Println()
 		stats_csv.Write([]byte("\n"))
 	}
-    fmt.Println("\nTotals:")
+	fmt.Println("\nTotals:")
 	for _, d := range sums {
 		fmt.Printf("%10.3f s", d)
 		fmt.Print(strings.Repeat(" ", FIELD-12))

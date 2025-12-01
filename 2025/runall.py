@@ -30,7 +30,7 @@ print('-'*92)
 
 sums = [0,0,0]
 
-for day in range(20,26):
+for day in range(1,26):
     fn = f'day{day:02d}'
     gather = []
     times = []
@@ -43,6 +43,8 @@ for day in range(20,26):
             times.append( time.time() - before )
             gather.append( s.splitlines() )
 
+    if not gather:
+        continue
     print(fn)
     pad = ''
     for lns in zip(*gather):
