@@ -44,21 +44,31 @@ point_t directions[] = {
 
 typedef set<point_t> pointset_t;
 
-int part1( pointset_t & rolls )
+int neighbors1( const pointset_t & rolls, const point_t & pt )
+{
+    int count = 0;
+    for( auto & dxy : directions )
+    {
+        count += rolls.find(pt+dxy) != rolls.end();            
+    }
+    return count;
+}
+
+int neighbors( const pointset_t & rolls, const point_t & pt )
+{
+    return count_if(
+        begin(directions), end(directions),
+        [&rolls,pt](point_t & dxy) {
+            return rolls.find(pt+dxy) != rolls.end();
+        }
+    );
+}
+
+int part1( const pointset_t & rolls )
 {
     int total = 0;
-    for( auto & pt : rolls )
-    {
-        int count = 0;
-        for( auto & dxy : directions )
-        {
-            point_t npt = pt+dxy;
-            if( rolls.find(npt) != rolls.end() )
-                count += 1;
-            
-        }
-        total += count < 4;
-    } 
+    for( auto && pt : rolls )
+        total += neighbors(rolls, pt) < 4;
     return total;
 }
 
@@ -68,20 +78,12 @@ int part2 (pointset_t & rolls )
 	for( ;; )
     {
 		pointset_t nrolls;
-        for( auto & pt : rolls )
-        {
-			int count = 0;
-            for( auto & dxy : directions )
-            {
-                point_t npt = pt+dxy;
-                if( rolls.find(npt) != rolls.end() )
-                	count += 1;
-			}
-			if( count >= 4)
-            {
-				nrolls.insert( pt );
-			}
-		}
+        copy_if(
+            rolls.begin(),
+            rolls.end(),
+            inserter(nrolls, nrolls.begin()),
+            [&rolls](const point_t & pt) { return neighbors(rolls, pt) >= 4; }
+        );
         if( rolls.size() == nrolls.size() )
             break;
 		removed += rolls.size() - nrolls.size();
