@@ -30,16 +30,14 @@ const string test(
 bool DEBUG = false;
 bool TEST = false;
 
-typedef vector<vector<int64_t>> MatrixInt;
-
 // Prep for part 1 by transposing the matrix.
 
-MatrixInt transpose( const StringVector & data, const string & ops ) 
+LongMatrix transpose( const StringVector & data, const string & ops ) 
 {
-    MatrixInt cols(ops.size());
+    LongMatrix cols(ops.size());
     for( auto & line : data )
     {
-        vector<int> row = split_int( line );
+        vector<int> row = split_fields<int>( line );
         for( int i = 0; i < row.size(); i++ )
         {
             cols[i].push_back( row[i] );
@@ -59,10 +57,10 @@ MatrixInt transpose( const StringVector & data, const string & ops )
 
 // Prep for part 2 by handling column by column.
 
-MatrixInt transform(const StringVector & data, const string & ops)
+LongMatrix transform(const StringVector & data, const string & ops)
 {
     int ml = data[0].size();
-    MatrixInt cols;
+    LongMatrix cols;
     vector<int64_t> col;
     for( int i = 0; i < ml; i++ )
     {
@@ -97,7 +95,7 @@ MatrixInt transform(const StringVector & data, const string & ops)
 }
 
 
-int64_t part2 (const MatrixInt & nums, const string & ops )
+int64_t part2 (const LongMatrix & nums, const string & ops )
 {
     int64_t result = 0;
     for( int i = 0; i < ops.size(); i++ )
