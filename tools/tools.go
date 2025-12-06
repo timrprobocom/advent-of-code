@@ -210,6 +210,14 @@ func Sum[T ~int](set []T) T {
 	return sum
 }
 
+func Prod[T ~int](set []T) T {
+	var sum T = 1
+	for _, n := range set {
+		sum *= n
+	}
+	return sum
+}
+
 // Set intersection.
 
 func Intersect[T comparable](m1 map[T]bool, m2 map[T]bool) map[T]bool {
@@ -272,7 +280,7 @@ func Lcm(a, b int64) int64 {
 
 // How can this be so broken?
 
-func Mod [T Number](a, b T) T {
+func Mod[T Number](a, b T) T {
 	m := a % b
 	if m < 0 {
 		return b + m

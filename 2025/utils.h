@@ -37,6 +37,33 @@ std::vector<StringVector> split_chunks( const std::string & src )
     return build;
 }
 
+std::vector<int> split_int( const std::string src )
+{
+    std::vector<int> build;
+    bool dig = false;
+    int n = 0;
+    for( auto c : src )
+    {
+        if( c == ' ' )
+        {
+            if( dig )
+            {
+                build.push_back( n );
+                n = 0;
+                dig = false;
+            }
+        }
+        else
+        {
+            n = n * 10 + c - '0';
+            dig = true;
+        }
+    }
+    if( dig )
+        build.push_back( n );
+    return build;
+}
+
 template<typename T>
 struct Point {
     T x;
