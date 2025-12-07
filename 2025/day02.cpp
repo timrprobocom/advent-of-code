@@ -73,31 +73,43 @@ int64_t part1 (string  data)
     return count;
 }
 
-// This is a shameful brute force approach.
-
-bool check(int64_t num)
+int64_t check1( string lo, string hi )
 {
-    string ns = to_string(num);
-    int n = ns.size();
-	for( int i = 1; i <= n/2; i++ )
+    int ln = lo.size();
+	int64_t lov = stoll(lo);
+	int64_t hiv = stoll(hi);
+	set<int64_t> found;
+
+	for( int i = 1; i < ln; i++ )
     {
-		if( n % i )
+		if( ln%i )
 			continue;
 
-		bool ok = true;
-        for( int j = i; j < n; j += i )
+		int64_t s = stoll(lo.substr(0,i));
+		int64_t e = stoll(hi.substr(0,i));
+        for( int64_t p = s; p <= e; p++ )
         {
-            if(ns.substr(j,i) != ns.substr(0,i) )
-            {
-                ok = false;
-                break;
+            string pp = to_string(p);
+            string pp1;
+            for( int j = 0; j < ln/i; j++ )
+                pp1 += pp;
+            int64_t st = stoll( pp1 );
+			if( lov <= st && st <= hiv ) {
+				found.insert(st);
 			}
 		}
-		if( ok ) {
-			return true;
-		}
 	}
-	return false;
+	return accumulate( found.begin(), found.end(), 0LL );
+}
+
+int64_t check(string lo, string hi)
+{
+    int ln = lo.size();
+    int hn = hi.size();
+    if( ln == hn )
+        return check1(lo, hi);
+
+    return check1(lo, string(ln,'9')) + check1( "1"+string(ln,'0'), hi); 
 }
 
 int64_t part2 (string data)
@@ -108,13 +120,7 @@ int64_t part2 (string data)
         auto rg = split(row,"-");
         string l = rg[0];
         string r = rg[1];
-        int64_t ln = stoll(l);
-        int64_t rn = stoll(r);
-
-        for( int64_t n = ln; n < rn; n++ )
-            if( check(n) )
-                count += n;
-
+        count += check(l, r);
         if (DEBUG) 
 			cout << l << " " << r << " " << count << "\n";
 	}

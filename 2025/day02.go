@@ -60,27 +60,37 @@ func part1(data string) int {
 	return count
 }
 
-// This is a shameful brute force approach.
+func check1(lo string, hi string) int {
+	ln := len(lo)
+	lov := tools.StrToInt(lo)
+	hiv := tools.StrToInt(hi)
+	found := make(map[int]bool)
 
-func check(num int) bool {
-	ns := strconv.Itoa(num)
-	n := len(ns)
-	for i := 1; i <= n/2; i++ {
-		if n%i > 0 {
+	for i := 1; i < ln; i++ {
+		if ln%i > 0 {
 			continue
 		}
-		ok := true
-		for j := i; j < n; j += i {
-			if ns[j:j+i] != ns[:i] {
-				ok = false
-				break
+		s := tools.StrToInt(lo[:i])
+		e := tools.StrToInt(hi[:i])
+		for p := s; p <= e; p++ {
+			st := tools.StrToInt(strings.Repeat(strconv.Itoa(p), ln/i))
+			if lov <= st && st <= hiv {
+				found[st] = true
 			}
 		}
-		if ok {
-			return true
-		}
 	}
-	return false
+	return tools.Sum(tools.Keys(found))
+}
+
+func check(lo string, hi string) int {
+	ln := len(lo)
+	hn := len(hi)
+	if ln == hn {
+		return check1(lo, hi)
+	}
+	m1 := strings.Repeat("9", ln)
+	m2 := "1" + strings.Repeat("0", ln)
+	return check1(lo, m1) + check1(m2, hi)
 }
 
 func part2(data string) int {
@@ -89,14 +99,7 @@ func part2(data string) int {
 		rg := strings.Split(row, "-")
 		l := rg[0]
 		r := rg[1]
-		ln := tools.StrToInt(l)
-		rn := tools.StrToInt(r)
-
-		for n := ln; n <= rn; n++ {
-			if check(n) {
-				count += n
-			}
-		}
+		count += check(l, r)
 		if DEBUG {
 			fmt.Println(l, r, count)
 		}
