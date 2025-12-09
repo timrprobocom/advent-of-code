@@ -45,6 +45,7 @@ const string test(
 
 bool DEBUG = false;
 bool TEST = false;
+bool TIMING = false;
 
 struct Point3d {
     int64_t x;
@@ -195,12 +196,15 @@ int main( int argc, char ** argv )
     cout << "Part 2: " << part2(points, distances) << "\n";
     auto p3 = chrono::system_clock::now();
 
-    auto part1 = p2-p1;
-    auto part2 = p3-p2;
-    auto full = p3-start;
+    if( TIMING )
+    {
+        auto part1 = p2-p1;
+        auto part2 = p3-p2;
+        auto full = p3-start;
 
-    cout << "\n";
-    cout << "Part 1: " << chrono::duration_cast<chrono::milliseconds>(part1).count() << "ms\n";
-    cout << "Part 2: " << chrono::duration_cast<chrono::milliseconds>(part2).count() << "ms\n";
-    cout << "All:    " << chrono::duration_cast<chrono::milliseconds>(full).count() << "ms\n";
+        cout << "\n";
+        cout << "Part 1: " << chrono::duration_cast<chrono::milliseconds>(part1).count() << "ms\n";
+        cout << "Part 2: " << chrono::duration_cast<chrono::milliseconds>(part2).count() << "ms\n";
+        cout << "All:    " << chrono::duration_cast<chrono::milliseconds>(full).count() << "ms\n";
+    }
 }
