@@ -46,8 +46,10 @@ type Dist struct {
 	b    int
 }
 
+var K int = 100000
+
 func hash(pts []int) int {
-	return ((pts[0]*100000)+pts[1])*100000 + pts[2]
+	return (pts[0]*K)+pts[1]
 }
 
 func getCounts(circuits []int) map[int]int {
@@ -104,7 +106,7 @@ func part2(data [][]int, dists []Dist) int {
 			}
 		}
 		if len(getCounts(tools.Values(circuit))) == 1 {
-			return (d.a / 10000000000) * (d.b / 10000000000)
+			return (d.a / K) * (d.b / K)
 		}
 	}
 

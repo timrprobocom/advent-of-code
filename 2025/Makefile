@@ -3,15 +3,15 @@
 ifndef windir
 O = .o
 EXE =
-CPPFLAGS = --std=c++17
 CXX = g++
+CPPFLAGS = --std=c++17 -O2
 LIBS = -llapack
 else
 O = .obj
 EXE = .exe
+CXX = cl
 CPPFLAGS = -EHsc
 OUTPUT_OPTION = -Fe$@
-CXX = cl
 endif
 
 COMPILE.cpp = $(CXX) $(CPPFLAGS)
