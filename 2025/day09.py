@@ -59,7 +59,6 @@ def makePolygon(data):
         l,r = rows[y]
         matches = 0
         nrow = []
-        print("Checking", y,  l, r)
         for cl,cr in row:
             if (cl,cr) == (l,r):
                 matches = 1
@@ -90,7 +89,7 @@ def makePolygon(data):
 
 # The figure is a circle with a slit, like a Pacman.
 
-# This one takes 29 seconds.
+# This one takes 22 seconds.
 
 def part2(data):
     scans = makePolygon(data)
@@ -99,37 +98,40 @@ def part2(data):
             print(y,scans[y])
         print("**")
  
-    d = 0
+    best = 0
     for a,b in itertools.combinations(data,2):
+        area = (abs( b[1]-a[1])+1) * (abs(b[0]-a[0])+1)
+        if area < best:
+            continue
         x1,x2 = sorted((a[0],b[0]))
         y1,y2 = sorted((a[1],b[1]))
         for y in range(y1,y2):
             if y in scans:
-                found = False
                 for l,r in scans[y]:
-                    found = found or (x1 >= l and x2 <= r)
-                if not found:
+                    if (x1 >= l and x2 <= r):
+                        break
+                else:
                     break
         else:
-            area = (abs( b[1]-a[1]) + 1) * (abs(b[0]-a[0])+1)
-            if DEBUG and area > d:
+            if DEBUG:
                 print(area,a,b)
-            d = max(d, area)
-    return d
+            best = area
+    return best
 
-# This one takes 19 seconds.
+# This one takes 11 seconds.
 
 def part2(data):
     p1 = Polygon( data )
-    d = 0
+    best = 0
     for a,b in itertools.combinations(data,2):
-        p2 = Polygon( [(a[0],a[1]),(a[0],b[1]), (b[0],b[1]), (b[0],a[1])])
-        if p1.contains(p2):
-            area = (abs( b[1]-a[1]) + 1) * (abs(b[0]-a[0])+1)
-            if area > d:
-                print(area,a,b)
-            d = max(d, area)
-    return d
+        area = (abs( b[1]-a[1]) + 1) * (abs(b[0]-a[0])+1)
+        if area >= best:
+            p2 = Polygon( [(a[0],a[1]),(a[0],b[1]), (b[0],b[1]), (b[0],a[1])])
+            if p1.contains(p2):
+                if DEBUG:
+                    print(area,a,b)
+                best = area
+    return best
 
 print("Part 1:", part1(data))
 print("Part 2:", part2(data)) # 1429075575
