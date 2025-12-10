@@ -1,7 +1,7 @@
 import os
 import sys
 import itertools
-from shapely.geometry import Polygon
+#from shapely.geometry import Polygon
 
 test = """\
 7,1
