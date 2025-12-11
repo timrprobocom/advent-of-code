@@ -51,10 +51,11 @@ void parse(
 
         // This isn't right.  We need to how LARGE the lights array is.
 
-        lights.push_back( parts.front() );
+        auto pf = parts.front();
+        lights.push_back(pf.substr(1, pf.size()-2) );
 
         auto pb = parts.back().substr(1, parts.back().size()-2);
-        joltage.push_back( split_int(pb) );
+        joltage.push_back( split_int(pb,",") );
 
         IntMatrix pp;
         for( int i = 1; i < parts.size()-1; i++ )
@@ -64,7 +65,6 @@ void parse(
         }
 
         presses.push_back( pp );
-        cout << "Parsed lights " << lights.back() << " with " << presses.back().size() << " presses and " << joltage.back().size() << " joltages\n";
 	}
 }
 
@@ -81,7 +81,6 @@ string toggle(string lights, const IntVector & switches)
     return lights;
 }
 
-
 int64_t part1 ( StringVector & lights, vector<vector<vector<int>>> & presses )
 {
     int sum = 0;
@@ -92,33 +91,31 @@ int64_t part1 ( StringVector & lights, vector<vector<vector<int>>> & presses )
         int found = 0;
         int bits = target.size();
 
-        cout << "Lights " << target << " with " << prs.size() << " combos\n";
-
-        deque<int> queue;
+        deque<tuple<int,int>> queue;
         for( int j = 0; j < prs.size(); j++ )
-            queue.push_back( 1<<j );
+            queue.push_back( make_tuple(1<<j,1) );
 
         while( !queue.empty() )
         {
-            int curr = queue.front();
+            auto [curr, count] = queue.front();
             queue.pop_front();
 
             // Try this combination.
 
-            string mylights('.',bits);
+            string mylights(bits, '.');
             for( int j = 0; j < bits; j++ )
                 if( (curr>>j) & 1 )
                     mylights = toggle( mylights, prs[j] );
-                
+
             if( mylights == target )
             {
-//                sum += popcount(curr);
+                sum += count; // I need to know how many transformations have been make.
                 break;
             }
 
             for( int j = 0; j < prs.size(); j++ )
                 if( (1 << j) > curr )
-                    queue.push_back( curr | (1 << j) );
+                    queue.push_back( make_tuple(curr | (1 << j), count+1) );
 		}
 	}
 	return sum;
