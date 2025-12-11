@@ -1,13 +1,16 @@
 #include <vector>
+#include <list>
 #include <fstream>
 #include <sstream>
 #include <string>
+
 
 typedef unsigned short byte_t;
 typedef std::vector<std::vector<short>> ShortMatrix;
 typedef std::vector<std::vector<int>> IntMatrix;
 typedef std::vector<std::vector<int64_t>> LongMatrix;
 
+typedef std::vector<int> IntVector;
 typedef std::vector<std::string> StringVector;
 
 StringVector split(const std::string src, const std::string delim = "\n")
@@ -24,6 +27,30 @@ StringVector split(const std::string src, const std::string delim = "\n")
     sv.push_back(src.substr(was));
     return sv;
 }
+
+std::list<std::string> split_list(const std::string src, const std::string delim = "\n")
+{
+    std::list<std::string> sv;
+    int was = 0;
+    for (
+        int j = src.find(delim);
+        j != -1;
+        was = j + delim.size(), j = src.find(delim, was))
+    {
+        sv.push_back(src.substr(was, j - was));
+    }
+    sv.push_back(src.substr(was));
+    return sv;
+}
+
+std::vector<int> split_int(const std::string src, const std::string delim = "\n")
+{
+    std::vector<int> iv;
+    for( auto & word : split(src, delim) )
+        iv.push_back( stoi(word) );
+    return iv;
+}
+
 
 std::vector<StringVector> split_chunks(const std::string &src)
 {
