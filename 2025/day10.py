@@ -26,12 +26,12 @@ def parse(data):
     presses = []
     joltage = []
     for line in data:
-        parts = line.split()
-        lights.append(list(int(c == '#') for c in parts.pop(0)[1:-1]))
-        joltage.append(list(map(int,parts.pop(-1)[1:-1].split(','))))
+        l1, *parts, j1 = line.split()
+        lights.append(list(int(c == '#') for c in l1[1:-1]))
+        joltage.append(list(map(int,j1.strip('{}').split(','))))
         pp = []
         for p in parts:
-            pp.append( tuple(map(int, p[1:-1].split(','))))
+            pp.append( tuple(map(int, p.strip('()').split(','))))
         presses.append(pp)
     return lights, presses, joltage
 

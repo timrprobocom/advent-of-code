@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/mowshon/iterium"
+	"gonum.org/v1/gonum/mat"
 
 	"aoc/tools"
 	_ "embed"
@@ -39,7 +40,8 @@ func parse(data []string) ([][]int, [][][]int, [][]int) {
 		}
 		lights = append(lights, ll)
 
-		joltage = append(joltage, tools.SplitIntBy(parts[len(parts)-1], ","))
+		jj := parts[len(parts)-1]
+		joltage = append(joltage, tools.SplitIntBy(jj[1:len(jj)-1], ","))
 
 		pp := [][]int{}
 		for _, p := range parts[1 : len(parts)-1] {
@@ -84,9 +86,44 @@ func part1(lights [][]int, presses [][][]int) int {
 	return sum
 }
 
-func part2(pushes [][][]int, joltage [][]int) int {
+func solve( pushes [][]int, joltage []int) int {
+	// So we need a system which has one row per light, one column per buttonpush set.
 
+fmt.Println( "len joltage", len(joltage), "len pushes", len(pushes) )
+	sysx := make([]float64, len(joltage)*len(pushes))
+	jolts := make([]float64, len(joltage))
+	for i, j := range joltage {
+		jolts[i] = float64(j)
+	}
+	for i, p := range pushes {
+		for _, p1 := range p {
+			fmt.Println( i, p1, len(joltage) );
+			sysx[p1 * len(pushes) + i] = 1.0
+		}
+	}
+	fmt.Println( "sysx\n", sysx )
+	fmt.Println( "jolts\n", jolts )
+
+	sys := mat.NewDense( len(joltage), len(pushes), sysx )
+	fmt.Println("sys\n",sys);
+	equals := mat.NewDense( len(joltage), 1, jolts )
+	var res mat.Dense
+	fmt.Println("solve", res.Solve(sys, equals))
+
+//	if res.Solve(sys, equals) == nil {
+//		fmt.Println(res)
+//	}
+	fmt.Println(res)
 	return 0
+}
+
+func part2(pushes [][][]int, joltage [][]int) int {
+	sum := 0
+	for i := range pushes {
+		sum += solve( pushes[i], joltage[i] )
+		break
+	}
+	return sum
 }
 
 func main() {
