@@ -1,3 +1,5 @@
+github.com/lukpank/go-glpk v0.0.0-20180303121012-2e64496cbbfa h1:Yw0xrf0Et15qHHMQevm9HXyxhaUZasVrWQ3Qz2ogT+c=
+github.com/lukpank/go-glpk v0.0.0-20180303121012-2e64496cbbfa/go.mod h1:KEQoE37Z9T1bOAfFP0+yjmcgGabWf6j32MA+z6QmkhA=
 github.com/mowshon/iterium v1.0.0 h1:04pku9dTNnfVvshf+DQIV3E92T/EwmnXKtXMkmZ3+5Q=
 github.com/mowshon/iterium v1.0.0/go.mod h1:Bnchn9HAYNQ/7MLUwKDyvjduSuVJQQwrNxmXJDqpXg4=
 golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa h1:FRnLl4eNAQl8hwxVVC17teOw8kdjVDVAiFMtgUdTSRQ=

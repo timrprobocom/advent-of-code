@@ -89,7 +89,7 @@ func part1(lights [][]int, presses [][][]int) int {
 func solve( pushes [][]int, joltage []int) int {
 	// So we need a system which has one row per light, one column per buttonpush set.
 
-fmt.Println( "len joltage", len(joltage), "len pushes", len(pushes) )
+	fmt.Println( "len joltage", len(joltage), "len pushes", len(pushes) )
 	sysx := make([]float64, len(joltage)*len(pushes))
 	jolts := make([]float64, len(joltage))
 	for i, j := range joltage {
@@ -125,6 +125,49 @@ func part2(pushes [][][]int, joltage [][]int) int {
 	}
 	return sum
 }
+
+func encode(ttt []int) string {
+	string s
+	for _, t := range ttt {
+		s = s + ('A'+t)
+	}
+	return s
+}
+
+func decode(ttt string) []int {
+	s := []int{}
+	for _, t := range ttt {
+		s := append(s, t-'A')
+	}
+	return s
+}
+
+func patterns( coeffs [][]int ) map[string]int {
+	out := make(map[string]int)
+	num_buttons := len(coeffs)
+	num_variables := len(coeffs[0])
+	for pattern_len := 1; pattern_len <= num_buttons; pattern_len++ {
+		combos, _ := iterium.Combinations(range(num_buttons), pattern_len)
+		for  buttons := range combos {
+			pattern = tuple(map(sum, zip((0,) * num_variables, *(coeffs[i] for i in buttons))))
+			out[pattern] = pattern_len
+		}
+	}
+	return out
+}
+
+def solve_single(coeffs: list[tuple[int, ...]], goal: tuple[int, ...]) -> int:
+	pattern_costs = patterns(coeffs)
+	@cache
+	def solve_single_aux(goal: tuple[int, ...]) -> int:
+		if all(i == 0 for i in goal): return 0
+		answer = 1000000
+		for pattern, pattern_cost in pattern_costs.items():
+			if all(i <= j and i % 2 == j % 2 for i, j in zip(pattern, goal)):
+				new_goal = tuple((j - i)//2 for i, j in zip(pattern, goal))
+				answer = min(answer, pattern_cost + 2 * solve_single_aux(new_goal))
+		return answer
+	return solve_single_aux(goal)
 
 func main() {
 	var input string

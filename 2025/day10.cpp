@@ -63,7 +63,6 @@ void parse(
             auto pb = parts[i].substr(1, parts[i].size()-2);
             pp.push_back( split_int(pb, ",") );
         }
-
         presses.push_back( pp );
 	}
 }
