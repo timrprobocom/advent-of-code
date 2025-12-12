@@ -87,7 +87,7 @@ func GetNumbers[T Number](input string) [][]T {
 			row = make([]T, 0)
 			accum = 0
 			sign = 1
-		case ' ', ',':
+		case ' ', ',', 'x':
 			if last != ' ' {
 				row = append(row, sign*accum)
 				accum = 0
