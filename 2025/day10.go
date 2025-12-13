@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"slices"
 	"strings"
 
 	"github.com/mowshon/iterium"
-	"gonum.org/v1/gonum/mat"
 
 	"aoc/tools"
 	_ "embed"
@@ -86,110 +86,186 @@ func part1(lights [][]int, presses [][][]int) int {
 	return sum
 }
 
-func solve( pushes [][]int, joltage []int) int {
-	// So we need a system which has one row per light, one column per buttonpush set.
+var EPSILON float64 = 1e-9
 
-	fmt.Println( "len joltage", len(joltage), "len pushes", len(pushes) )
-	sysx := make([]float64, len(joltage)*len(pushes))
-	jolts := make([]float64, len(joltage))
-	for i, j := range joltage {
-		jolts[i] = float64(j)
+type Matrix struct {
+	data         [][]float64
+	rows         int
+	cols         int
+	dependents   []int
+	independents []int
+}
+
+func from_machine(presses [][]int, joltages []int) Matrix {
+	rows := len(joltages)
+	cols := len(presses)
+	data := make([][]float64, rows)
+	for i := 0; i < len(data); i++ {
+		data[i] = make([]float64, cols+1)
 	}
-	for i, p := range pushes {
-		for _, p1 := range p {
-			fmt.Println( i, p1, len(joltage) );
-			sysx[p1 * len(pushes) + i] = 1.0
+	// Add all of our buttons.
+	for c, prs := range presses {
+		for _, p := range prs {
+			if p < rows { // how could it not be?
+				data[p][c] = 1.0
+			}
 		}
 	}
-	fmt.Println( "sysx\n", sysx )
-	fmt.Println( "jolts\n", jolts )
 
-	sys := mat.NewDense( len(joltage), len(pushes), sysx )
-	fmt.Println("sys\n",sys);
-	equals := mat.NewDense( len(joltage), 1, jolts )
-	var res mat.Dense
-	fmt.Println("solve", res.Solve(sys, equals))
+	// Add the joltages in the last column.
 
-//	if res.Solve(sys, equals) == nil {
-//		fmt.Println(res)
-//	}
-	fmt.Println(res)
-	return 0
+	for r, j := range joltages {
+		data[r][cols] = float64(j)
+	}
+
+	m := Matrix{data, rows, cols, []int{}, []int{}}
+	if DEBUG {
+		fmt.Println("Before gauss\n", m)
+	}
+	m.gaussian_elimination()
+	if DEBUG {
+		fmt.Println("After gauss\n", m)
+	}
+	return m
+}
+
+// https://en.wikipedia.org/wiki/Gaussian_elimination
+func (mat *Matrix) gaussian_elimination() {
+	pivot := 0
+	col := 0
+	for pivot < mat.rows && col < mat.cols {
+		// Find the best pivot row for this column.
+		// (I think this is the largest absolute value
+		maxrow := 0
+		var maxv float64 = 0
+		for r := pivot; r < mat.rows; r++ {
+			if math.Abs(mat.data[r][col]) > maxv {
+				maxrow = r
+				maxv = math.Abs(mat.data[r][col])
+			}
+		}
+		if DEBUG {
+			fmt.Println("dfs, pivot ", pivot, " col ", col, " max is ", maxrow, maxv)
+		}
+
+		// If the best value is zero, this is a free variable.
+		if maxv < EPSILON {
+			mat.independents = append(mat.independents, col)
+			col++
+			continue
+		}
+
+		// Swap rows and mark this column as dependent.
+		mat.data[pivot], mat.data[maxrow] = mat.data[maxrow], mat.data[pivot]
+		mat.dependents = append(mat.dependents, col)
+
+		// Normalize pivot row.
+		pivot_value := mat.data[pivot][col]
+		for c := col; c <= mat.cols; c++ {
+			mat.data[pivot][c] /= pivot_value
+		}
+
+		// Eliminate this column in all other rows.
+		for r := 0; r < mat.rows; r++ {
+			if r != pivot {
+				factor := mat.data[r][col]
+				if math.Abs(factor) > EPSILON {
+					for c := col; c <= mat.cols; c++ {
+						mat.data[r][c] -= factor * mat.data[pivot][c]
+					}
+				}
+			}
+		}
+
+		pivot++
+		col++
+	}
+
+	// Any remaining columns are free variables.
+	for c := col; c < mat.cols; c++ {
+		mat.independents = append(mat.independents, c)
+	}
+}
+
+// Check if the given values for our independent variables are valid. If so, return the total button presses.
+
+func (mat *Matrix) valid(values []int) int {
+	// We start with how many times we've pressed the free variables.
+	total := tools.Sum(values)
+
+	// Calculate dependent variable values based on independent variables.
+	for row := 0; row < len(mat.dependents); row++ {
+		val := mat.data[row][mat.cols]
+		for i, col := range mat.independents {
+			val -= mat.data[row][col] * float64(values[i])
+		}
+
+		// We need non-negative, whole numbers for a valid solution.
+		if val < -EPSILON {
+			return -1
+		}
+		rounded := math.Round(val)
+		if math.Abs(val-rounded) > EPSILON {
+			return -1
+		}
+
+		total += int(rounded)
+	}
+
+	return total
+}
+
+func dfs(mat Matrix, idx int, values []int, min *int, max int) {
+	total := 0
+
+	// When we've assigned all independent variables, check if it's a valid solution.
+	if idx == len(mat.independents) {
+		total = mat.valid(values)
+		if total >= 0 {
+			if total < *min {
+				*min = total
+			}
+		}
+		return
+	}
+
+	// Try different values for the current independent variable.
+	total = tools.Sum(values[0:idx])
+	for val := 0; val <= max; val++ {
+		// Optimization: If we ever go above our min, we can't possibly do better.
+		if total+val >= *min {
+			break
+		}
+		values[idx] = val
+		dfs(mat, idx+1, values, min, max)
+	}
+}
+
+func solve(pushes [][]int, joltage []int) int {
+	matrix := from_machine(pushes, joltage)
+
+	// Now we can DFS over a much smaller solution space.
+
+	max := 0
+	for _, j := range joltage {
+		if j > max {
+			max = j
+		}
+	}
+	max++
+
+	min := 999999999
+	values := make([]int, len(matrix.independents))
+	dfs(matrix, 0, values, &min, max)
+	return min
 }
 
 func part2(pushes [][][]int, joltage [][]int) int {
 	sum := 0
 	for i := range pushes {
-		sum += solve( pushes[i], joltage[i] )
-		break
+		sum += solve(pushes[i], joltage[i])
 	}
 	return sum
-}
-
-func encode(ttt []int) string {
-	var s string
-	for _, t := range ttt {
-		s = s + ('A'+t)
-	}
-	return s
-}
-
-func decode(ttt string) []int {
-	s := []int{}
-	for _, t := range ttt {
-		s := append(s, t-'A')
-	}
-	return s
-}
-
-func patterns( coeffs [][]int ) map[string]int {
-	out := make(map[string]int)
-	num_buttons := len(coeffs)
-	num_variables := len(coeffs[0])
-	all_buttons := make([]int,num_buttons)
-	for i := 0; i < num_buttons; i++ {
-		all_buttons[i] = i
-	}
-	for pattern_len := 1; pattern_len <= num_buttons; pattern_len++ {
-		combos, _ := iterium.Combinations(all_buttons, pattern_len)
-		sum := make([]int,num_variables)
-		for  buttons := range combos {
-			for _,i := range buttons {
-				for j := 0; j <= len(coeffs[i]); j++ {
-					sum[j] += coeffs[i][j];
-				}
-			}
-			pattern := encode(sum);
-			out[pattern] = pattern_len
-		}
-	}
-	return out
-}
-
-// This needs to be memoized.
-func solve_single_aux( goal []int ) int {
-	all := true
-	for _,g := range goal {
-		all := all & (g == 0)
-	}
-	if all {
-		return 0
-	}
-
-	answer := 1000000
-
-func solve_single( coeffs [][]int, goal []int ) int {
-	pattern_costs := patterns(coeffs)
-	@cache
-	def solve_single_aux(goal: tuple[int, ...]) -> int:
-		if all(i == 0 for i in goal): return 0
-		answer = 1000000
-		for pattern, pattern_cost in pattern_costs.items():
-			if all(i <= j and i % 2 == j % 2 for i, j in zip(pattern, goal)):
-				new_goal = tuple((j - i)//2 for i, j in zip(pattern, goal))
-				answer = min(answer, pattern_cost + 2 * solve_single_aux(new_goal))
-		return answer
-	return solve_single_aux(goal)
 }
 
 func main() {
