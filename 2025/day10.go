@@ -144,9 +144,6 @@ func (mat *Matrix) gaussian_elimination() {
 				maxv = math.Abs(mat.data[r][col])
 			}
 		}
-		if DEBUG {
-			fmt.Println("dfs, pivot ", pivot, " col ", col, " max is ", maxrow, maxv)
-		}
 
 		// If the best value is zero, this is a free variable.
 		if maxv < EPSILON {
@@ -231,7 +228,7 @@ func dfs(mat Matrix, idx int, values []int, min *int, max int) {
 
 	// Try different values for the current independent variable.
 	total = tools.Sum(values[0:idx])
-	for val := 0; val <= max; val++ {
+	for val := 0; val < max; val++ {
 		// Optimization: If we ever go above our min, we can't possibly do better.
 		if total+val >= *min {
 			break
