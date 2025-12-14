@@ -24,11 +24,16 @@ var test = `
 //go:embed day10.txt
 var live string
 
-func parse(data []string) ([][]int, [][][]int, [][]int) {
-	lights := [][]int{}
-	presses := [][][]int{}
-	joltage := [][]int{}
-	for _, line := range data {
+type Unit struct {
+	lights  []int
+	presses [][]int
+	joltage []int
+}
+
+func parse(data []string) []Unit {
+	units := make([]Unit, len(data))
+	for i, line := range data {
+		unit := &units[i]
 		parts := strings.Split(line, " ")
 		ll := []int{}
 		for _, c := range parts[0] {
@@ -38,18 +43,16 @@ func parse(data []string) ([][]int, [][][]int, [][]int) {
 				ll = append(ll, 0)
 			}
 		}
-		lights = append(lights, ll)
+		unit.lights = ll
 
 		jj := parts[len(parts)-1]
-		joltage = append(joltage, tools.SplitIntBy(jj[1:len(jj)-1], ","))
+		unit.joltage = tools.SplitIntBy(jj[1:len(jj)-1], ",")
 
-		pp := [][]int{}
 		for _, p := range parts[1 : len(parts)-1] {
-			pp = append(pp, tools.SplitIntBy(p[1:len(p)-1], ","))
+			unit.presses = append(unit.presses, tools.SplitIntBy(p[1:len(p)-1], ","))
 		}
-		presses = append(presses, pp)
 	}
-	return lights, presses, joltage
+	return units
 }
 
 func toggle(lights []int, switches []int) {
@@ -58,21 +61,19 @@ func toggle(lights []int, switches []int) {
 	}
 }
 
-func part1(lights [][]int, presses [][][]int) int {
+func part1(units []Unit) int {
 	sum := 0
 	// What would a BFS look like?
-	for i := 0; i < len(lights); i++ {
-		target := lights[i]
-		prs := presses[i]
+	for _, unit := range units {
 		found := 0
-		for j := 1; j <= len(prs); j++ {
-			combos, _ := iterium.Combinations(prs, j).Slice()
+		for j := 1; j <= len(unit.presses); j++ {
+			combos, _ := iterium.Combinations(unit.presses, j).Slice()
 			for _, cx := range combos {
-				mylights := tools.Repeat(0, len(target))
+				mylights := tools.Repeat(0, len(unit.lights))
 				for _, c := range cx {
 					toggle(mylights, c)
 				}
-				if slices.Equal(mylights, target) {
+				if slices.Equal(mylights, unit.lights) {
 					found = j
 					break
 				}
@@ -96,15 +97,15 @@ type Matrix struct {
 	independents []int
 }
 
-func from_machine(presses [][]int, joltages []int) Matrix {
-	rows := len(joltages)
-	cols := len(presses)
+func from_machine(unit Unit) Matrix {
+	rows := len(unit.joltage)
+	cols := len(unit.presses)
 	data := make([][]float64, rows)
 	for i := 0; i < len(data); i++ {
 		data[i] = make([]float64, cols+1)
 	}
 	// Add all of our buttons.
-	for c, prs := range presses {
+	for c, prs := range unit.presses {
 		for _, p := range prs {
 			if p < rows { // how could it not be?
 				data[p][c] = 1.0
@@ -114,7 +115,7 @@ func from_machine(presses [][]int, joltages []int) Matrix {
 
 	// Add the joltages in the last column.
 
-	for r, j := range joltages {
+	for r, j := range unit.joltage {
 		data[r][cols] = float64(j)
 	}
 
@@ -248,13 +249,13 @@ func dfs(mat Matrix, idx int, values []int, min *int, max int) {
 	}
 }
 
-func solve(pushes [][]int, joltage []int) int {
-	matrix := from_machine(pushes, joltage)
+func solve(unit Unit) int {
+	matrix := from_machine(unit)
 
 	// Now we can DFS over a much smaller solution space.
 
 	max := 0
-	for _, j := range joltage {
+	for _, j := range unit.joltage {
 		if j > max {
 			max = j
 		}
@@ -267,10 +268,10 @@ func solve(pushes [][]int, joltage []int) int {
 	return min
 }
 
-func part2(pushes [][][]int, joltage [][]int) int {
+func part2(units []Unit) int {
 	sum := 0
-	for i := range pushes {
-		sum += solve(pushes[i], joltage[i])
+	for _, unit := range units {
+		sum += solve(unit)
 	}
 	return sum
 }
@@ -279,8 +280,8 @@ func main() {
 	var input string
 	TEST, DEBUG, input = tools.Setup(test, live)
 	data := strings.Split(input, "\n")
-	lights, presses, joltage := parse(data)
+	units := parse(data)
 
-	fmt.Println("Part 1:", part1(lights, presses))
-	fmt.Println("Part 2:", part2(presses, joltage))
+	fmt.Println("Part 1:", part1(units))
+	fmt.Println("Part 2:", part2(units))
 }

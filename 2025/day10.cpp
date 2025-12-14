@@ -29,38 +29,40 @@ bool DEBUG = false;
 bool TEST = false;
 bool TIMING = false;
 
+struct Unit {
+    string      lights;
+    IntMatrix   presses;
+    IntVector   joltages;
+};
 
 #define _in_
 #define _out_
 
 void parse(
     _in_  StringVector & data,
-    _out_ StringVector & lights,
-    _out_ vector<vector<vector<int>>> & presses,
-    _out_ IntMatrix & joltage
+    _out_ vector<Unit> & units
 )
 {
-    lights.clear();
-    presses.clear();
-    joltage.clear();
+    units.resize( data.size() );
+    auto unit = units.begin();
 
     for( auto & line : data )
     {
         auto parts = split(line, " ");
 
         auto pf = parts.front();
-        lights.push_back(pf.substr(1, pf.size()-2) );
+        unit->lights = pf.substr(1, pf.size()-2);
 
         auto pb = parts.back().substr(1, parts.back().size()-2);
-        joltage.push_back( split_int(pb, ",") );
+        unit->joltages = split_int(pb, ",");
 
-        IntMatrix pp;
         for( int i = 1; i < parts.size()-1; i++ )
         {
             auto pb = parts[i].substr(1, parts[i].size()-2);
-            pp.push_back( split_int(pb, ",") );
+            unit->presses.push_back( split_int(pb, ",") );
         }
-        presses.push_back( pp );
+
+        unit++;
     }
 }
 
@@ -77,13 +79,13 @@ string toggle(string lights, const IntVector & switches)
     return lights;
 }
 
-int64_t part1 ( StringVector & lights, vector<vector<vector<int>>> & presses )
+int64_t part1 ( vector<Unit> & units )
 {
     int sum = 0;
-    for( int i = 0; i < lights.size(); i++ )
+    for( auto & unit : units )
     {
-        string target = lights[i];
-        IntMatrix & prs = presses[i];
+        string target = unit.lights;
+        IntMatrix & prs = unit.presses;
         int found = 0;
         int bits = prs.size();
 
@@ -126,9 +128,9 @@ struct Matrix {
     vector<int> dependents;
     vector<int> independents;
 
-    Matrix( vector<vector<int>> & presses, vector<int> & joltages )
-        : m_rows (joltages.size())
-        , m_cols (presses.size())
+    Matrix( Unit & unit )
+        : m_rows (unit.joltages.size())
+        , m_cols (unit.presses.size())
     {
         data.resize( m_rows );
         for( auto & d : data )
@@ -136,14 +138,14 @@ struct Matrix {
 
         // Add all of our buttons.
 
-        for( int c = 0; c < presses.size(); c++ )
-            for( auto p : presses[c] )
+        for( int c = 0; c < unit.presses.size(); c++ )
+            for( auto p : unit.presses[c] )
                 data[p][c] = 1.0;
     
         // Add the joltages in the last column.
 
-        for( int r = 0; r < joltages.size(); r++ )
-            data[r][m_cols] = joltages[r];
+        for( int r = 0; r < unit.joltages.size(); r++ )
+            data[r][m_cols] = unit.joltages[r];
     }
 
     void print()
@@ -284,9 +286,9 @@ int dfs(Matrix & mat, int idx, vector<int> & values, int  min , int max)
     return min;
 }
 
-int solve(vector<vector<int>> & pushes, vector<int> & joltage) 
+int solve( Unit & unit )
 {
-    Matrix matrix( pushes, joltage );
+    Matrix matrix( unit );
     if( DEBUG )
     {
         cout << "BEFORE\n";
@@ -301,7 +303,7 @@ int solve(vector<vector<int>> & pushes, vector<int> & joltage)
 
     // Now we can DFS over a much smaller solution space.
 
-    int max = *max_element( joltage.begin(), joltage.end() ) + 1;
+    int max = *max_element( unit.joltages.begin(), unit.joltages.end() ) + 1;
     int min = 999999999;
 
     vector<int> values( matrix.independents.size() );
@@ -309,12 +311,12 @@ int solve(vector<vector<int>> & pushes, vector<int> & joltage)
 }
 
 
-int64_t part2 ( vector<vector<vector<int>>> presses, IntMatrix & joltage )
+int64_t part2 ( vector<Unit> & units )
 {
-    int sum = 0;
-    for( int i = 0; i < presses.size(); i++ )
-        sum += solve( presses[i], joltage[i] );
-    return sum;
+    return accumulate( 
+        units.begin(), units.end(), 0, 
+        [](int sum, Unit & unit) { return sum + solve(unit); } 
+    );
 }
 
 int main( int argc, char ** argv )
@@ -332,12 +334,9 @@ int main( int argc, char ** argv )
     string input = TEST ? test : file_contents(DAY".txt");
     StringVector lines = split(input);
 
-    StringVector lights;
-    vector<vector<vector<int>>> presses;
-    IntMatrix joltage;
-
-    parse( lines, lights, presses, joltage );
+    vector<Unit> units;
+    parse( lines, units );
     
-    cout << "Part 1: " << part1(lights, presses) << "\n";
-    cout << "Part 2: " << part2(presses, joltage) << "\n";
+    cout << "Part 1: " << part1(units) << "\n";
+    cout << "Part 2: " << part2(units) << "\n";
 }
