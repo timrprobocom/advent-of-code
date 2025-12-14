@@ -145,6 +145,10 @@ func (mat *Matrix) gaussian_elimination() {
 			}
 		}
 
+		if DEBUG {
+			fmt.Println( "DFS, pivot", pivot, "col", col, "max is", maxrow, maxv );
+		}
+
 		// If the best value is zero, this is a free variable.
 		if maxv < EPSILON {
 			mat.independents = append(mat.independents, col)
@@ -161,6 +165,9 @@ func (mat *Matrix) gaussian_elimination() {
 		for c := col; c <= mat.cols; c++ {
 			mat.data[pivot][c] /= pivot_value
 		}
+		if DEBUG {
+			fmt.Println( "pivot value ", pivot_value );
+		}
 
 		// Eliminate this column in all other rows.
 		for r := 0; r < mat.rows; r++ {
@@ -174,6 +181,9 @@ func (mat *Matrix) gaussian_elimination() {
 			}
 		}
 
+		if DEBUG {
+			fmt.Println( mat );
+		}
 		pivot++
 		col++
 	}
@@ -270,11 +280,6 @@ func main() {
 	TEST, DEBUG, input = tools.Setup(test, live)
 	data := strings.Split(input, "\n")
 	lights, presses, joltage := parse(data)
-	if DEBUG {
-		fmt.Println(lights)
-		fmt.Println(presses)
-		fmt.Println(joltage)
-	}
 
 	fmt.Println("Part 1:", part1(lights, presses))
 	fmt.Println("Part 2:", part2(presses, joltage))

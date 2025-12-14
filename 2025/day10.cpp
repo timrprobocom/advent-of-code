@@ -61,23 +61,7 @@ void parse(
             pp.push_back( split_int(pb, ",") );
         }
         presses.push_back( pp );
-
-        #if 0
-        cout << "compare\n" << line << "\n";
-        cout << lights.back() << " -- (";
-        for( auto & row : presses.back() )
-        {
-            cout << "(";
-            for( auto col : row )
-                cout << " " << col;
-            cout << ") ";
-        }
-        cout << " ) { ";
-        for( auto col : joltage.back() )
-            cout << " " << col;
-        cout << "}\n";
-        #endif
-	}
+    }
 }
 
 
@@ -133,10 +117,10 @@ int64_t part1 ( StringVector & lights, vector<vector<vector<int>>> & presses )
 	return sum;
 }
 
-float EPSILON = 1e-9;
+double EPSILON = 1e-9;
 
 struct Matrix {
-    vector<vector<float>>   data;
+    vector<vector<double>>   data;
     int         m_rows;
     int         m_cols;
     vector<int> dependents;
@@ -195,8 +179,8 @@ struct Matrix {
             // (I think this is the row that contains the largest absolute value.)
 
             auto m = max_element( data.begin()+pivot, data.end(), 
-                [col](vector<float> & a, vector<float> & b) { return abs(a[col]) < abs(b[col]); });
-            float maxv = abs((*m)[col]);
+                [col](vector<double> & a, vector<double> & b) { return abs(a[col]) < abs(b[col]); });
+            double maxv = abs((*m)[col]);
             int maxrow = m - data.begin();
 
             if (DEBUG )
@@ -218,6 +202,8 @@ struct Matrix {
             auto pivot_value = data[pivot][col];
             for( int c = col; c <= m_cols; c++ )
                 data[pivot][c] /= pivot_value;
+            if( DEBUG )
+                cout << "pivot value " << pivot_value << "\n";
 
             // Eliminate this column in all other rows.
             for( int r = 0; r < m_rows; r++ )
@@ -229,7 +215,7 @@ struct Matrix {
                     {
                         for( int c = col; c <= m_cols; c++ )
                         {
-                            data[r][c] = round(data[r][c] - factor * data[pivot][c]);
+                            data[r][c] = (data[r][c] - factor * data[pivot][c]);
                         }
                     }
                 }
@@ -256,7 +242,7 @@ struct Matrix {
         {
             auto val = data[row][m_cols];
             for( int i = 0; i < independents.size(); i++ )
-                val -= data[row][independents[i]] * float(values[i]);
+                val -= data[row][independents[i]] * double(values[i]);
 
             // We need non-negative, whole numbers for a valid solution.
             if( val < -EPSILON )
@@ -274,45 +260,51 @@ struct Matrix {
 
 int dfs(Matrix & mat, int idx, vector<int> & values, int  min , int max)
 {
-	int total = 0;
+    int total = 0;
 
-	// When we've assigned all independent variables, check if it's a valid solution.
+    // When we've assigned all independent variables, check if it's a valid solution.
     if( idx == mat.independents.size() )
     {
-		total = mat.valid(values);
-		if( total >= 0 && total < min )
+        total = mat.valid(values);
+        if( total >= 0 && total < min )
             min = total;
-		return min;
-	}
+        return min;
+    }
 
-	// Try different values for the current independent variable.
-	total = accumulate(values.begin(), values.begin()+idx, 0);
-	for( int val = 0; val < max; val++ )
+    // Try different values for the current independent variable.
+    total = accumulate(values.begin(), values.begin()+idx, 0);
+    for( int val = 0; val < max; val++ )
     {
-		// Optimization: If we ever go above our min, we can't possibly do better.
-		if( total+val >= min )
+        // Optimization: If we ever go above our min, we can't possibly do better.
+        if( total+val >= min )
             break;
-		values[idx] = val;
-		min = dfs(mat, idx+1, values, min, max);
-	}
+        values[idx] = val;
+        min = dfs(mat, idx+1, values, min, max);
+    }
     return min;
 }
 
 int solve(vector<vector<int>> & pushes, vector<int> & joltage) 
 {
-	Matrix matrix( pushes, joltage );
-    cout << "BEFORE\n";
-    matrix.print();
+    Matrix matrix( pushes, joltage );
+    if( DEBUG )
+    {
+        cout << "BEFORE\n";
+        matrix.print();
+    }
     matrix.gaussian_elimination();
-    cout << "AFTER\n";
-    matrix.print();
+    if( DEBUG)
+    {
+        cout << "AFTER\n";
+        matrix.print();
+    }
 
-	// Now we can DFS over a much smaller solution space.
+    // Now we can DFS over a much smaller solution space.
 
-	int max = *max_element( joltage.begin(), joltage.end() ) + 1;
-	int min = 999999999;
+    int max = *max_element( joltage.begin(), joltage.end() ) + 1;
+    int min = 999999999;
 
-	vector<int> values( matrix.independents.size() );
+    vector<int> values( matrix.independents.size() );
     return dfs(matrix, 0, values, min, max);
 }
 
@@ -321,13 +313,7 @@ int64_t part2 ( vector<vector<vector<int>>> presses, IntMatrix & joltage )
 {
     int sum = 0;
     for( int i = 0; i < presses.size(); i++ )
-//        sum += solve( presses[i], joltage[i] );
-    {
-        auto val = solve( presses[i], joltage[i] );
-        cout << "Value: " << val << "\n";
-        if( val < 999999999 )
-        sum += val;
-    }
+        sum += solve( presses[i], joltage[i] );
     return sum;
 }
 
