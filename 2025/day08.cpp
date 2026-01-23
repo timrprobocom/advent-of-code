@@ -188,7 +188,7 @@ int main( int argc, char ** argv )
     );
     if( DEBUG )
         for( auto & d : distances )
-            printf( "%15ld %15ld %15ld\n", d.dist, d.a, d.b );
+            printf( "%15lld %15lld %15lld\n", d.dist, d.a, d.b );
 
     auto p1 = chrono::system_clock::now();
     cout << "Part 1: " << part1(points, distances) << "\n";
