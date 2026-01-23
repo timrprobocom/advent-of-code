@@ -57,9 +57,9 @@ for day in range(1,26):
                 print(ln.ljust(31),end='')
                 pad = ''
         print()
-    if ''.join(gather[0]) != ''.join(gather[1]):
+    if len(gather) > 1 and ''.join(gather[0]) != ''.join(gather[1]):
         print("##### Python and C++ results do not match. *****")
-    if ''.join(gather[0]) != ''.join(gather[2]):
+    if len(gather) > 2 and ''.join(gather[0]) != ''.join(gather[2]):
         print("##### Python and Go results do not match. *****")
     for i,t in enumerate(times):
         sums[i] += t

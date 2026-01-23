@@ -1,3 +1,7 @@
+import sys
+
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
 
 data = """\
 cpy 41 a
@@ -11,9 +15,9 @@ data = [k.strip() for k in open('day12.txt').readlines()]
 
 ip = 0
 
-class CPU(object):
-    def __init__(self):
-        self.register = {'a': 0, 'b':0, 'c':1, 'd':0 }
+class CPU:
+    def __init__(self, init=0):
+        self.register = {'a': 0, 'b':0, 'c':init, 'd':0 }
         self.ip = 0
 
     def eval(self,val):
@@ -44,8 +48,16 @@ class CPU(object):
 
         return True
 
-cpu = CPU()
+cpu = CPU(0)
 while cpu.execute():
     pass
+if DEBUG:
+    print( cpu.register )
+print( 'Part 1:', cpu.register['a'] )
 
-print cpu.register
+cpu = CPU(1)
+while cpu.execute():
+    pass
+if DEBUG:
+    print( cpu.register )
+print( 'Part 2:', cpu.register['a'] )

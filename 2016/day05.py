@@ -22,7 +22,8 @@ def part2(key):
                 pos = ord(md5x[5]) - ord('0')
                 if part2[pos] == '-':
                     part2[pos] = md5x[6]
-                    print( raw, md5x, ''.join(part1), ''.join(part2) )
+                    if DEBUG:
+                        print( raw, md5x, ''.join(part1), ''.join(part2) )
                     if not '-' in part2: break
         cnt += 1
     return part1,part2
@@ -30,6 +31,3 @@ def part2(key):
 p1, p2 = part2(key)
 print('Part 1:', ''.join(p1))
 print('Part 2:', ''.join(p2))
-
-
-

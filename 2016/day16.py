@@ -1,4 +1,7 @@
+import sys
 
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
 
 
 def dragoncurve( seq, n ):
@@ -23,16 +26,17 @@ def strtoseq(s):
 def seqtostr(s):
     return ''.join( chr(c+48) for c in s)
 
-print dragoncurve([1],3)
-print dragoncurve([0],3)
-print dragoncurve([1,1,1,1,1],9)
-print seqtostr(dragoncurve(strtoseq('111100001010'),25))
+if DEBUG:
+    print( dragoncurve([1],3) )
+    print( dragoncurve([0],3) )
+    print( dragoncurve([1,1,1,1,1],9) )
+    print( seqtostr(dragoncurve(strtoseq('111100001010'),25)) )
 
-print seqtostr(checksum([1,1,0,0,1,0,1,1,0,1,0,0]))
+    print( seqtostr(checksum([1,1,0,0,1,0,1,1,0,1,0,0])) )
 
 data = strtoseq('11101000110010100')
-#curve = dragoncurve(data,272)
+curve = dragoncurve(data,272)
+print( 'Part 1:', seqtostr(checksum(curve)) )
 curve = dragoncurve(data,35651584)
-print len(curve)
-print seqtostr(checksum(curve))
+print( 'Part 2:', seqtostr(checksum(curve)) )
 

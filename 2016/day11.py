@@ -3,6 +3,8 @@ import itertools
 import sys
 import queue
 
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
 
 # Initial state:
 #
@@ -90,14 +92,16 @@ def process(bldg):
     while not undone.empty():
         count += 1
         if count % 10000 == 0:
-            print(count,depth)
+            if DEBUG:
+                print(count,depth)
         bldg, elevator, depth = undone.get()
 #        dprint( depth, elevator, bldg )
 #        dprint( list( get_moves(bldg, elevator) ) )
 #        dprint( "****" )
         for newfloor,newbldg in get_moves(bldg, elevator):
             if not any(newbldg[0:3]):
-                print( "WINNER", depth, newbldg )
+                if DEBUG:
+                    print( "WINNER", depth, newbldg )
                 return depth
             state = (newfloor,encode(newbldg))
             if state in seen:
