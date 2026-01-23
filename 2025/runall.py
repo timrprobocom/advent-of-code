@@ -45,7 +45,7 @@ for day in range(1,26):
 
     if not gather:
         continue
-    print(fn)
+    print(fn,' ')
     pad = ''
     for lns in zip(*gather):
         for i,ln in enumerate(lns):
