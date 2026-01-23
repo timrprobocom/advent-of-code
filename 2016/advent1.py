@@ -1,9 +1,11 @@
 import sys
+DEBUG = 0
 moves = open('day1.txt').read().split(',')
 x,y = (0,0)
 face = 0
 hits = {}
 hits[(x,y)]=1
+part2 = None
 for m in moves:
     m = m.strip()
     direc = m[0]
@@ -22,10 +24,15 @@ for m in moves:
             y += 1
         else:
             x -= 1
-        if (x,y) in hits: 
-            print(x, y, abs(x)+abs(y))
-            sys.exit(1)
+        if (x,y) in hits and not part2: 
+            part2 = x, y
         hits[(x,y)]=1
-    print(direc, count, x, y)
-print(x, y)
-print(abs(x)+abs(y))
+    if DEBUG:
+        print(direc, count, x, y)
+if DEBUG:
+    print(x, y)
+print("Part 1:", abs(x)+abs(y))
+x,y = part2
+if DEBUG:
+    print(x, y)
+print("Part 2:", abs(x)+abs(y))

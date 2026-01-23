@@ -1,3 +1,8 @@
+import sys
+
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+
 data = """\
 value 5 goes to bot 2
 bot 2 gives low to bot 1 and high to bot 0
@@ -6,9 +11,10 @@ bot 1 gives low to output 1 and high to bot 0
 bot 0 gives low to output 2 and high to output 0
 value 2 goes to bot 2""".splitlines()
 
-data = open('../Downloads/day10.txt').readlines()
+data = open('day10.txt').readlines()
 
 class Bot(object):
+    part1 = None
     def __init__(self, i):
         self.bot = i+0
         self.lowrule = None
@@ -18,11 +24,14 @@ class Bot(object):
     def give( self, chip ):
         self.chips.append( chip )
         if len(self.chips) == 2:
-            print self.bot, self.chips
+            if DEBUG:
+                print( self.bot, self.chips )
             low = min(self.chips)
             high = max(self.chips)
             if low==17 and high==61:
-                print "****"
+                Bot.part1 = self.bot
+                if DEBUG:
+                    print( "****" )
             if self.lowrule[0]:
                 output[self.lowrule[1]] = low
             else:
@@ -59,9 +68,12 @@ for ln in data:
             bot[tgt].highrule = (1,highd)
 
 # Now feed the gives.
-print gives
+if DEBUG:
+    print(gives)
 
 for tok,dst in gives:
     bot[dst].give( tok )
-print output
-print output[0]*output[1]*output[2]
+if DEBUG:
+    print( output )
+print( 'Part 1:', Bot.part1 )
+print( 'Part 2:', output[0]*output[1]*output[2] )

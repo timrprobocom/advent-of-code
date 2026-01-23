@@ -34,7 +34,7 @@ data = data.splitlines()
 def part1(data):
     count = 0
     beams = {}
-    for n, row in enumerate(data):
+    for n, row in enumerate(data[::2]):
         if not n:
             beams[row.find('S')] = 1
             continue

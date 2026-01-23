@@ -1,3 +1,8 @@
+import sys
+
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+
 data = [
 'rect 3x2',
 'rotate column x=1 by 1',
@@ -9,7 +14,7 @@ sx = 7
 sy = 3
 
 
-data = [k.strip() for k in open('../Downloads/day8.txt').readlines()]
+data = [k.strip() for k in open('day8.txt').readlines()]
 sx = 50
 sy = 6
 
@@ -36,8 +41,8 @@ class Screen():
 
     def render(self):
         for row in self.screen:
-            print ''.join(row)
-        print
+            print( ''.join(row) )
+        print()
 
     def count(self):
         cnt = 0
@@ -60,13 +65,18 @@ def parse( screen, line ):
         elif words[1] == 'row':
             screen.rotateRow( row, cnt )
         else:
-            print "Unknown word", words
+            print( "Unknown word", words )
     else:
-        print "Unknown word", words
+        print( "Unknown word", words )
 
 screen = Screen( sx, sy )
 for line in data:
-    print line
+    if DEBUG:
+        print( line )
     parse( screen, line )
-    screen.render()
-print screen.count()
+    if DEBUG:
+        screen.render()
+
+print( 'Part 1:', screen.count() )
+print( 'Part 2 (requires manual analysis):' )
+screen.render()

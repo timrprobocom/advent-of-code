@@ -4,14 +4,20 @@ RRDDD
 LURDL
 UUUUD""".splitlines()
 
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
 
-x,y = (2,2)
+if not TEST:
+    moves = open('day2.txt').readlines()
 
-pad = ( '     ', ' 123 ', ' 456 ', ' 789 ', '     ' )
+pad1 = (
+    '     ',
+    ' 123 ',
+    ' 456 ',
+    ' 789 ',
+    '     ' )
 
-moves = open('../Downloads/day2.txt').readlines()
-x,y = (4,4)
-pad = (
+pad2 = (
     '       ',
     '   1   ',
     '  234  ',
@@ -20,16 +26,28 @@ pad = (
     '   D   ',
     '       ')
     
+def find5(pad):
+    for y,line in enumerate(pad):
+        if '5' in line:
+            return line.index('5'),y
+    return -1,-1
 
-for ln in moves:
-    for c in ln.strip():
-        nx,ny = x,y
-        if c=='R': nx += 1
-        elif c=='U': ny -= 1
-        elif c=='L': nx -= 1
-        elif c=='D': ny += 1
-        if pad[ny][nx] != ' ':
-            x,y=nx,ny
+def part1(pad,moves):
+    res = ''
+    x,y = find5(pad)
 
-    print pad[y][x],
+    for ln in moves:
+        for c in ln.strip():
+            nx,ny = x,y
+            if c=='R': nx += 1
+            elif c=='U': ny -= 1
+            elif c=='L': nx -= 1
+            elif c=='D': ny += 1
+            if pad[ny][nx] != ' ':
+                x,y=nx,ny
+        res += pad[y][x]
+    return res
+
+print('Part 1:', part1(pad1,moves) )
+print('Part 2:', part1(pad2,moves) )
 

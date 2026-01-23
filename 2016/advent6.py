@@ -1,3 +1,7 @@
+import sys
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+
 data = """\
 eedadn
 drvtee
@@ -16,7 +20,8 @@ vrdear
 dvrsen
 enarar""".splitlines()
 
-data = [k.strip() for k in open('../Downloads/day6.txt').readlines()]
+if not TEST:
+    data = [k.strip() for k in open('day6.txt').readlines()]
 
 class Counter(object):
     def __init__(self):
@@ -25,26 +30,28 @@ class Counter(object):
         self.counts[ord(c)-ord('a')] += 1
     def debug(self):
         for c in self.counts:
-            print "%d" % c,
-        print
+            print( "%d" % c, end='')
+        print()
     def getmax(self):
-        mc = '-'
-        mx = 999
-        for i,t in enumerate(self.counts):
-            if t < mx:
-                mc = chr(i+97)
-                mx = t
-        return mc
+        m = max(self.counts)
+        return chr(self.counts.index(m)+97)
+    def getmin(self):
+        m = min(self.counts)
+        return chr(self.counts.index(m)+97)
 
 counters = []
-for i in range(len(data[0])):
+for _ in range(len(data[0])):
     counters.append( Counter() )
 
 for line in data:
-    print line
+    if DEBUG:
+        print(line)
     for i,c in enumerate(line):
         counters[i].register(c)
-    counters[0].debug()
+    if DEBUG:
+        counters[0].debug()
 
-print '------'
-print ''.join(c.getmax() for c in counters)
+if DEBUG:
+    print(counters)
+print( 'Part 1:', ''.join(c.getmax() for c in counters) )
+print( 'Part 2:', ''.join(c.getmin() for c in counters) )

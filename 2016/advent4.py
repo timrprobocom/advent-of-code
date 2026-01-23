@@ -1,13 +1,19 @@
-dataset = """\
+import sys
+import re
+
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+
+data = """\
 aaaaa-bbb-z-y-x-123[abxyz]
 a-b-c-d-e-f-g-h-987[abcde]
 not-a-real-room-404[oarel]
 totally-real-room-200[decoy]""".splitlines()
 
-dataset = "qzmt-zixmtkozy-ivhz-343[xxxxx]"
-dataset = open('day4.txt')
+data = ["qzmt-zixmtkozy-ivhz-343[xxxxx]"]
+if not TEST:
+    data = open('day4.txt').readlines()
 
-import re
 
 def decode( name, code ):
     result = ""
@@ -18,14 +24,15 @@ def decode( name, code ):
             result += chr((ord(c) - ord('a') + code) % 26 + ord('a'))
     return result
 
-for ln in dataset:
-    ln = ln.strip()
-    x = re.search( r'-\d+', ln )
-    code = ln[0:x.start()]
-    room = int(ln[x.start()+1:x.end()])
-    cksum = ln[x.end():]
+def decodeAll(data):
+    for ln in data:
+        ln = ln.strip()
+        x = re.search( r'-\d+', ln )
+        code = ln[0:x.start()]
+        room = int(ln[x.start()+1:x.end()])
+        cksum = ln[x.end():]
 
-    print room, ln, decode(code,room)
+        print( room, ln, decode(code,room) )
 
 def makeSum( code ):
     count = {}
@@ -40,8 +47,7 @@ def makeSum( code ):
     # Now invert this.
 
     bycount = {}
-    keys = count.keys()
-    keys.sort()
+    keys = sorted(count.keys())
     for k in keys:
         v = count[k]
         if v not in bycount:
@@ -49,9 +55,7 @@ def makeSum( code ):
         else:
             bycount[v] += k
 
-    keys = bycount.keys()
-    keys.sort()
-    keys.reverse()
+    keys = sorted(bycount.keys(),reverse=True)
     sumx = ''
 
     for k in keys:
@@ -59,19 +63,28 @@ def makeSum( code ):
         if len(sumx) >= 5:
             return sumx[:5]
 
-def part1():
+def part1(dataset):
+    part2 = None
     valid = 0
     for ln in dataset:
         ln = ln.strip()
         x = re.search( r'-\d+', ln )
         code = ln[0:x.start()]
-        room = ln[x.start()+1:x.end()]
+        room = int(ln[x.start()+1:x.end()])
         cksum = ln[x.end():]
 
         mysum = makeSum( code )
 
-        print code, room, cksum, mysum
+        if decode(code,room) == 'northpole object storage':
+            part2 = room
+
+        if DEBUG:
+            print( code, room, cksum, mysum )
         if cksum[1:-1] == mysum:
-            valid += int(room)
+            valid += room
      
-    print valid
+    return valid,part2
+
+p1,p2 = part1(data)
+print( "Part 1:", p1 )
+print( "Part 2:", p2 )
