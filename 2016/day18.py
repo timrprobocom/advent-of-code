@@ -1,13 +1,16 @@
 #
-# A vEriation of the Game of Life.
+# A variation of the Game of Life.
 #
 # 1,1,0 => 1
 # 0,1,1 => 1
 # 1,0,0 => 1
 # 0,0,1 => 1
 
-lookup = [ 0, 1, 0, 1, 1, 0, 1, 0 ]
+import sys
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
 
+lookup = [ 0, 1, 0, 1, 1, 0, 1, 0 ]
 
 def nextRow( row ):
     newrow = []
@@ -24,9 +27,12 @@ ipt = ".^..^....^....^^.^^.^.^^.^.....^.^..^...^^^^^^.^^^^.^.^^^^^^^.^^^^^..^.^^
 baserow = [1 if c=='^' else 0 for c in ipt]
 row = baserow
 sumx = len(row) - sum(row)
-print row
+if DEBUG:
+    print( row )
 for i in range(399999):
     row = nextRow(row)
     sumx += len(row) - sum(row)
+    if i == 38:
+        print('Part 1:', sumx)
 
-print sumx
+print( 'Part 2:', sumx )
