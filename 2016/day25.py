@@ -1,23 +1,13 @@
-data = """\
-cpy 2 a
-tgl a
-tgl a
-tgl a
-cpy 1 a
-dec a
-dec a""".splitlines()
+import sys
+TEST = False
+DEBUG = 'debug' in sys.argv
 
 data = [k.strip() for k in open('day25.txt').readlines()]
 
-ip = 0
-
 def parse(data):
-    code = []
-    for ln in data:
-        code.append( ln.split() )
-    return code
+    return [ln.split() for ln in data]
 
-class CPU(object):
+class CPU:
     def __init__(self, pgm):
         self.register = {'a': 0, 'b':0, 'c':0, 'd':0 }
         self.program = pgm
@@ -34,7 +24,6 @@ class CPU(object):
         if self.ip >= len(self.program):
             return False
         parts = self.program[self.ip]
-#        print self.ip, parts
 
         if parts[0] == 'cpy':
             if parts[2] in self.register:
@@ -68,8 +57,9 @@ class CPU(object):
             self.ip += 1
         elif parts[0] == 'tgl':
             delta = self.eval(parts[1]) + self.ip
-            print self.register
-            print "fixing",delta
+            if DEBUG:
+                print( self.register )
+                print( "fixing",delta )
             self.ip += 1
             if delta < 0 or delta >= len(self.program):
                 return True
@@ -86,21 +76,20 @@ class CPU(object):
 
         return True
 
+def part1(program):
+    i = 0
+    while 1:
+        cpu = CPU( program )
+        cpu.register['a'] = i
+        while cpu.execute():
+            pass
+        if DEBUG:
+            print( i, cpu.outs )
+        if cpu.outs == [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1] or cpu.outs == [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]:
+            if DEBUG:
+                print( cpu.register )
+            return i
+        i += 1
+            
 program = parse(data)
-print program
-
-i = 0
-while 1:
-    cpu = CPU( program )
-    cpu.register['a'] = i
-    while cpu.execute():
-#        print cpu.register
-        pass
-    print i, cpu.outs
-    if cpu.outs == [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1] or cpu.outs == [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]:
-        print "*** Winner *** "
-        break
-    i += 1
-        
-
-print cpu.register
+print('Part 1:', part1(program))

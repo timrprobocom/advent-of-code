@@ -51,7 +51,7 @@ for day in range(1,26):
         for i,ln in enumerate(lns):
             print(pad,end='')
             if len(ln) > 30:
-                print(ln)
+                print(ln,end='')
                 pad = ' '*(31*(i+1))
             else:
                 print(ln.ljust(31),end='')
