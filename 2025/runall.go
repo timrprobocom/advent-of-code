@@ -103,10 +103,10 @@ func main() {
 				fmt.Println()
 			}
 		}
-		if strings.Join(gather[0], "") != strings.Join(gather[1], "") {
+		if len(gather) > 1 && strings.Join(gather[0], "") != strings.Join(gather[1], "") {
 			fmt.Println("#### Python and C++ results do not match ####")
 		}
-		if strings.Join(gather[0], "") != strings.Join(gather[2], "") {
+		if len(gather) > 2 && strings.Join(gather[0], "") != strings.Join(gather[2], "") {
 			fmt.Println("#### Python and Go results do not match ####")
 		}
 		for i, d := range times {
