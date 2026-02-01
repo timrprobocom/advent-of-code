@@ -1,3 +1,7 @@
+import sys
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+
 test='flqrgnkx'
 live='nbysizxe'
 
@@ -8,7 +12,7 @@ extra = ''.join(chr(k) for k in (17,31,73,47,23))
 
 def knothash(inp):
     val = inp + extra
-    rope = range(256)
+    rope = list(range(256))
     posn = 0
     skip = 0
 
@@ -55,8 +59,10 @@ counts = makecounts()
 
 def countbits(hx):
     c = 0
-    for byte in hx.decode('hex'):
-        c += counts[ord(byte)]
+    for byte in bytes.fromhex(hx):
+#    for byte in hx.decode('hex'):
+        c += counts[byte]
+#        c += counts[ord(byte)]
     return c
 
 def makearray(data):
@@ -72,9 +78,9 @@ def convert(array):
     grid = []
     for row in array:
         binrow = []
-        for c in row.decode('hex'):
+        for c in bytes.fromhex(row):
             for b in (128,64,32,16,8,4,2,1):
-                binrow.append( -1 if ord(c) & b else 0 )
+                binrow.append( -1 if c & b else 0 )
         grid.append(binrow)
     return grid
 
@@ -98,17 +104,11 @@ def partb(grid):
                 tag += 1
     return tag-1
 
-array = makearray(test)
-print 'Part A', parta(array)
+array = makearray(test if TEST else live)
+print('Part 1:', parta(array))
 grid = convert(array)
-print 'Part B', partb(grid)
-for y in range(16):
-    print ' '.join('%3d' % k for k in grid[y][0:16])
+print('Part 2:', partb(grid))
+if DEBUG:
+    for y in range(16):
+        print(' '.join('%3d' % k for k in grid[y][0:16]))
 
-
-array = makearray(live)
-print 'Part A', parta(array)
-grid = convert(array)
-print 'Part B', partb(grid)
-for y in range(16):
-    print ' '.join('%3d' % k for k in grid[y][0:16])

@@ -39,13 +39,13 @@ def walk(movelist):
         dist = getdist(posn)
         if dist > xmax:
             xmax = dist
-        print mv, posn
+        print(mv, posn)
     # Distance is
     # min(abs(x),abs(y)+1/2?
     return getdist(posn), xmax
 
 
 for movelist, ans in test:
-    print walk(movelist), ans
+    print(walk(movelist), ans)
 
-print walk(live)
+print(walk(live))

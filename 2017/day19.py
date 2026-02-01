@@ -1,3 +1,7 @@
+import sys
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+
 test = """\
      |          
      |  +--+    
@@ -8,26 +12,24 @@ test = """\
 
 live = open('day19.txt').readlines()
 
-data = live
+data = test if TEST else live
 
 m = max(len(ln) for ln in data)
 
 row,col = 0,data[0].find('|')
 direc = (1,0)
-print "Grid is ",len(data),"rows x",m,"cols"
+if DEBUG:
+    print("Grid is ",len(data),"rows x",m,"cols")
 
-print row,col
 collect = []
 steps = 0
 while 1:
     row,col = row+direc[0],col+direc[1]
     steps += 1
-    print row,col,
     if row < 0 or row >= len(data) or col < 0 or col >= m:
         break
 
     ch = data[row][col]
-    print ch
     if ch == '|' or ch == '-':
         continue
     if ch == ' ':
@@ -35,7 +37,8 @@ while 1:
     if ch == '+':
 # If we can continue, we do.
         nr,nc = row+direc[0],col+direc[1]
-        print "Testing",nr,nc
+        if DEBUG:
+            print("Testing",nr,nc)
         if nr >= 0 and nr < len(data) and nc >= 0 and nc < m and data[nr][nc] != ' ':
             continue
         if direc[0] == 0:
@@ -60,10 +63,8 @@ while 1:
                 direc = (0,1)
     else:
         collect.append(ch)
-        print ''.join(collect)
+        if DEBUG:
+            print(''.join(collect))
 
-print
-print ''.join(collect)
-print steps
-
-
+print('Part 1:', ''.join(collect))
+print('Part 2:', steps )

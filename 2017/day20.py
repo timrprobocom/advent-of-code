@@ -12,22 +12,7 @@ class particle:
 
     def parse(self,ln):
         ln = ln.replace('<','(').replace('>',')').replace(', ',';')
-        exec(ln)
-        self.p = p
-        self.v = v
-        self.a = a
-
-#        i1 = ln.find('<')
-#        i2 = ln.find('>',i1)
-#        self.p = tuple (int(k) for k in ln[i1+1:i2].split(',') )
-
-#        i1 = ln.find('<',i2)
-#        i2 = ln.find('>',i1)
-#        self.v = tuple (int(k) for k in ln[i1+1:i2].split(',') )
-
-#        i1 = ln.find('<',i2)
-#        i2 = ln.find('>',i1)
-#        self.a = tuple (int(k) for k in ln[i1+1:i2].split(',') )
+        exec(ln, self.__dict__)
 
     def cycle(self):
         self.v = tuple(i+j for i,j in zip(self.v,self.a))
@@ -35,7 +20,7 @@ class particle:
 
     def dist(self):
         p = self.p
-        print p
+        print(p)
         return p[0]*p[0]+p[1]*p[1]+p[2]*p[2]
 
 def collide( particles ):
@@ -75,15 +60,8 @@ for i in range(1000):
     collide( particles )
 
 
-#mind = 9999999999999
-#mindo = 0
-#for p in particles:
-#    d = p.dist()
-#    if d < mind:
-#        mind = d
-#        mindo = p.ord
 
-print mins[0].__dict__
-print "bbbbb", len(particles)
-print "***", mind, mindo
+print("Part 1:", mins[0].ord)
+print("Part 2:", len(particles))
+#print("***", mind, mindo)
 

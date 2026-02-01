@@ -22,7 +22,7 @@ class obj(object):
 
 for ln in data:
     parts = ln.split()
-    print parts
+    print(parts)
     base = int(parts.pop(0))
     allx.add( base )
     if base not in connx:
@@ -48,8 +48,8 @@ while allx:
     allx.add( head )
     descend( head, seen )
     groups.append(seen)
-    print head, len(seen)
+    print(head, len(seen))
     allx -= seen
-    print allx
+    print(allx)
 
-print len(groups)
+print(len(groups))

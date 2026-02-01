@@ -1,8 +1,11 @@
+import sys
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+
 test = "s1,x3/4,pe/b"
 live = open('day16.txt').read().rstrip()
 
-data = live.split(',')
-
+data = (test if TEST else live).split(',')
 
 dance = 'abcdefghijklmnop'
 #dance = 'abcde'
@@ -28,13 +31,19 @@ def round(dance):
 
 track = [dance]
 
+dance = round(dance)
+print('Part 1:', dance)
+track.append(dance)
+
 while 1:
     dance = round(dance)
-    print dance
+    if DEBUG:
+        print(dance)
     if dance in track:
-        print "Repeat in ", len(track)
+        if DEBUG:
+            print("Repeat in ", len(track))
         break
     track.append(dance)
 
-print track[1000000000%len(track)]
+print('Part 2:', track[1000000000%len(track)])
 

@@ -1,3 +1,7 @@
+import sys
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+
 test = """\
 pbga (66)
 xhth (57)
@@ -13,10 +17,12 @@ ugml (68) -> gyxo, ebii, jptl
 gyxo (61)
 cntj (57)"""
 
-live = open('day7.txt').readlines()
+live = open('day7.txt').read()
 
-#data = test.splitlines()
-data = live
+if TEST:
+    data = test.splitlines()
+else:
+    data = live.splitlines()
 
 def parse(line):
     base = ''
@@ -48,11 +54,13 @@ for ln in data:
             progs[c] = {}
         progs[c]['parent'] = base
 
-root = None
-for k,v in progs.items():
-    if not v['parent']:
-        print k
-        root = k
+def part1(progs):
+    for k,v in progs.items():
+        if not v['parent']:
+            return k
+
+root = part1(progs)
+print('Part 1:', root)
 
 ### Part 2, do a depth first traversal to establish weights
 
@@ -69,15 +77,18 @@ def traverse( name, depth=0 ):
         mn = min( progs[n]['total'] for n in node['children'] )
         mx = max( progs[n]['total'] for n in node['children'] )
         if mn != mx:
-            print "****"
-            print name, depth, tot, [progs[k]['total'] for k in node['children']]
+            if DEBUG:
+                print(name, depth, tot, [progs[k]['total'] for k in node['children']])
             for i in node['children']:
                 if progs[i]['total'] == mx:
-                    print i, "is", progs[i]['weight'], "should be", progs[i]['weight']-mx+mn
+                    if DEBUG:
+                        print(i, "is", progs[i]['weight'], "should be", progs[i]['weight']-mx+mn)
+                    progs['answer'] = progs[i]['weight']-mx+mn
                     progs[i]['total'] -= mx-mn
                     tot -= mx-mn
     node['total'] = tot
     return tot
 
 traverse(root)
+print('Part 2:', progs['answer'])
 

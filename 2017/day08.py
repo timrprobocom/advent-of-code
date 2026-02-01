@@ -1,3 +1,7 @@
+import sys
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+
 test = """\
 b inc 5 if a > 1
 a inc 1 if b < 5
@@ -5,6 +9,8 @@ c dec -10 if a >= 1
 c inc -20 if c == 10""".splitlines()
 
 live = open('day8.txt').readlines()
+
+data = test if TEST else live
 
 def process(data):
     registers = {}
@@ -43,5 +49,6 @@ def process(data):
                 xmax = registers[parts[0]]
     return max(registers.values()), xmax
 
-print process(test)
-print process(live)
+p1, p2 = process(data)
+print('Part 1:', p1)
+print('Part 2:', p2)
