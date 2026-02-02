@@ -1,4 +1,6 @@
-
+import sys
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
 
 test = {
     'A':  [ (1, +1, 'B'),  (0, -1, 'B') ],
@@ -36,14 +38,15 @@ class machine(object):
         self.state = do[2]
 
     def cksum( self ):
-        print self.tape
+        if DEBUG:
+            print(self.tape)
         return sum( self.tape.values() )
 
 liveSteps = 12399302
 
 turing = machine(live, 'A')
 for i in range(liveSteps):
-    if i % 10000 == 0:
-        print '\r', i,
+    if DEBUG and i % 10000 == 0:
+        print(i, end='\r')
     turing.step()
-print turing.cksum()
+print('Part 1:', turing.cksum())

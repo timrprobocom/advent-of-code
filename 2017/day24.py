@@ -1,3 +1,7 @@
+import sys
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+
 test = """\
 0/2
 2/2
@@ -14,8 +18,10 @@ def translate(lines):
         tups.append( tuple(int(a) for a in ln.rstrip().split('/')) )
     return tups
 
-#data = translate(test)
-data = translate(open('day24.txt').readlines())
+if TEST:
+    data = translate(test)
+else:
+    data = translate(open('day24.txt').readlines())
 
 def fill(tups):
     left = {}
@@ -31,11 +37,14 @@ def fill(tups):
 
 left,right = fill(data)
 
-maxp = 0
-maxlen = 0
-maxlenp = 0
+class Keep:
+    p = 0
+    len = 0
+    lenp = 0
+
+maxx = Keep()
+
 def chain(p, search, accum):
-    global maxp, maxlen, maxlenp
     accum = accum[:]
     accum.append( p )
     left[p[0]].remove( p )
@@ -46,15 +55,16 @@ def chain(p, search, accum):
 
     if not lefts and not rights:
         tot = sum((i+j for i,j in accum))
-        if tot > maxp:
-            maxp = tot
-        if len(accum) > maxlen:
-            maxlen = len(accum)
-            maxlenp = tot
-        elif len(accum) == maxlen:
-            if tot > maxlenp:
-                maxlenp = tot
-        print 'end', accum, tot
+        if tot > maxx.p:
+            maxx.p = tot
+        if len(accum) > maxx.len:
+            maxx.len = len(accum)
+            maxx.lenp = tot
+        elif len(accum) == maxx.len:
+            if tot > maxx.lenp:
+                maxx.lenp = tot
+        if DEBUG:
+            print('end', accum, tot)
     else:
         for l in lefts:
             chain( l, l[1], accum )
@@ -72,6 +82,7 @@ if 0 in left:
 if 0 in right:
     for start in right[0]:
         chain( start, start[0], accum )
-print maxp, maxlen, maxlenp
-
-
+if DEBUG:
+    print(maxx.__dict__)
+print('Part 1:', maxx.p)
+print('Part 2:', maxx.lenp)

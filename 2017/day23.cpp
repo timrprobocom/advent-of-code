@@ -139,13 +139,21 @@ void summarize( registerFile_t & registers )
         << "\n";
 }
 
+int isqrt(int n)
+{
+    int guess = n / 2;
+    for( int i = 0; i < 7; i++ )
+        guess = (n / guess + guess) / 2;
+    return guess;
+}
 
 int main()
 {
     code_t code = compileProgram(live);
     registerFile_t registers;
     fillRegisters( registers );
-    registers['a'] = 1;
+//   This is part 2, which is O(N**3) and cannot be computed.
+//   registers['a'] = 1;
 
     // Go.
 
@@ -182,5 +190,28 @@ int main()
         }
         registers['p'] ++;
     }
-    std::cout << muls << " multiplies\n";
+
+    std::cout << "Part 1: " << muls << "\n";
+
+    int start = code[0].op2 * code[4].op2 - code[5].op2;
+    int endx = start - int(code[7].op2);
+    int step = -code[code.size()-2].op2;
+
+    std::cout << start << " " << endx << " " << step << "\n";
+    std::cout << 1234 << " " << isqrt(1234) << "\n";
+
+    int cnt = 0;
+    for( int i = start; i <= endx; i += step )
+    {
+        for( int j = 2; j < isqrt(i); j ++ )
+        {
+            if( i % j == 0 )
+            {
+                cnt ++;
+                break;
+            }
+        }
+    }
+
+    std::cout << "Part 2: " << cnt << "\n";
 }
