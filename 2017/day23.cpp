@@ -4,6 +4,9 @@
 #include <string>
 #include <map>
 
+bool DEBUG = false;
+bool TEST = false;
+
 const char * live[] = {
     "set b 65",
     "set c b",
@@ -130,22 +133,41 @@ int lookup( registerFile_t & regs, instruction_t * instr )
 
 void summarize( registerFile_t & registers )
 {
-    std::cout 
-        << " b:" << registers['b']
-        << " c:" << registers['c'] 
-        << " d:" << registers['d']
-        << " e:" << registers['e']
-        << " h:" << registers['h']
-        << "\n";
+    if( DEBUG )
+        std::cout 
+            << " b:" << registers['b']
+            << " c:" << registers['c'] 
+            << " d:" << registers['d']
+            << " e:" << registers['e']
+            << " h:" << registers['h']
+            << "\n";
 }
 
-
-int main()
+int isqrt(int n)
 {
+    int guess = n / 2;
+    for( int i = 0; i < 7; i++ )
+        guess = (n / guess + guess) / 2;
+    return guess;
+}
+
+int main( int argc, char ** argv )
+{
+    std::string name = *argv;
+    while( *++argv )
+    {
+        std::string arg(*argv);
+        if( arg == "debug")
+            DEBUG = true;
+        else if( arg =="test")
+            TEST = true;
+    }
+
     code_t code = compileProgram(live);
     registerFile_t registers;
     fillRegisters( registers );
-    registers['a'] = 1;
+//   This is part 2, which is O(N**3) and cannot be computed.
+//   registers['a'] = 1;
 
     // Go.
 
@@ -166,7 +188,7 @@ int main()
                 registers[instr->op1] -= op2;
                 if( instr->op1 == 'd' )
                     summarize( registers );
-                if( instr->op1 == 'h' )
+                if( DEBUG && instr->op1 == 'h' )
                     std::cout << "h is now " << registers['h'] << "\n";
                 break;
             case opMul:
@@ -182,5 +204,31 @@ int main()
         }
         registers['p'] ++;
     }
-    std::cout << muls << " multiplies\n";
+
+    std::cout << "Part 1: " << muls << "\n";
+
+    int start = code[0].op2 * code[4].op2 - code[5].op2;
+    int endx = start - int(code[7].op2);
+    int step = -code[code.size()-2].op2;
+
+    if( DEBUG )
+    {
+        std::cout << start << " " << endx << " " << step << "\n";
+        std::cout << 1234 << " " << isqrt(1234) << "\n";
+    }
+
+    int cnt = 0;
+    for( int i = start; i <= endx; i += step )
+    {
+        for( int j = 2; j < isqrt(i); j ++ )
+        {
+            if( i % j == 0 )
+            {
+                cnt ++;
+                break;
+            }
+        }
+    }
+
+    std::cout << "Part 2: " << cnt << "\n";
 }

@@ -1,5 +1,10 @@
 #include <stdio.h>
-#include <stdint.h>
+#include <cstdint>
+#include <string>
+#include <iostream>
+
+bool DEBUG = false;
+bool TEST = false;
 
 struct Generator
 {
@@ -40,24 +45,33 @@ struct GeneratorB
     }
 };
 
-int main()
+int part1( uint32_t start1, uint32_t start2,  uint32_t mod1, uint32_t mod2, int loops )
 {
-#if 0
-    GeneratorB g1(   65, 16807, 4 );
-    GeneratorB g2( 8921, 48271, 8 );
-#else
-    GeneratorB g1(  277, 16807, 4 );
-    GeneratorB g2(  349, 48271, 8 );
-#endif
-
+    GeneratorB g1( start1, 16807, mod1 );
+    GeneratorB g2( start2, 48271, mod2 );
     int count = 0;
-//    for( int i = 0; i < 40000000; i++ )
-    for( int i = 0; i < 5000000; i++ )
-    {
+    for( int i = 0; i < loops; i++ )
         if( (g1.next() & 0xffff) == (g2.next() & 0xffff) )
             count++;
+    return count;
+}
+
+int main( int argc, char ** argv )
+{
+    std::string name = *argv;
+    while( *++argv )
+    {
+        std::string arg(*argv);
+        if( arg == "debug")
+            DEBUG = true;
+        else if( arg =="test")
+            TEST = true;
     }
 
-    printf( "Answer is %d\n", count );
+    int start1 = TEST ?   65 : 277;
+    int start2 = TEST ? 8921 : 349;
+
+    std::cout << "Part 1: " << part1( start1, start2, 1, 1, 40000000 ) << "\n";
+    std::cout << "Part 2: " << part1( start1, start2, 4, 8,  5000000 ) << "\n";
 }
 

@@ -1,3 +1,7 @@
+import sys
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+
 # How do you represent a hex grid?
 #
 #
@@ -39,13 +43,17 @@ def walk(movelist):
         dist = getdist(posn)
         if dist > xmax:
             xmax = dist
-        print(mv, posn)
+        if DEBUG:
+            print(mv, posn)
     # Distance is
     # min(abs(x),abs(y)+1/2?
     return getdist(posn), xmax
 
 
-for movelist, ans in test:
-    print(walk(movelist), ans)
-
-print(walk(live))
+if TEST:
+    for movelist, ans in test:
+        print(walk(movelist), ans)
+else:
+    p1,p2 = walk(live)
+    print("Part 1:", p1)
+    print("Part 2:", p2)

@@ -1,3 +1,6 @@
+import sys
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
 
 
 inrules = {
@@ -95,7 +98,6 @@ def convert(inrules):
     return rules2, rules3
 
 def process2x2( grid ):
-    print "2x2", len(grid)
     newgrid = []
     for i in range(0,len(grid),2):
         line1 = ''
@@ -111,7 +113,6 @@ def process2x2( grid ):
     return newgrid
 
 def process3x3( grid ):
-    print "3x3", len(grid)
     newgrid = []
     for i in range(0,len(grid),3):
         line1 = ''
@@ -150,19 +151,26 @@ def count(grid, ch):
 
 inrules = getdata()
 rules2, rules3 = convert(inrules)
-print len(rules2), "rules for 2x2"
-#print rules2
-print len(rules3), "rules for 3x3"
-#print rules3
+if DEBUG:
+    print(len(rules2), "rules for 2x2")
+    print(len(rules3), "rules for 3x3")
 
 
 test = ".#.","..#","###"
 
-grid = test
-print '\n'.join(grid)
-print count(grid,'#')
-for i in range(18):
-    grid = process(grid)
-    print '\n'.join(grid)
-    print len(grid), 'x', len(grid[0]), count(grid,'#'), count(grid,'.')
+def part1(grid):
+    if DEBUG:
+        print('\n'.join(grid))
+        print(count(grid,'#'))
+    for i in range(18):
+        grid = process(grid)
+        if i == 4:
+            part1 = count(grid,'#')
+        if DEBUG:
+            print('\n'.join(grid))
+            print(len(grid), 'x', len(grid[0]), count(grid,'#'), count(grid,'.'))
+    return part1, count(grid,'#')
 
+p1, p2 = part1(test)
+print('Part 1:', p1)
+print('Part 2:', p2)

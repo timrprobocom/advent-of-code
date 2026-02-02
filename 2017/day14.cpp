@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <cstdint>
 #include <vector>
 #include <numeric>
 #include <algorithm>
@@ -7,11 +8,42 @@
 #define test "flqrgnkx"
 #define live "nbysizxe"
 
+bool DEBUG = false;
+bool TEST = false;
+
 // 128 bits is 16 bytes
 
 const char extra[] = {17,31,73,47,23,0};
 
 typedef std::vector<uint8_t> ByteVector;
+typedef std::vector<ByteVector> ByteArray;
+typedef std::vector<int32_t> IntVector;
+typedef std::vector<IntVector> IntArray;
+
+class popcount_t {
+    std::vector<int> counts;
+
+public:
+    popcount_t()
+    {
+        for( int i = 0; i < 256; i++ )
+        {
+            int cnt = 0;
+            for( int b = 0; b < 8; b++ )
+                if( i & (1 << b) )
+                    cnt ++;
+            counts.push_back( cnt );
+        }
+    }
+
+    int count(ByteVector & bv )
+    {
+        int c = 0;
+        for( auto & b : bv )
+            c += counts[b];
+        return c;
+    }
+};
 
 ByteVector knothash( std::string inp )
 {
@@ -70,94 +102,82 @@ std::string tostring(ByteVector v)
     return s;
 }
 
-void
-day10b()
-{
-    for( auto input : {
-        "",
-        "AoC 2017",
-        "1,2,3",
-        "1,2,4",
-        "94,84,0,79,2,27,81,1,123,93,218,23,103,255,254,243"
-    })
-    {
-        ByteVector v = knothash( input );
-        std::cout << tostring(v) << "\n";
+ByteArray makearray(std::string data) {
+    ByteArray array;
+    for( int row = 0; row < 128; row++ ) {
+        std::string inp = data + "-" + std::to_string(row);
+        array.push_back( knothash(inp) );
     }
+    return array;
 }
 
+int part1( ByteArray & array )
+{
+    popcount_t popcount;
+    int sum = 0;
+    for( auto & row : array )
+        sum += popcount.count(row);
+    return sum;
+}
 
-#if 0
+IntArray convert( ByteArray & array )
+{
+    IntArray grid;
+    for( auto row : array )
+    {
+        IntVector binrow;
+        for( auto c : row )
+        {
+            for( int b = 7; b >= 0; b-- )
+            {
+                binrow.push_back( c & (1<<b) ? -1 : 0 );
+            }
+        }
+        grid.push_back( binrow );
+    }
+    return grid;
+}
 
-def makecounts():
-    counts = []
-    for i in range(256):
-        c = 0
-        for b in (1,2,4,8,16,32,64,128):
-            if i & b:
-                c += 1
-        counts.append(c)
-    return counts
+void contiguous( IntArray & grid, int y, int x, int tag )
+{
+    grid[y][x] = tag;
+    if( x > 0 && grid[y][x-1] < 0 )
+        contiguous( grid, y, x-1, tag );
+    if( x < 127 && grid[y][x+1] < 0 )
+        contiguous( grid, y, x+1, tag );
+    if( y > 0 && grid[y-1][x] < 0 )
+        contiguous( grid, y-1, x, tag );
+    if( y < 127 && grid[y+1][x] < 0 )
+        contiguous( grid, y+1, x, tag );
+}
 
-counts = makecounts()
+int part2( IntArray & grid ) 
+{
+    int tag = 1;
+    for( int y = 0; y < 128; y++ )
+        for( int x = 0; x < 128; x++ )
+            if( grid[y][x] == -1 )
+            {
+                contiguous( grid, y, x, tag );
+                tag ++;
+            }
+    return tag-1;
+}
 
-def countbits(hx):
-    c = 0
-    for byte in hx.decode('hex'):
-        c += counts[ord(byte)]
-    return c
+int main( int argc, char ** argv )
+{
+    std::string name = *argv;
+    while( *++argv )
+    {
+        std::string arg(*argv);
+        if( arg == "debug")
+            DEBUG = true;
+        else if( arg =="test")
+            TEST = true;
+    }
 
-def makearray(data):
-    array = []
-    for row in range(128):
-        array.append( knothash('%s-%d' % (data,row) ) )
-    return array
-
-def parta(array):
-    return sum( countbits(row) for row in array )
-
-def convert(array):
-    grid = []
-    for row in array:
-        binrow = []
-        for c in row.decode('hex'):
-            for b in (128,64,32,16,8,4,2,1):
-                binrow.append( -1 if ord(c) & b else 0 )
-        grid.append(binrow)
-    return grid
-
-def contiguous( grid, y, x, tag ):
-    grid[y][x] = tag
-    if x > 0 and grid[y][x-1] < 0:
-        contiguous( grid, y, x-1, tag )
-    if x < 127 and grid[y][x+1] < 0:
-        contiguous( grid, y, x+1, tag )
-    if y > 0 and grid[y-1][x] < 0:
-        contiguous( grid, y-1, x, tag )
-    if y < 127 and grid[y+1][x] < 0:
-        contiguous( grid, y+1, x, tag )
-
-def partb(grid):
-    tag = 1
-    for y in range(128):
-        for x in range(128):
-            if grid[y][x] == -1:
-                contiguous( grid, y, x, tag )
-                tag += 1
-    return tag-1
-
-array = makearray(test)
-print 'Part A', parta(array)
-grid = convert(array)
-print 'Part B', partb(grid)
-for y in range(16):
-    print ' '.join('%3d' % k for k in grid[y][0:16])
-
-
-array = makearray(live)
-print 'Part A', parta(array)
-grid = convert(array)
-print 'Part B', partb(grid)
-for y in range(16):
-    print ' '.join('%3d' % k for k in grid[y][0:16])
-#endif
+    auto array = makearray(TEST ? test : live);
+    std::cout << "Part 1: " << part1(array) << "\n";
+    auto grid = convert(array);
+    std::cout << "Part 2: " << part2(grid) << "\n";
+}

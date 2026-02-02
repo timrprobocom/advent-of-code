@@ -1,27 +1,20 @@
 #include <fstream>
 #include <iostream>
 #include <list>
+#include <algorithm>
 
-int main()
+bool DEBUG = false;
+bool TEST = false;
+
+int part1( int data )
 {
     std::list<int> buffer;
     buffer.push_back( 0 );
-#if 0
-    int data = 3;
     int rounds = 2017;
-#else
-    int data = 328;
-    int rounds = 5000000;
-#endif
     std::list<int>::iterator posn = buffer.begin();
 
     for( int i = 1; i <= rounds; i++ )
     {
-        if( i % 100000 == 0 )
-        {
-            std::cout << i << "\r";
-            std::cout.flush();
-        }
         for( int m = 0; m < data+1; m++ )
         {
             if( posn == buffer.end() )
@@ -29,24 +22,53 @@ int main()
             posn++;
         }
         posn = buffer.insert( posn, i );
-#if 0
-        for( auto && p = buffer.begin(); p != buffer.end(); p++ )
-            std::cout << *p << ", ";
-        std::cout << std::endl;
-#endif
     }
 
-    auto p = std::find( buffer.begin(), buffer.end(), 0 );
+    auto p = std::find( buffer.begin(), buffer.end(), 2017 );
 
-    std::cout << "\n";
-    std::cout << *p << ", ";
+    if( DEBUG )
+        std::cout << *p << ", ";
     p++;
-    std::cout << *p << "\n";
+    if( DEBUG )
+        std::cout << *p << "\n";
 
-    p = std::find( buffer.begin(), buffer.end(), 2017 );
+    return *p;
+}
 
-    std::cout << *p << ", ";
-    p++;
-    std::cout << *p << "\n";
+int part2( int data )
+{
+    int rounds = 5000000;
+    int size = 1;
+    int pos = 0;
+    int result = 0;
+
+    for( int i = 0; i < rounds; i++ )
+    {
+        int newx = (pos + data) % size + 1;
+        if( newx == 1 )
+            result = i+1;
+
+        pos = newx;
+        size ++;
+    }
+    return result;
+}
+
+int main( int argc, char ** argv )
+{
+    std::string name = *argv;
+    while( *++argv )
+    {
+        std::string arg(*argv);
+        if( arg == "debug")
+            DEBUG = true;
+        else if( arg =="test")
+            TEST = true;
+    }
+
+    int data = TEST ? 3 : 328;
+
+    std::cout << "Part 1: " << part1(data) << "\n";
+    std::cout << "Part 2: " << part2(data) << "\n";
 }
 

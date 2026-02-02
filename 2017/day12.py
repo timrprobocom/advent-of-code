@@ -1,3 +1,7 @@
+import sys
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+
 test = """\
 0 <-> 2
 1 <-> 1
@@ -9,20 +13,17 @@ test = """\
 
 live = open( "day12.txt" ).readlines()
 
-data = live
-
+data = test if TEST else live
 
 # This is a directed, but non-acyclic graph.
 
 connx = {}
 allx = set()
 
-class obj(object):
-    pass
-
 for ln in data:
     parts = ln.split()
-    print(parts)
+    if DEBUG:
+        print(parts)
     base = int(parts.pop(0))
     allx.add( base )
     if base not in connx:
@@ -48,8 +49,11 @@ while allx:
     allx.add( head )
     descend( head, seen )
     groups.append(seen)
-    print(head, len(seen))
+    if DEBUG:
+        print(head, len(seen))
     allx -= seen
-    print(allx)
+    if DEBUG:
+        print(allx)
 
-print(len(groups))
+print("Part 1:", len(groups[0]))
+print("Part 2:", len(groups))
