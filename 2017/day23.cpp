@@ -144,17 +144,6 @@ void summarize( registerFile_t & registers )
 }
 
 int isqrt(int n)
-<<<<<<< HEAD
-=======
-{
-    int guess = n / 2;
-    for( int i = 0; i < 7; i++ )
-        guess = (n / guess + guess) / 2;
-    return guess;
-}
-
-int main()
->>>>>>> 1741b890e11aeeff3236447ca9acdbbb33ee07a6
 {
     int guess = n / 2;
     for( int i = 0; i < 7; i++ )
