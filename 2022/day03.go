@@ -74,24 +74,3 @@ func main() {
 	fmt.Println("Part 1:", part1(data))
 	fmt.Println("Part 2:", part2(data))
 }
-
-
-
-/*
-def part2(data):
-    prior = 0
-    counter = 2
-    sect = None
-    for row in data:
-        if sect:
-            sect.intersection_update(set(row))
-        else:
-            sect = set(row)
-
-        if not counter:
-            prior += score(sect)
-            sect = None
-            counter = 3
-        counter -= 1
-    return prior
-*/
