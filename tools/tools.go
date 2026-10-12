@@ -21,6 +21,10 @@ func AbsDiffInt[T Number](x, y T) T {
 	return x - y
 }
 
+func StartsWith(haystack string, needle string) bool {
+	return len(haystack) >= len(needle) && haystack[0:len(needle)] == needle
+}
+
 // golang shock #1:  "append" modifies its parameters.
 // This returns a new slice without that member.
 
