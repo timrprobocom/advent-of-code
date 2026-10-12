@@ -25,8 +25,10 @@ def run(file, ext):
 
 names = {'.py':'Python', '.cpp':'C++   ', '.go':'Go    '}
 
-print('Python'.ljust(30), 'C++'.ljust(30), 'Go')
-print('-'*92)
+FIELD = 40
+
+print('Python'.ljust(FIELD), 'C++'.ljust(FIELD), 'Go')
+print('-'*(FIELD*3+2))
 
 sums = [0,0,0]
 
@@ -47,15 +49,17 @@ for day in range(1,26):
         continue
     print(fn,' ')
     pad = ''
+    nextpad = ''
     for lns in zip(*gather):
         for i,ln in enumerate(lns):
             print(pad,end='')
-            if len(ln) > 30:
-                print(ln,end='')
-                pad = ' '*(31*(i+1))
+            if len(ln) > FIELD:
+                print(ln[:FIELD],end='')
+                nextpad = ' '*((FIELD+1)*(i+1))
             else:
-                print(ln.ljust(31),end='')
-                pad = ''
+                print(ln.ljust(FIELD),end=' ')
+                nextpad = ''
+            nextpad = pad
         print()
     if len(gather) > 1 and ''.join(gather[0]) != ''.join(gather[1]):
         print("##### Python and C++ results do not match. *****")
@@ -63,11 +67,11 @@ for day in range(1,26):
         print("##### Python and Go results do not match. *****")
     for i,t in enumerate(times):
         sums[i] += t
-        print( ('%10.3f'%t).ljust(31), end='')
+        print( ('%10.3f'%t).ljust(FIELD), end=' ')
     print()
 
 print("\nTotal times")
 for t in sums:
-    print( ('%10.3fs'%t).ljust(31), end='')
+    print( ('%10.3fs'%t).ljust(FIELD), end=' ')
 print()
 

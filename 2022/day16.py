@@ -20,7 +20,7 @@ else:
 
 DEBUG = 'debug' in sys.argv
 
-pat = re.compile('Valve ([A-Z][A-Z]) has flow rate=(\d*); tunnels? leads? to valves? ([A-Z, ]*)$')
+pat = re.compile(r'Valve ([A-Z][A-Z]) has flow rate=(\d*); tunnels? leads? to valves? ([A-Z, ]*)$')
 
 class Valve:
     def __init__(self, name, flow, tunnels):

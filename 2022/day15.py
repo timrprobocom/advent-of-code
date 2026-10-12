@@ -28,7 +28,7 @@ else:
 
 DEBUG = 'debug' in sys.argv
 
-pattern = re.compile("Sensor at x=([\d-]*), y=([\d-]*): closest beacon is at x=([\d-]*), y=([\d-]*)")
+pattern = re.compile(r"Sensor at x=([\d-]*), y=([\d-]*): closest beacon is at x=([\d-]*), y=([\d-]*)")
 
 class Sensor:
     def __init__( self, line ):

@@ -110,4 +110,6 @@ def part1(data):
 
     return qsum, min(poss)
 
-print("Part 1, 2:", part1(data))
+p1, p2 = part1(data)
+print("Part 1:", p1)
+print("Part 2:", p2)
