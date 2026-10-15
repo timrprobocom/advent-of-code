@@ -116,6 +116,41 @@ func GetNumbers[T Number](input string) [][]T {
 	return result
 }
 
+// Produce a matrix of just the integers from the input.
+
+func GetPosNumbers[T Number](input string) [][]T {
+	result := make([][]T, 0)
+	var row []T
+	var accum T
+	last := '?'
+	for _, c := range input {
+		switch c {
+		case '\n':
+			row = append(row, accum)
+			result = append(result, row)
+			row = make([]T, 0)
+			accum = 0
+			last = c
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			accum = accum*10 + T(c) - '0'
+			if DEBUG {
+				fmt.Println("Unexpected ", rune(c))
+			}
+			last = c
+		default:
+			if last != ' ' {
+				row = append(row, accum)
+				accum = 0
+			}
+			last = ' '
+		}
+	}
+	if len(row) > 0 {
+		result = append(result, append(row, accum))
+	}
+	return result
+}
+
 // How does the language not already have this
 
 func Isdigit(s byte) bool {
