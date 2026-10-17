@@ -55,7 +55,7 @@ func makeNode(name string) *Node {
 	}
 }
 
-func (s Node) Print() {
+func (s *Node) Print() {
 	if DEBUG {
 		fmt.Println("<Node", s.Name, "has", len(s.Children), "children, size", s.Size, ", allsize", s.Allsize, ">")
 	}
