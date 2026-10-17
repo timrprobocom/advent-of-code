@@ -238,7 +238,7 @@ func SplitInt64(s string) []int64 {
 	return SplitInt64By(s, " ")
 }
 
-func Sum[T ~int](set []T) T {
+func Sum[T Number](set []T) T {
 	var sum T
 	for _, n := range set {
 		sum += n
@@ -246,7 +246,7 @@ func Sum[T ~int](set []T) T {
 	return sum
 }
 
-func Prod[T ~int](set []T) T {
+func Prod[T Number](set []T) T {
 	var sum T = 1
 	for _, n := range set {
 		sum *= n
@@ -255,21 +255,20 @@ func Prod[T ~int](set []T) T {
 }
 
 func Min[T Number](chunk []T) T {
-    var minx T = chunk[0]
-	for _,k := range chunk {
-		minx = min(minx,k)
+	var minx T = chunk[0]
+	for _, k := range chunk {
+		minx = min(minx, k)
 	}
 	return minx
 }
 
 func Max[T Number](chunk []T) T {
-    var maxx T = chunk[0]
-	for _,k := range chunk {
-		maxx = max(maxx,k)
+	var maxx T = chunk[0]
+	for _, k := range chunk {
+		maxx = max(maxx, k)
 	}
 	return maxx
 }
-
 
 // Set intersection.
 
