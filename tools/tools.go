@@ -254,6 +254,23 @@ func Prod[T ~int](set []T) T {
 	return sum
 }
 
+func Min[T Number](chunk []T) T {
+    var minx T = chunk[0]
+	for _,k := range chunk {
+		minx = min(minx,k)
+	}
+	return minx
+}
+
+func Max[T Number](chunk []T) T {
+    var maxx T = chunk[0]
+	for _,k := range chunk {
+		maxx = max(maxx,k)
+	}
+	return maxx
+}
+
+
 // Set intersection.
 
 func Intersect[T comparable](m1 map[T]bool, m2 map[T]bool) map[T]bool {
