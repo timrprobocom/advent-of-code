@@ -122,7 +122,7 @@ func GetPosNumbers[T Number](input string) [][]T {
 	result := make([][]T, 0)
 	var row []T
 	var accum T
-	last := '?'
+	last := ' '
 	for _, c := range input {
 		switch c {
 		case '\n':
@@ -130,12 +130,9 @@ func GetPosNumbers[T Number](input string) [][]T {
 			result = append(result, row)
 			row = make([]T, 0)
 			accum = 0
-			last = c
+			last = ' '
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			accum = accum*10 + T(c) - '0'
-			if DEBUG {
-				fmt.Println("Unexpected ", rune(c))
-			}
 			last = c
 		default:
 			if last != ' ' {
