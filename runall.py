@@ -1,10 +1,19 @@
 #! /usr/bin/python3
 
 import os
+import sys
 import subprocess
 import time
 
 # python c++ go
+
+FIRST = 1
+LAST = 25
+if len(sys.argv) == 2:
+    LAST = int(sys.argv[1])
+if len(sys.argv) == 3:
+    FIRST = int(sys.argv[1])
+    LAST = int(sys.argv[2])
 
 # Python is slowest, then unoptimized C++, then go and optimized C++ are about the same.
 
@@ -32,7 +41,7 @@ print('-'*(FIELD*3+2))
 
 sums = [0,0,0]
 
-for day in range(1,26):
+for day in range(FIRST,LAST+1):
     fn = f'day{day:02d}'
     gather = []
     times = []
