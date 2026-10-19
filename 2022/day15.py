@@ -137,8 +137,8 @@ def part2(data):
 
 # This one runs instantaneously.  If we draw a line parallel to each
 # surface of the diamonds but one pixel out, then the unseen beacon 
-# will be at an intersection of four of those lines.  Handline these
-# lines is each, because the slope is either +1 or -1.
+# will be at an intersection of four of those lines.  Handling these
+# lines is easy, because the slope is either +1 or -1.
 
 def part2(data):
 

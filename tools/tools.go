@@ -1,7 +1,7 @@
 package tools
 
 import (
-	"fmt"
+//	"fmt"
 	"os"
 	"strings"
 )
@@ -82,7 +82,7 @@ func GetNumbers[T Number](input string) [][]T {
 	var row []T
 	var accum T
 	var sign T = 1
-	last := '?'
+	last := ' '
 	for _, c := range input {
 		switch c {
 		case '\n':
@@ -91,12 +91,7 @@ func GetNumbers[T Number](input string) [][]T {
 			row = make([]T, 0)
 			accum = 0
 			sign = 1
-		case ' ', ',', 'x':
-			if last != ' ' {
-				row = append(row, sign*accum)
-				accum = 0
-				sign = 1
-			}
+			c = ' '
 		case '+':
 			sign = 1
 		case '-':
@@ -104,9 +99,12 @@ func GetNumbers[T Number](input string) [][]T {
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			accum = accum*10 + T(c) - '0'
 		default:
-			if DEBUG {
-				fmt.Println("Unexpected ", rune(c))
+			if last != ' ' {
+				row = append(row, sign*accum)
+				accum = 0
+				sign = 1
 			}
+			c = ' '
 		}
 		last = c
 	}
