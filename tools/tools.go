@@ -376,3 +376,17 @@ func Mandist(pt1, pt2 Point) int {
 func (pt Point) InRange(width int, height int) bool {
 	return Between(0, pt.X, width) && Between(0, pt.Y, height)
 }
+
+func Span( points []Point ) (int,int,int,int) {
+	minx := points[0].X
+	maxx := points[0].X
+	miny := points[0].Y
+	maxy := points[0].Y
+	for _,pt := range points {
+		minx = min(minx, pt.X)
+		maxx = max(maxx, pt.X)
+		miny = min(miny, pt.Y)
+		maxy = max(maxy, pt.Y)
+	}
+	return minx,maxx,miny,maxy
+}

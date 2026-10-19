@@ -1,6 +1,4 @@
-import ast
 import sys
-from functools import cmp_to_key
 
 test = """\
 498,4 -> 498,6 -> 496,6

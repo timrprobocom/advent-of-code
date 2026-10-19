@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"strings"
 
 	"aoc/tools"
@@ -70,16 +69,7 @@ func move(h Point, t Point) Point {
 }
 
 func plot(visit map[Point]bool) {
-	minx := math.MaxInt
-	maxx := 0
-	miny := math.MaxInt
-	maxy := 0
-	for pt, _ := range visit {
-		minx = min(minx, pt.X)
-		maxx = max(maxx, pt.X)
-		miny = min(miny, pt.Y)
-		maxy = max(maxy, pt.Y)
-	}
+	minx, maxx, miny, maxy := tools.Span(tools.Keys(visit))
 	w := maxx - minx + 1
 	h := maxy - miny + 1
 	mapx := make([][]byte, h)
