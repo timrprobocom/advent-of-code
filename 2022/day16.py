@@ -159,7 +159,7 @@ AA = valveindex['AA']
 
 _seen = {}
 m = 0
-print("Part 1: ",part1(1, AA, [ 0 ]))
+print("Part 1:",part1(1, AA, [ 0 ]))
 _seen = {}
 m = 0
-print("Part 2: ",part2(1, AA, AA, [ 0 ]))
+print("Part 2:",part2(1, AA, AA, [ 0 ]))
