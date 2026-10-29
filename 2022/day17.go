@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"aoc/tools"
@@ -205,10 +206,18 @@ func signature( step int, rocktype int, rocks PointSet ) string {
     maxy := toprow(rocks)
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("|%d,%d", step, rocktype))
+
+    deltas := []int{}
 	for pt,_ := range rocks {
-		if maxy-pt.Y < 30 {
-			sb.WriteString(fmt.Sprintf(",%d,%d",pt.X,pt.Y))
+		dy := maxy-pt.Y
+		if dy < 30 {
+			deltas = append( deltas, int(dy*10+pt.X) )
 		}
+	}
+	slices.Sort(deltas)
+
+	for _,n := range deltas {
+		sb.WriteString(fmt.Sprintf(";%d",n))
 	}
     return sb.String()
 }
@@ -220,7 +229,8 @@ func part2( moves string ) int64 {
 	var layers int64 = 0
 	seen := make(map[string]Point)
 
-	for i := range BIG {
+	var i int64 = 0
+	for i <= BIG {
         fmt.Print(i,"\r")
 
 		var y int64 = 3
@@ -272,7 +282,7 @@ func part2( moves string ) int64 {
 			if layers == 0 && ok {
 				dt := i - oldty.X
 				dy := top - oldty.Y
-				fmt.Print("cycle:", i,y,oldty,dt,dy)
+				fmt.Println("cycle:", i,y,oldty,dt,dy)
 				cycles := (BIG-i)/dt
 				layers += cycles*dy
 				i += cycles*dt
@@ -280,9 +290,10 @@ func part2( moves string ) int64 {
 			seen[sig] = Point{i,top}
 			break
 		}
+		i++
 	}
 
-    return toprow(rocks)+1
+    return toprow(rocks)+layers
 }
 
 func main() {
@@ -292,62 +303,3 @@ func main() {
 	fmt.Println("Part 1:", part1(input) )
 	fmt.Println("Part 2:", part2(input) )
 }
-
-
-/*
-def part2(data):
-    n = len(data)
-    rocks = set()
-    step = 0
-    layers = 0
-    seen = {}
-    i = 0
-    while i <= BIG:
-        print(i,end='\r')
-        y = toprow(rocks) + 4 if rocks else 3
-        rt = i % len(rocktypes)
-        rock = makerock(rt, 2, y )
-        while True:
-
-            # Go left/right.
-
-            code = data[step % n]
-            step += 1
-            if code == '<':
-                rock.left()
-            else:
-                rock.right()
-            if rocks and collision(rock,rocks):
-                if code == '<':
-                    rock.right()
-                else:
-                    rock.left()
-
-            # Go down unless were already at bottom.
-
-            if not rock.bottom():
-                rocks |= rock.points
-                break
-            rock.down()
-            if collision(rock,rocks):
-                rock.up()
-                rocks |= rock.points
-                top = toprow(rocks)
-                sig = (step%len(data), rt, signature(rocks))
-                if not layers and sig in seen:
-                    (oldt,oldy) = seen[sig]
-                    dy = top - oldy
-                    dt = i - oldt
-                    print("cycle:", i,y,oldt,oldy,dt,dy)
-                    cycles = (BIG-i)//dt
-                    layers += cycles*dy
-                    i += cycles*dt
-                seen[sig] = (i,top)
-                break
-        i += 1
-
-    if DEBUG:
-        plot(rocks)
-    return toprow(rocks)+layers
-
-*/
