@@ -49,13 +49,10 @@ def get_limits(data):
     return minx, miny, maxx, maxy
 
 def part1(data):
-    filled = set()
-    beacons = set()
+    # There is only one beacon at the target Y.
+    rangelo = target
+    rangehi = target
     for s in data:
-        if s.y0 == target:
-            beacons.add(s.x0)
-        if s.y1 == target:
-            beacons.add(s.x1)
         fromtgt = abs(target-s.y0)
         # So, from 8,7 to 2,10 distance is 9
         #   7:-1 to 17  19
@@ -70,12 +67,11 @@ def part1(data):
         
         x00 = s.x0 - s.dist + fromtgt
         x99 = s.x0 + s.dist - fromtgt
+        rangelo = min(rangelo,x00)
+        rangehi = max(rangehi,x99)
         if DEBUG:
             print(s.x0,s.y0,s.x1,s.y1,s.dist,x00,x99)
-        for i in range(x00,x99+1):
-            filled.add(i)
-    filled -= beacons
-    return len(filled)
+    return rangehi-rangelo
 
 # This one handles each sensor, then each scanline within the sensor.
 
