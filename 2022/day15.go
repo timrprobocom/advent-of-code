@@ -1,8 +1,9 @@
 package main
 
 import (
+	"os"
 	"fmt"
-//	"strings"
+	"runtime/pprof"
 
 	"aoc/tools"
 	_ "embed"
@@ -53,15 +54,13 @@ func (s Sensor) Within( pt Point ) bool {
 }
 
 func part1( data []*Sensor, target int) int {
-    filled := make(map[int]bool)
-    beacons := make(map[int]bool)
+
+	// There's only one beacon at the target Y.  We don't need to count them.
+
+	rangelo := target;
+	rangehi := target;
+
     for _,s := range data {
-        if s.S.Y == target {
-            beacons[s.S.X] = true
-		}
-        if s.B.Y == target {
-            beacons[s.B.X] = true
-		}
         fromtgt := tools.AbsInt (target-s.S.Y)
 
         // So, from 8,7 to 2,10 distance is 9
@@ -81,11 +80,14 @@ func part1( data []*Sensor, target int) int {
         if DEBUG {
             fmt.Println(s.S.X,s.S.X,s.B.X,s.B.Y,s.Reach,x00,x99)
 		}
-		for i := x00; i <= x99; i++ {
-            filled[i] = true
-		}
+		// Turns out this doesn't matter.
+		if DEBUG && (x99 < rangelo  ||  x00 > rangehi) {
+			fmt.Println( x00, x99, "discontiguous" )
+		} 
+		rangelo = min(x00,rangelo)
+		rangehi = max(x99,rangehi)
 	}
-	return len(filled) - len(beacons)
+	return rangehi - rangelo
 }
 
 func part2( data []*Sensor, target int) int64 {
@@ -167,6 +169,12 @@ func main() {
 	target := 2000000
 	if TEST {
 		target = 10
+	}
+	if false {
+		f,_ := os.Create("cpu.pprof")
+		defer f.Close()
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
 	}
 
 	fmt.Println("Part 1:", part1(data,target))
