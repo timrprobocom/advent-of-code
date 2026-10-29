@@ -55,7 +55,7 @@ def solve(plan,T):
             continue
         seen.add(state)
 
-        if len(seen) % 1000000 == 0:
+        if DEBUG and len(seen) % 1000000 == 0:
             print(t,best,len(seen))
 
         q.append((ox+r1,cl+r2,ob+r3,ge+r4,r1,r2,r3,r4,t-1))

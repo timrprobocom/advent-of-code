@@ -67,9 +67,10 @@ def part1(data):
     rocks = set()
     step = 0
     for i in range(2022):
-        print(i,end='\r')
-        if i and DEBUG:
-            plot(rocks)
+        if DEBUG:
+            print(i,end='\r')
+            if i:
+                plot(rocks)
         y = toprow(rocks) + 4 if rocks else 3
         rock = makerock(i%len(rocktypes), 2, y )
         while True:
@@ -115,7 +116,8 @@ def part2(data):
     seen = {}
     i = 0
     while i <= BIG:
-        print(i,end='\r')
+        if DEBUG:
+            print(i,end='\r')
         y = toprow(rocks) + 4 if rocks else 3
         rt = i % len(rocktypes)
         rock = makerock(rt, 2, y )
@@ -150,7 +152,8 @@ def part2(data):
                     (oldt,oldy) = seen[sig]
                     dy = top - oldy
                     dt = i - oldt
-                    print("cycle:", i,y,oldt,oldy,dt,dy)
+                    if DEBUG:
+                        print("cycle:", i,y,oldt,oldy,dt,dy)
                     cycles = (BIG-i)//dt
                     layers += cycles*dy
                     i += cycles*dt

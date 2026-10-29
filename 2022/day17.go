@@ -154,7 +154,6 @@ func part1( moves string ) int64 {
     step := 0
 	for i := range 2022 {
         if i > 0 && DEBUG {
-			fmt.Println( "Cycle", i )
             plot(rocks)
 		}
 		var y int64 = 3
@@ -231,7 +230,9 @@ func part2( moves string ) int64 {
 
 	var i int64 = 0
 	for i <= BIG {
-        fmt.Print(i,"\r")
+		if DEBUG {
+			fmt.Print(i,"\r")
+		}
 
 		var y int64 = 3
 		if len(rocks) > 0 {
@@ -282,7 +283,9 @@ func part2( moves string ) int64 {
 			if layers == 0 && ok {
 				dt := i - oldty.X
 				dy := top - oldty.Y
-				fmt.Println("cycle:", i,y,oldty,dt,dy)
+				if DEBUG {
+					fmt.Println("cycle:", i,y,oldty,dt,dy)
+				}
 				cycles := (BIG-i)/dt
 				layers += cycles*dy
 				i += cycles*dt
