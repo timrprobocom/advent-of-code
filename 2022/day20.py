@@ -42,20 +42,15 @@ def mix(data):
         data = move(data, i)
 
 def part1(data):
-    data = parse(data)
     mix(data)
     return sum(result(data))
 
 def part2(data):
-    data = parse(data)
     key = 811589153
     data = [(i,j*key) for i,j in data]
     for _ in range(10):
-        if DEBUG:
-            print('.',end='',flush=True)
         mix(data)
-    print('',end='\r')
     return sum(result(data))
 
-print("Part 1:", part1(data))
-print("Part 2:", part2(data))
+print("Part 1:", part1(parse(data)))
+print("Part 2:", part2(parse(data)))
