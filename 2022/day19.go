@@ -41,7 +41,7 @@ func solve( plan []int, T int ) int {
     core := max(plan[1],plan[2],plan[3],plan[5])
 	best := 0
 	for !q.IsEmpty() {
-        state,_ := q.Pop()
+        state,_ := q.PopFront()
 
         best = max(best,state.ge)
         if state.t == 0 {
@@ -58,7 +58,7 @@ func solve( plan []int, T int ) int {
         r2 := min(state.r2, plan[4])
         r3 := min(state.r3, plan[6])
 		r4 := state.r4
-        ox := min(state.ox, t*core - r1*(t-1))
+        ox := min(state.ox, t*core    - r1*(t-1))
         cl := min(state.cl, t*plan[4] - r2*(t-1))
         ob := min(state.ob, t*plan[6] - r3*(t-1))
 		ge := state.ge
@@ -74,16 +74,16 @@ func solve( plan []int, T int ) int {
 
         q.Push(State{ox+r1,cl+r2,ob+r3,ge+r4,r1,r2,r3,r4,t-1})
         if ox >= plan[1] {
-            q.Push(State{ox-plan[1]+r1,cl+r2,ob+r3,ge+r4,r1+1,r2,r3,r4,t-1})
+            q.Push(State{ox-plan[1]+r1, cl+r2,        ob+r3,         ge+r4, r1+1,r2,r3,r4,t-1})
 		}
         if ox >= plan[2] {
-            q.Push(State{ox-plan[2]+r1,cl+r2,ob+r3,ge+r4,r1,r2+1,r3,r4,t-1})
+            q.Push(State{ox-plan[2]+r1, cl+r2,        ob+r3,         ge+r4, r1,r2+1,r3,r4,t-1})
 		}
         if ox >= plan[3] && cl >= plan[4] {
-            q.Push(State{ox-plan[3]+r1,cl-plan[4]+r2,ob+r3,ge+r4,r1,r2,r3+1,r4,t-1})
+            q.Push(State{ox-plan[3]+r1, cl-plan[4]+r2,ob+r3,         ge+r4, r1,r2,r3+1,r4,t-1})
 		}
         if ox >= plan[5] && ob >= plan[6] {
-            q.Push(State{ox-plan[5]+r1,cl+r2,ob-plan[6]+r3,ge+r4,r1,r2,r3,r4+1,t-1})
+            q.Push(State{ox-plan[5]+r1, cl+r2,        ob-plan[6]+r3, ge+r4, r1,r2,r3,r4+1,t-1})
 		}
 	}
     return best
@@ -103,7 +103,15 @@ func part1( data [][]int ) int {
 
 
 func part2( data [][]int ) int {
-	return 0
+	result := 1
+    for _,plan := range data {
+        ans := solve(plan, 32)
+        if DEBUG {
+            fmt.Println("===",plan[0],ans)
+		}
+        result *= ans
+	}
+    return result
 }
 
 
@@ -114,7 +122,7 @@ func main() {
 	data := tools.GetNumbers[int](input)
 
 	fmt.Println("Part 1:", part1(data) )
-	fmt.Println("Part 2:", part2(data) )
+	fmt.Println("Part 2:", part2(data[:min(len(data),3)]) )
 }
 
 

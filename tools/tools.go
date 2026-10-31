@@ -422,6 +422,26 @@ func (s *Stack[T]) Pop() (T, error) {
 	return item, nil
 }
 
+// Pop removes and returns the bottom element of the stack.
+// Returns an error if the stack is empty.
+func (s *Stack[T]) PopFront() (T, error) {
+	if s.IsEmpty() {
+		var zero T // Returns the zero value of type T
+		return zero, errors.New("stack is empty")
+	}
+	
+	// Get the last item
+	item := s.items[0]
+	
+	// Prevent memory leaks: erase the element reference before reslicing
+	var zero T
+	s.items[0] = zero 
+	
+	// Reslice to remove the top element
+	s.items = s.items[1:]
+	return item, nil
+}
+
 // Peek returns the top element without removing it.
 func (s *Stack[T]) Peek() (T, error) {
 	if s.IsEmpty() {
