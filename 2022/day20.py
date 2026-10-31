@@ -51,7 +51,8 @@ def part2(data):
     key = 811589153
     data = [(i,j*key) for i,j in data]
     for _ in range(10):
-        print('.',end='',flush=True)
+        if DEBUG:
+            print('.',end='',flush=True)
         mix(data)
     print('',end='\r')
     return sum(result(data))

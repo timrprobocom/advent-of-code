@@ -91,7 +91,7 @@ func main() {
 
 	stats_csv, _ := os.Create("times.csv")
 	defer stats_csv.Close()
-	fmt.Println(ljust("Python", FIELD), ljust("C++", FIELD), "Go")
+	fmt.Println(ljust("Python", FIELD) + ljust("C++", FIELD) + "Go")
 	fmt.Println(strings.Repeat("-", 3*FIELD))
 
 	sums := []float64{0, 0, 0}
@@ -106,6 +106,9 @@ func main() {
 				s, elapsed := run(fn, lang)
 				times = append(times, elapsed)
 				gather = append(gather, strings.Split(s, "\n"))
+			} else {
+				times = append(times, time.Duration(0) )
+				gather = append(gather, []string{""})
 			}
 		}
 
@@ -137,16 +140,20 @@ func main() {
 				fmt.Println()
 			}
 		}
-		if len(gather) > 1 && strings.Join(gather[0], "") != strings.Join(gather[1], "") {
+		if len(gather) > 1 && len(gather[1][0]) > 0 && strings.Join(gather[0], "") != strings.Join(gather[1], "") {
 			fmt.Println("#### Python and C++ results do not match ####")
 		}
-		if len(gather) > 2 && strings.Join(gather[0], "") != strings.Join(gather[2], "") {
+		if len(gather) > 2 && len(gather[2][0]) > 0 && strings.Join(gather[0], "") != strings.Join(gather[2], "") {
 			fmt.Println("#### Python and Go results do not match ####")
 		}
 		for i, d := range times {
 			sums[i] += d.Seconds()
-			fmt.Printf("%10.6f", d.Seconds())
-			fmt.Print(strings.Repeat(" ", FIELD-10))
+			if d.Seconds() > 0 {
+				fmt.Printf("%10.6f", d.Seconds())
+				fmt.Print(strings.Repeat(" ", FIELD-10))
+			} else {
+				fmt.Print(strings.Repeat(" ",FIELD))
+			}
 			if i > 0 {
 				stats_csv.Write([]byte(","))
 			}

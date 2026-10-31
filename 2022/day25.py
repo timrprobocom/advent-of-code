@@ -56,11 +56,8 @@ def part1(data):
             num = num * 5 + codes[c]
         sumx += num
 
-    print(sumx)
+    if DEBUG:
+        print(sumx)
     return convert(sumx)
 
-def part2(data):
-    return 0
-
 print("Part 1:", part1(data))
-#print("Part 2:", part2(data))
