@@ -17,29 +17,43 @@ else:
 DEBUG = 'debug' in sys.argv
 
 def parse(data):
-    return [(i,int(j)) for i,j in enumerate(data)]
+    return [[i,int(j)] for i,j in enumerate(data)]
 
-def move(data, i):
-    # Find the item originally in position #i. 
-    # position gives its current position.
-    position, item = [
-        (pos, item) for pos, item in enumerate(data) if item[0] == i
-    ][0]
+def move(data, n):
+    posn,delta = data[n]
+    if delta < 0:
+        delta += len(data) - 1
 
-    data.pop(position)
-    dest = (position + item[1]) % len(data)
-    data.insert(dest, item)
-    return data
+    newpos = (posn+delta) % (len(data)-1)
+    if posn < newpos:
+        for i in range(len(data)):
+            if posn < data[i][0] <= newpos:
+                data[i][0] -= 1
+    elif posn > newpos:
+        for i in range(len(data)):
+            if newpos <= data[i][0] < posn:
+                data[i][0] += 1
+    data[n][0] = newpos
 
 def result(data):
     # Find the value of the first item.
-    first = [i for (i, item) in enumerate(data) if item[1] == 0][0]
-    for i in (1000, 2000, 3000):
-        yield data[(first + i) % len(data)][1]
+    zero = [pos for (pos, value) in data if value == 0][0]
+
+    sumx = 0
+    find = (
+        (zero + 1000) % len(data),
+        (zero + 2000) % len(data),
+        (zero + 3000) % len(data)
+    )
+
+    for pos,val in data:
+        if pos in find:
+            yield val
+
 
 def mix(data):
     for i in range(len(data)):
-        data = move(data, i)
+        move(data, i)
 
 def part1(data):
     mix(data)
@@ -47,7 +61,7 @@ def part1(data):
 
 def part2(data):
     key = 811589153
-    data = [(i,j*key) for i,j in data]
+    data = [[i,j*key] for i,j in data]
     for _ in range(10):
         mix(data)
     return sum(result(data))
