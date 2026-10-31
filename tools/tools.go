@@ -3,6 +3,7 @@ package tools
 import (
 //	"fmt"
 	"os"
+	"errors"
 	"strings"
 )
 
@@ -387,4 +388,55 @@ func Span( points []Point ) (int,int,int,int) {
 		maxy = max(maxy, pt.Y)
 	}
 	return minx,maxx,miny,maxy
+}
+
+// Stack represents a LIFO (Last-In-First-Out) stack using a generic type T.
+
+type Stack[T any] struct {
+	items []T
+}
+
+// Push adds an element to the top of the stack.
+func (s *Stack[T]) Push(item T) {
+	s.items = append(s.items, item)
+}
+
+// Pop removes and returns the top element of the stack.
+// Returns an error if the stack is empty.
+func (s *Stack[T]) Pop() (T, error) {
+	if s.IsEmpty() {
+		var zero T // Returns the zero value of type T
+		return zero, errors.New("stack is empty")
+	}
+	
+	// Get the last item
+	index := len(s.items) - 1
+	item := s.items[index]
+	
+	// Prevent memory leaks: erase the element reference before reslicing
+	var zero T
+	s.items[index] = zero 
+	
+	// Reslice to remove the top element
+	s.items = s.items[:index]
+	return item, nil
+}
+
+// Peek returns the top element without removing it.
+func (s *Stack[T]) Peek() (T, error) {
+	if s.IsEmpty() {
+		var zero T
+		return zero, errors.New("stack is empty")
+	}
+	return s.items[len(s.items)-1], nil
+}
+
+// IsEmpty checks if the stack has no elements.
+func (s *Stack[T]) IsEmpty() bool {
+	return len(s.items) == 0
+}
+
+// Size returns the total number of items in the stack.
+func (s *Stack[T]) Size() int {
+	return len(s.items)
 }
