@@ -19,19 +19,18 @@ test = """\
 
 if 'test' in sys.argv:
     data = test.splitlines()
-    BOX = 4 
 else:
     data = [l.rstrip() for l in open('day22.txt').readlines()]
-    BOX = 50
 
 DEBUG = 'debug' in sys.argv
+BOX = len(data[0])//3
 
 def parse(data):
     mymap = []
     for row in data:
         if not row:
             continue
-        if row[0] == '1':
+        if row[0] not in ' .#':
             codes = row
         else:
             mymap.append(row)
