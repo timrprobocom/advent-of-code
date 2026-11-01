@@ -63,6 +63,7 @@ func solve( plan []int, T int ) int {
         ob := min(state.ob, t*plan[6] - r3*(t-1))
 		ge := state.ge
 
+		state = State{ox,cl,ob,ge,r1,r2,r3,r4,t}
         if seen[state] {
             continue
 		}
