@@ -62,20 +62,21 @@ for day in range(FIRST,LAST+1):
         continue
     print(fn,' ')
     pad = ''
-    nextpad = ''
     for lns in itertools.zip_longest(*gather):
+        if not lns[0]:
+            break
         for i,ln in enumerate(lns):
             print(pad,end='')
             if not ln:
                 print(" "*FIELD, end=' ')
             elif len(ln) > FIELD:
                 print(ln[:FIELD],end='')
-                nextpad = ' '*((FIELD+1)*(i+1))
+                pad = ' '*((FIELD+1)*(i+1))
             else:
                 print(ln.ljust(FIELD),end=' ')
-                nextpad = ''
-            nextpad = pad
-        print()
+                pad = ''
+        if not pad:
+            print()
     if len(gather) > 1 and gather[1][0] and ''.join(gather[0]) != ''.join(gather[1]):
         print("##### Python and C++ results do not match. *****")
     if len(gather) > 2 and gather[2][0] and ''.join(gather[0]) != ''.join(gather[2]):
