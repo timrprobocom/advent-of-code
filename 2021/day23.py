@@ -219,7 +219,8 @@ def process(part,data):
 
     rooms = tuple(rooms)
     waitings = ("",)*len(WAITING_AREAS)
-    render(waitings, rooms)
+    if DEBUG:
+        render(waitings, rooms)
 
     out, path = get_path((waitings, rooms), expand, FINAL_NODE)
     if DEBUG:

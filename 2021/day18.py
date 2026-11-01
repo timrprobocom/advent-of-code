@@ -180,7 +180,8 @@ def part2(data):
                 continue
             val = magnitude( actions( add( a, b ) ) )
             if val > maxval:
-                print(val)
+                if DEBUG:
+                    print(val)
                 maxval = val
     return maxval
 
