@@ -12,10 +12,8 @@ test = """\
 
 if 'test' in sys.argv:
     data = test.splitlines()
-    BOX = 4 
 else:
     data = open('day23.txt').readlines()
-    BOX = 50
 
 DEBUG = 'debug' in sys.argv
 

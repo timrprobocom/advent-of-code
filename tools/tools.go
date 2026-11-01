@@ -316,7 +316,7 @@ func Values[K comparable, V any](m map[K]V) []V {
 
 // Recursively finds and returns the greatest common divisor of a given integer.
 
-func Gcd(a, b int64) int64 {
+func Gcd[T Number](a, b T) T {
 	if b == 0 {
 		return a
 	}
@@ -325,7 +325,7 @@ func Gcd(a, b int64) int64 {
 
 // Lcm returns the lcm of two numbers using the fact that lcm(a,b) * gcd(a,b) = | a * b |
 
-func Lcm(a, b int64) int64 {
+func Lcm[T Number](a, b T) T {
 	return AbsInt(a * b / Gcd(a, b))
 }
 
