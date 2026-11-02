@@ -34,7 +34,7 @@ calls = [int(x) for x in data[0].split(',')]
 data.pop(0)
 data.pop(0)
 
-# We'll just create a set of boards, each board is a 9-element list.
+# We'll just create a set of boards, each board is a 25-element list.
 
 boards = []
 board = []
@@ -45,7 +45,6 @@ for line in data:
     else:
         board.extend( [int(x) for x in line.split()] )
 boards.append(board)
-print(len(boards))
 
 def check(board):
     for row in range(5):
