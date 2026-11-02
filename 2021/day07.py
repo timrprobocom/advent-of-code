@@ -42,7 +42,7 @@ def part2(data,cost):
             return mf
         mf = f
 
-print("Part 1:", part1(data) )
+#print("Part 1:", part1(data) )
 print("Part 1:", part2(data, cost1) )
 print("Part 2:", part2(data, cost2) )
 
