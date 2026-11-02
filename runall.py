@@ -19,7 +19,9 @@ if len(sys.argv) == 3:
 # Python is slowest, then unoptimized C++, then go and optimized C++ are about the same.
 
 def fetch(cmd):
-    return subprocess.run( cmd, check=True, stdout=subprocess.PIPE).stdout.decode()
+    before = time.time()
+    stdout = subprocess.run( cmd, check=True, stdout=subprocess.PIPE).stdout.decode()
+    return stdout, time.time()-before
 
 def prep(file, ext):
     if ext == '.cpp':
@@ -31,6 +33,7 @@ def run(file, ext):
     if ext == '.py':
         return fetch(['python', fn+ext])
     else:
+        fetch(['./'+fn])
         return fetch(['./'+fn])
 
 names = {'.py':'Python', '.cpp':'C++   ', '.go':'Go    '}
@@ -50,9 +53,8 @@ for day in range(FIRST,LAST+1):
         if os.path.exists(fn+lang):
             print(names[lang],end=' \r')
             prep( fn, lang )
-            before = time.time()
-            s = run( fn, lang )
-            times.append( time.time() - before )
+            s, t = run( fn, lang )
+            times.append( t )
             gather.append( s.splitlines() )
         else:
             times.append( 0 )

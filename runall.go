@@ -28,30 +28,6 @@ func fetch(cmd string, args ...string) (string, time.Duration) {
 	return string(output), delta
 }
 
-// Why does Go have 0.1s 0.2s overhead on MacOS when Python does not?
-// And why does it not when run by Python 3.15?  Even running the
-// "time" command inside exec.Command has it!!!
-
-func fetch1(cmd string, args ...string) (string, time.Duration) {
-	argx := "time " + cmd + " " + strings.Join( args, " ")
-	sub := exec.Command("bash", "-c", argx)
-	fmt.Println(argx)
-	var outf strings.Builder
-	var errf strings.Builder
-	sub.Stdout = &outf
-	sub.Stderr = &errf
-	before := time.Now()
-	err := sub.Run()
-	delta := time.Since(before)
-	if err != nil {
-		fmt.Println("Error", err, "calling", cmd)
-		return "Error", time.Duration(0)
-	}
-	fmt.Println("stderr", errf.String(), "***")
-	return outf.String(), delta
-}
-
-
 func prep(file string, ext string) {
 	if ext == ".cpp" {
 		os.Remove(file)
@@ -72,6 +48,7 @@ func run(file string, ext string) (string, time.Duration) {
 	if ext == ".py" {
 		return fetch("python", file+ext)
 	} else {
+		fetch("./" + file)
 		return fetch("./" + file)
 	}
 	return "", time.Duration(0)
