@@ -65,7 +65,8 @@ def part2(data):
         if len(hdata) == 1 and len(ldata) == 1:
             break
 
-    print(hdata, ldata)
+    if DEBUG:
+        print(hdata, ldata)
     return int(hdata[0],2) * int(ldata[0],2)
 
 
