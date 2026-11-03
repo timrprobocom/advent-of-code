@@ -56,6 +56,8 @@ func run(file string, ext string) (string, time.Duration) {
 
 const FIELD int = 40
 
+var names = map[string]string { ".py":"Python", ".cpp":"C++   ", ".go":"Go    " }
+
 func main() {
 	FIRST := 1
 	LAST := 25
@@ -79,6 +81,7 @@ func main() {
 		var times []time.Duration
 		for _, lang := range []string{".py", ".cpp", ".go"} {
 			if _, err := os.Stat(fn + lang); err == nil {
+				print(names[lang]+"\r")
 				prep(fn, lang)
 				s, elapsed := run(fn, lang)
 				times = append(times, elapsed)
@@ -93,7 +96,7 @@ func main() {
 			continue
 		}
 
-		fmt.Println(fn)
+		fmt.Println("          \n"+fn)
 
 		pad := ""
 		for i := 0; i < len(gather[0]); i++ {
