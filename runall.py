@@ -62,7 +62,7 @@ for day in range(FIRST,LAST+1):
 
     if not gather:
         continue
-    print(fn,' ')
+    print("          \n"+ fn)
     pad = ''
     for lns in itertools.zip_longest(*gather):
         if not lns[0]:
