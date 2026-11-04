@@ -391,6 +391,7 @@ func Span( points []Point ) (int,int,int,int) {
 }
 
 // Stack represents a LIFO (Last-In-First-Out) stack using a generic type T.
+// Technically, it's a deque -- we push front, but pop front or back.
 
 type Stack[T any] struct {
 	items []T
