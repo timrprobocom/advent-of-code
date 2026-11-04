@@ -93,7 +93,7 @@ func main() {
 	var input []int
 	TEST, DEBUG, input = tools.Setup(test, live)
 
-	// Part 1 with math.  When aiming up, you will always come back to x=0
+	// Part 1 with math.  When aiming up, you will always come back to y=0
 	// with vy = -vy0, and the max will hit the bottom of the zone at the
 	// next step.  So, if bottom of the box is -10, you need initial
 	// velocity 9, and the highest is sum(1..9), which is y1(y1+1)/2.
