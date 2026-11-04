@@ -33,6 +33,7 @@ type Point = tools.Point
 
 var directions = []Point{ Point{-1,0}, Point{1,0}, Point{0,1}, Point{0,-1} }
 
+
 func nextto( pt Point ) []Point {
 	out := []Point{}
 	for _,dir := range directions {
@@ -48,13 +49,15 @@ func nextto( pt Point ) []Point {
 // Grow the grid by 5x.
 
 func expandgrid( grid [][]byte ) [][]byte {
-	newgrid := make([][]byte, HEIGHT )
+	newgrid := make([][]byte, len(grid)*5 )
+	w := len(grid[0])
+	h := len(grid)
     for i := range 5 {
         for y,row := range grid {
-			newgrid[y] = make([]byte, WIDTH)
+			newgrid[y+h*i] = make([]byte, len(row)*5)
             for j := range 5 {
                 for x,cell := range row {
-                    newgrid[y][x] = (cell+byte(i+j)-1) % 9 + 1
+                    newgrid[y+h*i][x+w*j] = byte((int(cell)+i+j-1) % 9 + 1)
 				}
 			}
 		}
@@ -68,6 +71,10 @@ func expandgrid( grid [][]byte ) [][]byte {
 // We use priority queue so the lowest cost path is always on top.
 
 func part1( grid [][]byte ) int64 {
+	WIDTH = len(grid[0])
+	HEIGHT = len(grid)
+	target := Point{WIDTH-1,HEIGHT-1}
+
     untried := pq.New[Point, int64](pq.MinHeap)
 	untried.Put( Point{0,0}, 0 )
     costs := make( map[Point]int64 )
@@ -75,12 +82,16 @@ func part1( grid [][]byte ) int64 {
         item := untried.Get()
 		xy := item.Value
 		cost := item.Priority
-		if xy.X == WIDTH-1 && xy.Y == HEIGHT-1 {
+		if cost > 3000 {
+			fmt.Println( "failed" )
+			break
+		}
+		if xy == target {
             return cost
 		}
         for _,pt := range nextto(xy) {
             nc := cost + int64(grid[pt.Y][pt.X])
-			if nc > costs[pt] {
+			if  costs[pt] == 0 || nc < costs[pt] {
 				costs[pt] = nc
 				untried.Put( pt, nc )
 			}
@@ -105,8 +116,6 @@ func main() {
 		}
 	}
 	grid = append( grid, row )
-	WIDTH = len(grid[0])
-	HEIGHT = len(grid)
 
 	fmt.Println("Part 1:", part1(grid))
 	fmt.Println("Part 2:", part1(expandgrid(grid)))

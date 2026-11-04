@@ -1,6 +1,4 @@
 import sys
-from heapq import heappush, heappop
-import itertools
 
 test = [
 "38006F45291200",
