@@ -37,7 +37,7 @@ func Remove(row []int, index int) []int {
 var DEBUG bool = false
 var TEST bool = false
 
-func Setup(test string, live string) (bool, bool, string) {
+func Setup[T any](test T, live T) (bool, bool, T) {
 	for _, arg := range os.Args {
 		if arg == "debug" {
 			DEBUG = true
@@ -47,7 +47,7 @@ func Setup(test string, live string) (bool, bool, string) {
 		}
 	}
 
-	var input string
+	var input T
 	if TEST {
 		input = test
 	} else {
