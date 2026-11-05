@@ -77,8 +77,3 @@ for gen in range(999):
 
 print("Part 1:", gen+1)
 
-
-
-#print( "Part 1:", part1(convert(data1)) )
-#print( "Part 2:", part2(convert(data2)) )
-
