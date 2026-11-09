@@ -30,7 +30,7 @@ type Grid = map[Point]bool
 
 func convert(data []string) Grid {
     coords := make(Grid)
-    for y,row := range data[2:] {
+    for y,row := range data {
         for x,cell := range row {
             if cell == '#' {
                 coords[Point{x,y}] = true
@@ -58,7 +58,7 @@ func (self *Mapper) find_extrema() {
 func makeMapper( data []string ) *Mapper {
 	mmm := Mapper{}
 	mmm.algo = data[0]
-	mmm.coords = convert(data)
+	mmm.coords = convert(data[2:])
 	mmm.find_extrema()
 	mmm.infinite = 0
 	return &mmm
@@ -88,17 +88,17 @@ func (self *Mapper) outside( pt Point ) bool {
 
 
 func (self *Mapper) printit() {
-	print("Grid:\n")
+	fmt.Println("Grid:")
 	for y := self.miny; y <= self.maxy; y++ {
 		row := make([]byte, self.maxx-self.minx+1)
 		for x := self.minx; x <= self.maxx; x++ {
 			if self.coords[Point{x,y}] {
-				row[x] = '#'
+				row[x-self.minx] = '#'
 			} else {
-				row[x] = '.'
+				row[x-self.minx] = '.'
 			}
 		}
-		fmt.Printf("%3d %s", y, string(row))
+		fmt.Printf("%3d %s\n", y, string(row))
 	}
 }
 
@@ -114,6 +114,8 @@ func (self *Mapper) generation() {
 	}
 	if self.algo[self.infinite*511] == '#' {
 		self.infinite = 1
+	} else {
+		self.infinite = 0
 	}
 	self.coords = newcoords
 	self.find_extrema()
@@ -122,7 +124,6 @@ func (self *Mapper) generation() {
 func (self *Mapper) length() int {
 	return len(self.coords)
 }
-
 
 
 func part1( coords *Mapper, n int ) int {
@@ -145,7 +146,6 @@ func main() {
 	var input string
 	TEST, DEBUG, input = tools.Setup(test, live)
 	coords := makeMapper(strings.Split(input, "\n"))
-
 	fmt.Println( "Part 1:", part1(coords,2) )
 	fmt.Println( "Part 2:", part1(coords,48) )
 }
