@@ -67,7 +67,7 @@ def find_matches( scan1, scan2 ):
 
 def process(scanners):
     # Make all rotations of all scanner readings.
-    # This is a 25x24 array.
+    # This is a Nx24x25/26 array.
 
     rotations = [
         list(zip(*list((list(allrotate(pt)) for pt in scanner)))) for scanner in scanners
@@ -130,7 +130,7 @@ def part2(info):
             maxx = max( maxx, sum(abs(i) for i in sub(pt0[1],pt1[1])))
     return maxx
 
-def visoalize(beacons, placed):
+def visualize(beacons, placed):
     import numpy as np
     import matplotlib.pyplot as plt
     from mpl_toolkits import mplot3d
@@ -147,7 +147,7 @@ def visoalize(beacons, placed):
 info = process(scanners)
 
 if 'vis' in sys.argv:
-    visoalize(*info)
+    visualize(*info)
     sys.exit(0)
 
 print( "Part 1:", part1(info))
