@@ -62,7 +62,10 @@ def find_matches( scan1, scan2 ):
     for pt1 in scan1:
         for pt2 in scan2:
             delta = sub(pt2,pt1)
-            if len(set1.intersection((sub(pt2x,delta) for pt2x in scan2))) >= 12:
+            inter = 0
+            for pt2x in scan2:
+                inter += sub(pt2x,delta) in set1
+            if inter >= 12:
                 return delta
 
 def process(scanners):
