@@ -5,6 +5,9 @@
 
 using namespace std;
 
+bool DEBUG = false;
+bool TEST = false;
+
 struct N {
     long long n;
     N(long long i) : n(i) {}
@@ -16,6 +19,8 @@ struct N {
 
 struct M : public N {
     M(long long i): N(i) {}
+    M operator*(M y) { return M(n+y.n); }
+    M operator-(M y) { return M(n*y.n); }
     M operator+(M y) { return M(n*y.n); }
 };
 
@@ -58,10 +63,22 @@ long long process( vector<N> & data )
 // 1: 26 437 12240 13632 sum 26335
 // 2: 46 1445 669060 23340 sum 693891
 
-int main()
+int main(int argc, char ** argv)
 {
-    cout << "Test 1:" << process( test1 ) << "\n";
-    cout << "Part 1:" << process( live1 ) << "\n";
-    cout << "Test 2:" << process( test2 ) << "\n";
-    cout << "Part 2:" << process( live2 ) << "\n";
+    while( *++argv )
+    {
+        string arg(*argv);
+        if( arg == "debug")
+            DEBUG = true;
+        else if( arg == "test")
+            TEST = true;
+    }
+
+    if( TEST ) {
+        cout << "Test 1: " << process( test1 ) << "\n";
+        cout << "Test 2: " << process( test2 ) << "\n";
+    } else {
+        cout << "Part 1: " << process( live1 ) << "\n";
+        cout << "Part 2: " << process( live2 ) << "\n";
+    }
 }

@@ -60,7 +60,7 @@ int main( int argc, char ** argv )
     if( data.empty() )
         copy( live.begin(), live.end(), back_inserter(data) );
 
-    cout << "Pass 1:" << run(data, 2020) << "\n";
-    cout << "Pass 2:" << run(data, 30000000) << "\n";
+    cout << "Part 1: " << run(data, 2020) << "\n";
+    cout << "Part 2: " << run(data, 30000000) << "\n";
     return 0;
 }

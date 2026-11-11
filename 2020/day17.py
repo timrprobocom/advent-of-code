@@ -71,7 +71,6 @@ def nextstate(state,part=1):
 state = translate( data )
 for i in range(6):
     state = nextstate( state, 1 )
-    print( len(state) )
     if GRID:
         printgrid( state )
 
@@ -80,6 +79,5 @@ print( "Part 1:", len(state) )
 state = translate( data )
 for i in range(6):
     state = nextstate( state, 2 )
-    print( len(state) )
 
 print( "Part 2:", len(state) )

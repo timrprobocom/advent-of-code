@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+import sys
+
 test = [
 1721,
 979,
@@ -9,7 +11,14 @@ test = [
 1456
 ]
 
+DEBUG = 'debug' in sys.argv
+TEST = 'test' in sys.argv
+
 live = [int(i) for i in open('day01.txt').readlines()]
+if TEST:
+    data = test
+else:
+    data = live
 
 def pass1(data):
     for i in range(len(data)):
@@ -24,7 +33,5 @@ def pass2(data):
                 if data[i]+data[j]+data[k] == 2020:
                     return data[i]*data[j]*data[k]
 
-print( pass1(test) )
-print( pass2(test) )
-print( "Pass 1:", pass1(live) )
-print( "Pass 2:", pass2(live) )
+print( "Pass 1:", pass1(data) )
+print( "Pass 2:", pass2(data) )

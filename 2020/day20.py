@@ -348,35 +348,35 @@ def search( biggrid ):
             # Check primary.
             if all( biggrid[row+dy][col+dx] == '#' for dy,dx in monster ):
                 count += 1
-                print( "FOUND 1", row, col )
+                if DEBUG: print( "FOUND 1", row, col )
             # Check flip.
             if all( biggrid[-row-dy-1][col+dx] == '#' for dy,dx in monster ):
                 count += 1
-                print( "FOUND 2", row, col )
+                if DEBUG: print( "FOUND 2", row, col )
             # Check vflikp.
             if all( biggrid[-row-dy-1][-col-dx-1] == '#' for dy,dx in monster ):
                 count += 1
-                print( "FOUND 3", row, col )
+                if DEBUG: print( "FOUND 3", row, col )
             # Check flip.
             if all( biggrid[row+dy][-col-dx-1] == '#' for dy,dx in monster ):
                 count += 1
-                print( "FOUND 4", row, col )
+                if DEBUG: print( "FOUND 4", row, col )
             # Check rotate primary.
             if all( biggrid[col+dx][row+dy] == '#' for dy,dx in monster ):
                 count += 1
-                print( "FOUND 5", row, col )
+                if DEBUG: print( "FOUND 5", row, col )
             # Check rotate flip.
             if all( biggrid[-col-dx-1][row+dy] == '#' for dy,dx in monster ):
                 count += 1
-                print( "FOUND 6", row, col )
+                if DEBUG: print( "FOUND 6", row, col )
             # Check rotate vflip
             if all( biggrid[-col-dx-1][-row-dy-1] == '#' for dy,dx in monster ):
                 count += 1
-                print( "FOUND 7", row, col )
+                if DEBUG: print( "FOUND 7", row, col )
             # Check rotate flip.
             if all( biggrid[col+dx][-row-dy-1] == '#' for dy,dx in monster ):
                 count += 1
-                print( "FOUND 8", row, col )
+                if DEBUG: print( "FOUND 8", row, col )
     return count
 
                
@@ -392,17 +392,17 @@ biggrid = stitchgrid( tiles, grid )
 if DEBUG:
     pprint( biggrid )
 
-import time
-t1 = time.time()
-print( search1(biggrid))
-print( search2(biggrid))
-for i in range(100):
-    search1(biggrid)
-t2 = time.time()
-for i in range(100):
-    search2(biggrid)
-t3 = time.time()
-print( t2-t1, t3-t2 )
+#import time
+#t1 = time.time()
+#print( search1(biggrid))
+#print( search2(biggrid))
+#for i in range(100):
+#    search1(biggrid)
+#t2 = time.time()
+#for i in range(100):
+#    search2(biggrid)
+#t3 = time.time()
+#print( t2-t1, t3-t2 )
 
 ogres = search(biggrid)
 

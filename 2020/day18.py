@@ -30,7 +30,7 @@ class M(int):
 print( "Part 1:", sum(eval(re.sub(r'(\d)',r'M(\1)', ln).replace('*','-'))                  for ln in data ))
 print( "Part 2:", sum(eval(re.sub(r'(\d)',r'M(\1)', ln).replace('*','-').replace('+','*')) for ln in data ))
 
-#sys.exit( 0 )
+sys.exit( 0 )
 
 def collapse( n, stack ):
     if not stack or stack[-1] == '(':

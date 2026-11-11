@@ -103,8 +103,9 @@ print( "Part 2:", functools.reduce(operator.mul,sets))
 # It says the ways to get to N is the sum of the ways to get to the past 3.
 # I suppose that's right.
 
-stairs = [0] * (data[-1]+1)
-stairs[0] = 1
-for n in data[1:]:
-    stairs[n] = stairs[n-3] + stairs[n-2] + stairs[n-1]
-print( stairs )
+if DEBUG:
+    stairs = [0] * (data[-1]+1)
+    stairs[0] = 1
+    for n in data[1:]:
+        stairs[n] = stairs[n-3] + stairs[n-2] + stairs[n-1]
+    print( stairs )

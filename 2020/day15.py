@@ -33,7 +33,7 @@ def run(data, count):
         found[t] = i+1
     nextx = data[-1]
     for tape in range(len(data),count):
-        if tape % 1000000 == 0:
+        if DEBUG and tape % 1000000 == 0:
             print( '  %d%%' % (tape * 100 / count), end='\r' )
         lastx = found[nextx] if found[nextx] >= 0 else tape
         found[nextx] = tape
@@ -41,5 +41,5 @@ def run(data, count):
 
     return nextx
 
-print( "Pass 1:", run(data,2020), '    ' )
-print( "Pass 2:", run(data,30000000), '    ' )
+print( "Part 1:", run(data,2020))
+print( "Part 2:", run(data,30000000))

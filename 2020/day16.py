@@ -79,7 +79,8 @@ def part1(rules, nearby):
 
 def part2( rules, mytix, nearby ):
     possible = dict( (k,set(range(len(rules)))) for k in rules.keys() )
-    print( possible )
+    if DEBUG:
+        print( possible )
 
     valid = makevalid(rules)
 
@@ -107,11 +108,13 @@ def part2( rules, mytix, nearby ):
         if not removed:
             break
 
-    print( "Final:", possible )
+    if DEBUG:
+        print( "Final:", possible )
 
     factor = 1
     for k, value in certain.items():
-        print( k, value )
+        if DEBUG:
+            print( k, value )
         if k.startswith('departure'):
             factor *= mytix[value]
     return factor

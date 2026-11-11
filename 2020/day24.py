@@ -105,7 +105,8 @@ def printgrid(blacks):
 
 blacks = part1()
 dprint(blacks)
-printgrid(blacks)
+if DEBUG:
+    printgrid(blacks)
 print( "Part 1:", len(blacks) )
 for day in range(100):
     blacks = cycle(blacks)

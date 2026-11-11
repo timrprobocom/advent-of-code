@@ -8,6 +8,9 @@
 
 using namespace std;
 
+bool DEBUG = false;
+bool TEST = false;
+
 array<string,3> test = {
     "1-3 a: abcde",
     "1-3 b: cdefg",
@@ -27,7 +30,8 @@ struct Problem {
         if( line.empty() )
             return str;
 
-        std::cout << "> " << line << "\n";
+        if( DEBUG )
+            std::cout << "> " << line << "\n";
         int i1 = line.find('-');
         int i2 = line.find(' ');
         p.d1 = std::stoi( line.substr(0,i1) );
@@ -38,13 +42,13 @@ struct Problem {
         return str;
     }
 
-    bool pass1()
+    bool part1()
     {
         int cnt = count( str.begin(), str.end(), ch );
         return (d1 <= cnt) && (cnt <= d2);
     }
 
-    bool pass2()
+    bool part2()
     {
         return (str[d1-1] == ch) != (str[d2-1] == ch);
     }
@@ -58,10 +62,10 @@ int main()
         istream_iterator<Problem>{}
     );
 
-    cout << "Pass 1: " 
-        <<  count_if( live.begin(), live.end(), []( Problem & s ) { return s.pass1(); } )
+    cout << "Part 1: " 
+        <<  count_if( live.begin(), live.end(), []( Problem & s ) { return s.part1(); } )
         << "\n";
-    cout << "Pass 2: " 
-        <<  count_if( live.begin(), live.end(), []( Problem & s ) { return s.pass2(); } ) 
+    cout << "Part 2: " 
+        <<  count_if( live.begin(), live.end(), []( Problem & s ) { return s.part2(); } ) 
         << "\n";
 }

@@ -10,6 +10,8 @@ using namespace std;
 
 typedef vector<string> Grid;
 
+bool DEBUG = false;
+
 std::array<Point,8> deltas { 
     Point(-1,-1),Point(-1,0),Point(-1,1),
     Point( 0,-1),            Point( 0,1),
@@ -127,17 +129,28 @@ void read( Grid & grid, istream & ifs )
 
 int main( int argc, char ** argv)
 {
+    const char * filename = "day11.txt";
+    while( *++argv )
+    {
+        string arg(*argv);
+        if( arg == "debug")
+            DEBUG = true;
+        else if( arg == "test")
+            filename = "day11.test.txt";
+    }
+
     Grid data;
-    read( data, cin );
+    ifstream fin(filename);
+    read( data, fin );
 
     // Pass 1.
 
     Grid grid = data;
     for(;;) {
-#ifdef DEBUG
-        cout << countOccupied( grid ) << "\n";
-        printGrid( grid );
-#endif
+        if( DEBUG ) {
+            cout << countOccupied( grid ) << "\n";
+            printGrid( grid );
+        }
         Grid grid2 = pass1step(grid);
         if( grid == grid2 )
             break;
@@ -150,10 +163,10 @@ int main( int argc, char ** argv)
 
     grid = data;
     for(;;) {
-#ifdef DEBUG
-        cout << countOccupied( grid ) << "\n";
-        printGrid( grid );
-#endif
+        if( DEBUG ) {
+            cout << countOccupied( grid ) << "\n";
+            printGrid( grid );
+        }
         Grid grid2 = pass2step(grid);
         if( grid == grid2 )
             break;

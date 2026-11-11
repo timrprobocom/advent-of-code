@@ -25,7 +25,7 @@ func main() {
                 seats = append( seats, seat )
 	}
 	sort.Ints( seats )
-	fmt.Println("Part 1: ",seats[len(seats)-1])
+	fmt.Println("Part 1:",seats[len(seats)-1])
 
         last := 0
         for _, seat := range seats {
@@ -34,5 +34,5 @@ func main() {
             }
             last = seat
         }
-        fmt.Println( "Part 2: ", last+1 )
+        fmt.Println( "Part 2:", last+1 )
 }

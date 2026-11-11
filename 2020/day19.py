@@ -87,7 +87,7 @@ def part2(data):
     rules = parse(rules)
     return sum('' in g(rules, string, "0") for string in strings)
 
-print( part1(data) )
-print( part2(data) )
+print( "Part 1:", part1(data) )
+print( "Part 2:", part2(data) )
 
 
