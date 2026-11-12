@@ -2,37 +2,76 @@ package main
 
 import (
 	"fmt"
-	"bufio"
-	"os"
-	"sort"
+	"slices"
+	"strconv"
+	"strings"
+
+	"aoc/tools"
+	_ "embed"
 )
 
-func main() {
-	file, _ := os.Open("day05.txt")
-	defer file.Close()
+var DEBUG bool = false
+var TEST bool = false
 
-	scanner := bufio.NewScanner(file)
-	var seats []int;
-	for scanner.Scan() {
-		seat := 0
-                ln := scanner.Text()
-		for _, c := range ln {
-			seat = seat * 2
-			if c == 'B' || c == 'R' {
-				seat += 1
-			}
-		}
-                seats = append( seats, seat )
+var test = `
+BFFFBBFRRR
+FFFBBBFRRR
+BBFFBBFRLL`[1:]
+
+// BFFFBBFRRR: row 70, column 7, seat ID 567.
+// FFFBBBFRRR: row 14, column 7, seat ID 119.
+// BBFFBBFRLL: row 102, column 4, seat ID 820.
+
+//go:embed day05.txt
+var live string
+
+
+func mapper(c rune) rune {
+	if c == 'B' || c == 'R' {
+		return '1'
+	} else if c == 'F' || c == 'L' {
+		return '0'
 	}
-	sort.Ints( seats )
-	fmt.Println("Part 1:",seats[len(seats)-1])
+	return 'X'
+}
+
+func xlate(n string) int {
+	t := strings.Map( mapper, n)
+	v,_ := strconv.ParseInt(t, 2, 64)
+	return int(v)
+}
+
+
+func part1(data []int) int {
+    return tools.Max(data)
+}
+
+
+func part2(data []int) int {
+	slices.Sort(data)
 
 	last := 0
-	for _, seat := range seats {
-		if last > 0 && seat != last+1 {
-			break
+	for _, i := range data {
+		if last > 0 && i != last+1 {
+			return i - 1
 		}
-		last = seat
+		last = i
 	}
-	fmt.Println( "Part 2:", last+1 )
+
+    return -1
+}
+
+
+func main() {
+	var input string
+	TEST, DEBUG, input = tools.Setup(test, live)
+	data := []int{}
+	for _,line := range strings.Split(input, "\n") {
+		if len(line) > 0 {
+			data = append(data, xlate(line))
+		}
+	}
+
+	fmt.Println("Part 1:", part1(data))
+	fmt.Println("Part 2:", part2(data))
 }
