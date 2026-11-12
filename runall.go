@@ -96,21 +96,22 @@ func main() {
 			continue
 		}
 
+		// Erase the language.
 		fmt.Println("          \n"+fn)
 
-		pad := ""
 		for i := 0; i < len(gather[0]); i++ {
-			pad = ""
+			pad := ""
 			if len(gather[0][i]) < 1 {
 				break
 			}
-			for j, ln := range gather {
+			for _, ln := range gather {
 				fmt.Print(pad)
 				if i >= len(ln) {
 					fmt.Print(strings.Repeat(" ", FIELD))
 				} else if len(ln[i]) > FIELD {
-					fmt.Println(ln[i])
-					pad = strings.Repeat(" ", (j+1)*FIELD)
+					fmt.Print(ln[i][:FIELD])
+//					fmt.Println(ln[i])
+//					pad = strings.Repeat(" ", (j+1)*FIELD)
 				} else {
 					fmt.Print(ljust(ln[i], FIELD))
 					pad = ""
@@ -120,6 +121,7 @@ func main() {
 				fmt.Println()
 			}
 		}
+
 		if len(gather) > 1 && len(gather[1][0]) > 0 && strings.Join(gather[0], "") != strings.Join(gather[1], "") {
 			fmt.Println("#### Python and C++ results do not match ####")
 		}

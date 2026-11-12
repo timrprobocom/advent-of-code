@@ -20,18 +20,18 @@ if TEST:
 else:
     data = live
 
-def pass1(data):
+def part1(data):
     for i in range(len(data)):
         for j in range(i+1,len(data)):
             if data[i]+data[j] == 2020:
                 return data[i]*data[j]
 
-def pass2(data):
+def part2(data):
     for i in range(len(data)):
         for j in range(i+1,len(data)):
             for k in range(j+1,len(data)):
                 if data[i]+data[j]+data[k] == 2020:
                     return data[i]*data[j]*data[k]
 
-print( "Pass 1:", pass1(data) )
-print( "Pass 2:", pass2(data) )
+print( "Part 1:", part1(data) )
+print( "Part 2:", part2(data) )

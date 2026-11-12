@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Fmt"
+	"fmt"
 	"bufio"
 	"os"
 	"sort"
@@ -27,12 +27,12 @@ func main() {
 	sort.Ints( seats )
 	fmt.Println("Part 1:",seats[len(seats)-1])
 
-        last := 0
-        for _, seat := range seats {
-            if last > 0 && seat != last+1 {
-                break
-            }
-            last = seat
-        }
-        fmt.Println( "Part 2:", last+1 )
+	last := 0
+	for _, seat := range seats {
+		if last > 0 && seat != last+1 {
+			break
+		}
+		last = seat
+	}
+	fmt.Println( "Part 2:", last+1 )
 }
