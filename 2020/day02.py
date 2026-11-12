@@ -14,12 +14,12 @@ TEST = 'test' in sys.argv
 pat = r"(\d+)-(\d+) (.): (.*)$"
 pat = re.compile(pat)
 
-def pass1( line ):
+def part1( line ):
     a, b, tgt, haystack = pat.match(line).groups()
     a, b = int(a), int(b)
     return a <= haystack.count(tgt)  <= b
 
-def pass2( line ):
+def part2( line ):
     a, b, tgt, haystack = pat.match(line).groups()
     a, b = int(a), int(b)
     return (haystack[a-1] == tgt) != (haystack[b-1] == tgt)
@@ -30,8 +30,8 @@ if TEST:
 else:
     data = live
 
-def evaluate( lines, passx ):
-    return sum( passx(line) for line in lines )
+def evaluate( lines, partx ):
+    return sum( partx(line) for line in lines )
 
-print( "Part 1:", evaluate( data, pass1 ) )
-print( "Part 2:", evaluate( data, pass2 ) )
+print( "Part 1:", evaluate( data, part1 ) )
+print( "Part 2:", evaluate( data, part2 ) )
