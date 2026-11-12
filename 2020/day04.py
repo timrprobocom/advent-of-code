@@ -45,9 +45,9 @@ else:
 #cid (Country ID) - ignored, missing or not.
 
 
-digits4 = re.compile('\d{4}')
-digits9 = re.compile('\d{9}')
-color =  re.compile('#[0-9a-f]{6}')
+digits4 = re.compile(r'\d{4}')
+digits9 = re.compile(r'\d{9}')
+color =  re.compile(r'#[0-9a-f]{6}')
 
 must = set(('byr','iyr','eyr','hgt','hcl','ecl','pid'))
 
@@ -77,7 +77,7 @@ def part2(data):
     return (count1,count2)
 
 p1,p2 = part2(data)
-print( "Part 1: ", p1 )
-print( "Part 2: ", p2 )
+print( "Part 1:", p1 )
+print( "Part 2:", p2 )
 
 
