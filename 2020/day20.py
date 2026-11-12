@@ -6,14 +6,6 @@ import functools
 import operator
 from pprint import pprint
 
-test = """\
-""".split('\n')
-
-# I've made this way too complicated.
-
-# 1: 26 437 12240 13632 sum 26335
-# 2: 46 1445 669060 23340 sum 693891
-
 DEBUG = 'debug' in sys.argv
 dprint = print if DEBUG else lambda *x: 0
 
@@ -341,41 +333,51 @@ def search2( biggrid ):
 
 
 def search( biggrid ):
+    # Once we find one, the rest will be in the same orientation.
     count = 0
+    found = 0
     bglen = len(biggrid)
     for row in range(0,bglen-3):
         for col in range(0,bglen-20):
             # Check primary.
-            if all( biggrid[row+dy][col+dx] == '#' for dy,dx in monster ):
+            if found in (0,1) and all( biggrid[row+dy][col+dx] == '#' for dy,dx in monster ):
                 count += 1
+                found = 1
                 if DEBUG: print( "FOUND 1", row, col )
             # Check flip.
-            if all( biggrid[-row-dy-1][col+dx] == '#' for dy,dx in monster ):
+            if found in (0,2) and all( biggrid[-row-dy-1][col+dx] == '#' for dy,dx in monster ):
                 count += 1
+                found = 2
                 if DEBUG: print( "FOUND 2", row, col )
             # Check vflikp.
-            if all( biggrid[-row-dy-1][-col-dx-1] == '#' for dy,dx in monster ):
+            if found in (0,3) and all( biggrid[-row-dy-1][-col-dx-1] == '#' for dy,dx in monster ):
                 count += 1
+                found = 3
                 if DEBUG: print( "FOUND 3", row, col )
             # Check flip.
-            if all( biggrid[row+dy][-col-dx-1] == '#' for dy,dx in monster ):
+            if found in (0,4) and all( biggrid[row+dy][-col-dx-1] == '#' for dy,dx in monster ):
                 count += 1
+                found = 4
                 if DEBUG: print( "FOUND 4", row, col )
             # Check rotate primary.
-            if all( biggrid[col+dx][row+dy] == '#' for dy,dx in monster ):
+            if found in (0,5) and all( biggrid[col+dx][row+dy] == '#' for dy,dx in monster ):
                 count += 1
+                found = 5
                 if DEBUG: print( "FOUND 5", row, col )
             # Check rotate flip.
-            if all( biggrid[-col-dx-1][row+dy] == '#' for dy,dx in monster ):
+            if found in (0,6) and all( biggrid[-col-dx-1][row+dy] == '#' for dy,dx in monster ):
                 count += 1
+                found = 6
                 if DEBUG: print( "FOUND 6", row, col )
             # Check rotate vflip
-            if all( biggrid[-col-dx-1][-row-dy-1] == '#' for dy,dx in monster ):
+            if found in (0,7) and all( biggrid[-col-dx-1][-row-dy-1] == '#' for dy,dx in monster ):
                 count += 1
+                found = 7
                 if DEBUG: print( "FOUND 7", row, col )
             # Check rotate flip.
-            if all( biggrid[col+dx][-row-dy-1] == '#' for dy,dx in monster ):
+            if found in (0,8) and all( biggrid[col+dx][-row-dy-1] == '#' for dy,dx in monster ):
                 count += 1
+                found = 8
                 if DEBUG: print( "FOUND 8", row, col )
     return count
 
@@ -392,17 +394,18 @@ biggrid = stitchgrid( tiles, grid )
 if DEBUG:
     pprint( biggrid )
 
-#import time
-#t1 = time.time()
-#print( search1(biggrid))
-#print( search2(biggrid))
-#for i in range(100):
-#    search1(biggrid)
-#t2 = time.time()
-#for i in range(100):
-#    search2(biggrid)
-#t3 = time.time()
-#print( t2-t1, t3-t2 )
+if 0:
+    import time
+    t1 = time.time()
+    print( search1(biggrid))
+    print( search2(biggrid))
+    for i in range(100):
+        search1(biggrid)
+    t2 = time.time()
+    for i in range(100):
+        search2(biggrid)
+    t3 = time.time()
+    print( t2-t1, t3-t2 )
 
 ogres = search(biggrid)
 
