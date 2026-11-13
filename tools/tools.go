@@ -1,7 +1,6 @@
 package tools
 
 import (
-//	"fmt"
 	"os"
 	"errors"
 	"strings"
@@ -45,6 +44,10 @@ func Setup[T any](test T, live T) (bool, bool, T) {
 		if arg == "test" {
 			TEST = true
 		}
+	}
+	
+	if os.Getenv("DEBUG") == "1" {
+		DEBUG = true
 	}
 
 	var input T
