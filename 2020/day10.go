@@ -67,7 +67,6 @@ var live string
 var diffs []int
 
 func part1(data []int) int {
-	fmt.Println(data)
 	diffs = []int{}
 	ones := 0
 	threes := 0
