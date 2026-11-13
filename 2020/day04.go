@@ -110,7 +110,7 @@ func part2(data []string) (int, int) {
 func main() {
 	var input string
 	TEST, DEBUG, input = tools.Setup(test, live)
-	data := strings.Split(input, "\n\n")
+	data := strings.Split(strings.TrimSpace(input), "\n\n")
 
     p1, p2 := part2(data)
 	fmt.Println("Part 1:", p1)

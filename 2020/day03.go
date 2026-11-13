@@ -61,10 +61,7 @@ func part2(data []string) int {
 func main() {
 	var input string
 	TEST, DEBUG, input = tools.Setup(test, live)
-	data := strings.Split(input, "\n")
-	if len(data[len(data)-1]) == 0 {
-		data = data[:len(data)-1]
-	}
+	data := strings.Split(strings.TrimSpace(input), "\n")
 
 	WIDTH = len(data[0])
 	HEIGHT = len(data)

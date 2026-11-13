@@ -66,10 +66,8 @@ func main() {
 	var input string
 	TEST, DEBUG, input = tools.Setup(test, live)
 	data := []int{}
-	for _,line := range strings.Split(input, "\n") {
-		if len(line) > 0 {
-			data = append(data, xlate(line))
-		}
+	for _,line := range strings.Split(strings.TrimSpace(input), "\n") {
+		data = append(data, xlate(line))
 	}
 
 	fmt.Println("Part 1:", part1(data))
