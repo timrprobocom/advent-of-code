@@ -48,19 +48,19 @@ def onepass(data):
     accum = 0
     seen = set()
     while 1:
+        if pc > len(data):
+            if DEBUG:
+                print("  off", pc )
+            return (False, accum)
+        if pc == len(data):
+            if DEBUG:
+                print("  OK", pc, accum )
+            return (True, accum)
         if pc in seen:
             if DEBUG:
                 print("  repeat", pc)
             return (False, accum)
         seen.add(pc)
-        if pc == len(data):
-            if DEBUG:
-                print("  OK", pc, accum )
-            return (True, accum)
-        if pc > len(data):
-            if DEBUG:
-                print("  off", pc )
-            return (False, accum)
         opc,delta = data[pc]
         if opc == "nop":
             pass
@@ -85,7 +85,8 @@ def cycle(base):
             data[i] = ('nop',data[i][1])
         (res,val) = onepass(data)
         if res:
-            print( "SUCCESS", val )
+            if DEBUG:
+                print( "SUCCESS", val )
             return val
 
 res, val = onepass(data)
