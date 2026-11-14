@@ -33,7 +33,7 @@ deltas = (
 def count(grid):
     return sum(ln.count('#') for ln in grid)
 
-def pass1step(grid):
+def part1step(grid):
     xlen = len(grid[0])
     ylen = len(grid)
     new = []
@@ -54,7 +54,7 @@ def pass1step(grid):
         new.append(''.join(line))
     return new
 
-def pass2step(grid):
+def part2step(grid):
     xlen = len(grid[0])
     ylen = len(grid)
     new = []
@@ -83,12 +83,12 @@ def pass2step(grid):
     return new
 
 
-for p,passfunc in ('Pass 1:', pass1step),('Pass 2:',pass2step):
+for p,partfunc in ('Pass 1:', part1step),('Pass 2:',part2step):
     grid = data
     while 1:
         if DEBUG:
             pprint( grid )
-        grid2 = passfunc(grid)
+        grid2 = partfunc(grid)
         if DEBUG:
             print( count(grid) )
         if grid == grid2:
