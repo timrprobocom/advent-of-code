@@ -83,7 +83,7 @@ def part2step(grid):
     return new
 
 
-for p,partfunc in ('Pass 1:', part1step),('Pass 2:',part2step):
+for p,partfunc in ('Part 1:', part1step),('Part 2:',part2step):
     grid = data
     while 1:
         if DEBUG:

@@ -60,7 +60,7 @@ def countneighbors2( cell, occupied ):
             y += dy
     return adjacent
 
-def passstep( seats, occupied, counter, criteria ):
+def partstep( seats, occupied, counter, criteria ):
     new = []
     for cell in seats:
         n = counter( cell, occupied )
@@ -71,13 +71,13 @@ def passstep( seats, occupied, counter, criteria ):
 
     return set(new)
 
-for p,counter,criteria in ('Pass 1:', countneighbors, 4),('Pass 2:', countneighbors2, 5):
+for p,counter,criteria in ('Part 1:', countneighbors, 4),('Part 2:', countneighbors2, 5):
     seats = translate(data)
     occupied = set()
     while 1:
         if DEBUG:
             pprint( occupied )
-        occ2 = passstep(seats, occupied, counter, criteria)
+        occ2 = partstep(seats, occupied, counter, criteria)
         if DEBUG:
             print( len(occ2) )
         if occupied == occ2:

@@ -34,7 +34,7 @@ void printGrid( Grid & grid )
         cout << line << "\n";
 }
 
-Grid pass1step( Grid & grid )
+Grid part1step( Grid & grid )
 {
     int xlen = grid[0].size();
     int ylen = grid.size();
@@ -73,7 +73,7 @@ Grid pass1step( Grid & grid )
     return newGrid;
 }
 
-Grid pass2step( Grid & grid )
+Grid part2step( Grid & grid )
 {
     int xlen = grid[0].size();
     int ylen = grid.size();
@@ -143,7 +143,7 @@ int main( int argc, char ** argv)
     ifstream fin(filename);
     read( data, fin );
 
-    // Pass 1.
+    // Part 1.
 
     Grid grid = data;
     for(;;) {
@@ -151,15 +151,15 @@ int main( int argc, char ** argv)
             cout << countOccupied( grid ) << "\n";
             printGrid( grid );
         }
-        Grid grid2 = pass1step(grid);
+        Grid grid2 = part1step(grid);
         if( grid == grid2 )
             break;
         grid = grid2;
     }
 
-    cout << "Pass 1: " << countOccupied( grid ) << "\n";
+    cout << "Part 1: " << countOccupied( grid ) << "\n";
 
-    // Pass 2.
+    // Part 2.
 
     grid = data;
     for(;;) {
@@ -167,13 +167,13 @@ int main( int argc, char ** argv)
             cout << countOccupied( grid ) << "\n";
             printGrid( grid );
         }
-        Grid grid2 = pass2step(grid);
+        Grid grid2 = part2step(grid);
         if( grid == grid2 )
             break;
         grid = grid2;
     }
 
-    cout << "Pass 2: " << countOccupied( grid ) << "\n";
+    cout << "Part 2: " << countOccupied( grid ) << "\n";
 }
 
 

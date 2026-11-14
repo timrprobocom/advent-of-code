@@ -375,6 +375,10 @@ func (pt Point) Back() Point {
 	return Point{-pt.X, -pt.Y}
 }
 
+func (pt Point) ScaleBy(factor int) Point {
+	return Point{pt.X*factor, pt.Y*factor}
+}
+
 func Mandist(pt1, pt2 Point) int {
 	return AbsInt(pt1.X-pt2.X) + AbsInt(pt1.Y-pt2.Y)
 }
