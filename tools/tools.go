@@ -4,6 +4,7 @@ import (
 	"os"
 	"errors"
 	"strings"
+	"strconv"
 )
 
 type Number interface {
@@ -208,6 +209,11 @@ func StrToInt64(s string) int64 {
 		}
 	}
 	return int64(sign) * accum
+}
+
+func StrToBin(s string) int {
+	val, _ := strconv.ParseInt(s, 2, 64)
+	return int(val)
 }
 
 // Convert a set of numbers to a slice.
