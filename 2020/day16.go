@@ -180,5 +180,5 @@ func main() {
 	rules, mytix, nearby := parse(strings.Split(input, "\n\n"))
 
 	fmt.Println("Part 1:", part1(rules, nearby))
-	fmt.Println("Part 1:", part2(rules, mytix, nearby))
+	fmt.Println("Part 2:", part2(rules, mytix, nearby))
 }

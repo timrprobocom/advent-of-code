@@ -57,5 +57,5 @@ func main() {
 	TEST, DEBUG, input = tools.Setup(live, live)
 
 	fmt.Println("Part 1:", part1(input, 2020))
-	fmt.Println("Part 1:", part1(input, 30000000))
+	fmt.Println("Part 2:", part1(input, 30000000))
 }
