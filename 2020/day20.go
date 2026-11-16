@@ -13,18 +13,13 @@ import (
 
 var DEBUG bool = false
 var TEST bool = false
+var dprint = tools.Absorb
 
 //go:embed test20.txt
 var test string
 
 //go:embed day20.txt
 var live string
-
-func absorb(a ...any) (n int, err error) {
-	return 0,nil
-}
-
-var dprint = absorb
 
 // Which edge is it?  
 // 0 = N

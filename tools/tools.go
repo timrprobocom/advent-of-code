@@ -7,6 +7,10 @@ import (
 	"strconv"
 )
 
+func Absorb(a ...any) (n int, err error) {
+	return 0,nil
+}
+
 type Number interface {
 	int | int8 | int16 | int32 | int64
 }
@@ -47,9 +51,7 @@ func Setup[T any](test T, live T) (bool, bool, T) {
 		}
 	}
 	
-	if os.Getenv("DEBUG") == "1" {
-		DEBUG = true
-	}
+	DEBUG = DEBUG || (os.Getenv("DEBUG") == "1");
 
 	var input T
 	if TEST {
