@@ -58,21 +58,10 @@ func reverse(s string) string {
 	return string(out)
 }
 
-/*
-func prod[T tools.Number]( nums []T ) T {
-	var p T = 1
-	for _,i := range nums {
-		p *= i
-	}
-	return p
-}
-*/
-
 
 func part1() int {
 	p := 1
 	for t, tlist := range matches {
-		fmt.Println(t,tlist)
 		if len(tlist) == 2 {
 			p *= t
 		}
@@ -185,6 +174,7 @@ func findgrid( ) [][]int {
 	}
 
 	if DEBUG {
+		fmt.Println("Grid:")
 		fmt.Println(grid)
 	}
     return grid
@@ -321,7 +311,7 @@ func rotate_grid( tiles map[int][]string, grid [][]int ) {
     for col := range gridsize-1 {
         target := grid[row][col]
 		if DEBUG {
-			fmt.Println( row, col, target, grid[row][col-1], grid[row][col-1] )
+			fmt.Println( row, col, target, grid[row][col+1], grid[row-1][col] )
 		}
 		found1 := -1
 		found2 := -1
@@ -368,7 +358,6 @@ func rotate_grid( tiles map[int][]string, grid [][]int ) {
 func stitchgrid( tiles map[int][]string, grid [][]int) []string {
 	biggrid := []string{}
     subrows := len(tiles[grid[0][0]])
-	fmt.Println("subrows",subrows)
 	for _,row := range grid {
 		for y := 1; y < subrows-1; y++ {
             line := ""
@@ -401,9 +390,8 @@ var monster = []Point{
 
 var msize = Point{3,20}
 
-// TODO
 // We COULD flip/rotate this map instead of 8 loops.
-
+//
 // VFLIP replaces Y,X with  maxY-1-Y,X
 // HFLIP replaces Y,X with  Y, maxX-1-X
 // ROT90CW replaces Y,X with X,Y
@@ -435,31 +423,30 @@ func makeRotatedMonsters() [][]Point {
 	// Rotate that.
 	mrow = []Point{}
 	for _,pt := range monsters[len(monsters)-1] {
-		mrow = append( mrow, Point{pt.Y, pt.X} )
+		mrow = append( mrow, Point{pt.X, pt.Y} )
 	}
 	monsters = append(monsters, mrow)
 
 	// H flip that.
 	mrow = []Point{}
 	for _,pt := range monsters[len(monsters)-1] {
-		mrow = append( mrow, Point{pt.Y, msize.X-pt.X-1} )
+		mrow = append( mrow, Point{pt.Y, msize.Y-pt.X-1} )
 	}
 	monsters = append(monsters, mrow)
 
 	// V flip that.
 	mrow = []Point{}
 	for _,pt := range monsters[len(monsters)-1] {
-		mrow = append( mrow, Point{msize.Y-pt.Y-1, pt.X} )
+		mrow = append( mrow, Point{msize.X-pt.Y-1, pt.X} )
 	}
 	monsters = append(monsters, mrow)
 
 	// H flip that.
 	mrow = []Point{}
 	for _,pt := range monsters[len(monsters)-1] { 
-		mrow = append( mrow, Point{pt.Y, msize.X-pt.X-1} )
+		mrow = append( mrow, Point{pt.Y, msize.Y-pt.X-1} )
 	}
 	monsters = append(monsters, mrow)
-	fmt.Println(monsters)
 
 	return monsters
 }
@@ -481,6 +468,7 @@ func search( biggrid []string ) int {
     bglen := len(biggrid)
 
     monsters := makeRotatedMonsters()
+
 	// The first 4 are 20x3.  The last 4 are 3x20.
 
 	for n,monster := range monsters {
@@ -573,7 +561,6 @@ func main() {
 
 	// Which tiles have edges in common?
 
-	fmt.Println(edges)
 	for _,tlist := range edges {
 		if len(tlist) > 1 {
 			matches[tlist[0]][tlist[1]] = true
@@ -585,7 +572,9 @@ func main() {
 	// Live is 12x12, count is 2806 - 15 * 12.
 
 	gridsize = int(math.Sqrt(float64(len(data))))
-	fmt.Println( gridsize, count )
+    if DEBUG {
+		fmt.Println( gridsize, count )
+	}
 
 	fmt.Println("Part 1:", part1() )
 	fmt.Println("Part 2:", part2(tiles, count))
