@@ -20,6 +20,11 @@ var test string
 //go:embed day20.txt
 var live string
 
+func absorb(a ...any) (n int, err error) {
+	return 0,nil
+}
+
+var dprint = absorb
 
 // Which edge is it?  
 // 0 = N
@@ -173,10 +178,8 @@ func findgrid( ) [][]int {
 		}
 	}
 
-	if DEBUG {
-		fmt.Println("Grid:")
-		fmt.Println(grid)
-	}
+	dprint("Grid:")
+	dprint(grid)
     return grid
 }
 
@@ -261,9 +264,7 @@ func rotate_grid( tiles map[int][]string, grid [][]int ) {
         for col := range gridsize-1 {
             target := grid[row][col]
             // Find the grid matches.
-			if DEBUG {
-				fmt.Println( row, col, target, grid[row][col+1], grid[row+1][col] )
-			}
+			dprint( row, col, target, grid[row][col+1], grid[row+1][col] )
 			found1 := -1
 			found2 := -1
             for m,ms := range rotations[target][:4] {
@@ -286,9 +287,7 @@ func rotate_grid( tiles map[int][]string, grid [][]int ) {
     col := gridsize-1
     for row := range gridsize-1 {
         target := grid[row][col]
-		if DEBUG {
-			fmt.Println( row, gridsize-1, target, grid[row][col-1], grid[row+1][col] )
-		}
+		dprint( row, gridsize-1, target, grid[row][col-1], grid[row+1][col] )
 		found1 := -1
 		found2 := -1
 		for m,ms := range rotations[target][:4] {
@@ -310,9 +309,7 @@ func rotate_grid( tiles map[int][]string, grid [][]int ) {
     row := gridsize-1
     for col := range gridsize-1 {
         target := grid[row][col]
-		if DEBUG {
-			fmt.Println( row, col, target, grid[row][col+1], grid[row-1][col] )
-		}
+		dprint( row, col, target, grid[row][col+1], grid[row-1][col] )
 		found1 := -1
 		found2 := -1
 		for m,ms := range rotations[target][:4] {
@@ -336,9 +333,7 @@ func rotate_grid( tiles map[int][]string, grid [][]int ) {
     target := grid[row][col]
 	found1 := -1
 	found2 := -1
-	if DEBUG {
-		fmt.Println( gridsize-1, gridsize-1, target, grid[row][col-1], grid[col-1][row] )
-	}
+	dprint( gridsize-1, gridsize-1, target, grid[row][col-1], grid[col-1][row] )
     for m,ms := range rotations[target][:4] {
 		if slices.Contains( rotations[grid[row][col-1]], ms ) {
             found1 = m ^ 1
@@ -487,9 +482,7 @@ func search( biggrid []string ) int {
 				if checkMonster( biggrid, row, col, monster ) {
 					count ++
 					found = n
-					if DEBUG {
-						fmt.Println( "FOUND", n  )
-					}
+					dprint( "FOUND", n  )
 				}
 			}
 		}
@@ -520,6 +513,10 @@ func main() {
 	var input string
 	TEST, DEBUG, input = tools.Setup(test, live)
 	data := strings.Split(strings.TrimSpace(input), "\n\n")
+
+    if DEBUG {
+		dprint = fmt.Println
+	}
 
 	edges = make(map[string][]int)
 	matches = make(map[int]map[int]bool)
@@ -572,9 +569,7 @@ func main() {
 	// Live is 12x12, count is 2806 - 15 * 12.
 
 	gridsize = int(math.Sqrt(float64(len(data))))
-    if DEBUG {
-		fmt.Println( gridsize, count )
-	}
+	dprint( gridsize, count )
 
 	fmt.Println("Part 1:", part1() )
 	fmt.Println("Part 2:", part2(tiles, count))
