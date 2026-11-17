@@ -46,6 +46,6 @@ int main()
         cnt2 += valid( t, 2 );
     }
 
-    std::cout << "Part 1 : " << cnt1 << "\n"
-              << "Part 2 : " << cnt2 << "\n";
+    std::cout << "Part 1: " << cnt1 << "\n"
+              << "Part 2: " << cnt2 << "\n";
 }
