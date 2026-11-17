@@ -43,6 +43,10 @@ func (self *Program) Close() {
 	self.die = true
 }
 
+func (self *Program) Connect(other *Program) {
+	other.input = self.output
+}
+
 func (self *Program) Clone() *Program {
 	return MakeProgram(self.pgm, []int{})
 }

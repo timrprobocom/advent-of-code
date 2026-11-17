@@ -513,3 +513,41 @@ func (s *Stack[T]) IsEmpty() bool {
 func (s *Stack[T]) Size() int {
 	return len(s.items)
 }
+
+// Generate permutations of a sequence.
+func Permutations(out chan []int, arr []int) {
+    var helper func([]int, int)
+
+    helper = func(arr []int, n int){
+        if n == 1{
+            tmp := make([]int, len(arr))
+            copy(tmp, arr)
+			out <- tmp
+        } else {
+            for i := 0; i < n; i++{
+                helper(arr, n - 1)
+                if n % 2 == 1{
+                    tmp := arr[i]
+                    arr[i] = arr[n - 1]
+                    arr[n - 1] = tmp
+                } else {
+                    tmp := arr[0]
+                    arr[0] = arr[n - 1]
+                    arr[n - 1] = tmp
+                }
+            }
+        }
+    }
+    helper(arr, len(arr))
+	close(out)
+}
+
+// Generate permutations of a sequence.
+func PermutationsArr(arr []int)[][]int{
+	out := make(chan []int)
+    res := [][]int{}
+	for _ = range out {
+		res = append(res, <-out)
+	}
+	return res
+}

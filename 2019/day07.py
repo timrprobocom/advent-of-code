@@ -31,7 +31,5 @@ if TESTS:
     for p in test:
         print( "Answer: ", runsequence(p) )
 
-# For part 1, enter 1.  For part 2, enter 5.
-
 else:
     print( "Part 1:", runsequence(real))
