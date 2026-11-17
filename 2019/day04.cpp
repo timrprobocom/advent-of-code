@@ -2,6 +2,9 @@
 #include <algorithm>
 #include <array>
 
+bool DEBUG = false;
+bool TEST = false;
+
 int tests[6] = { 111111, 223450, 123789, 112233, 123444, 111122 };
 
 //ranges = (254032,789860+1)
@@ -31,21 +34,34 @@ int valid( int pw, int part )
 }
 
 
-int main()
+
+int main( int argc, char ** argv )
 {
-    for( auto t : tests )
+    while( *++argv )
     {
-        std::cout << t << " P1: " << valid(t,1) << " P2: " << valid(t,2) << "\n";
-    }
-    
-    int cnt1 = 0;
-    int cnt2 = 0;
-    for( int t = 254032; t <= 789860; t++ )
-    {
-        cnt1 += valid( t, 1 );
-        cnt2 += valid( t, 2 );
+        std::string arg(*argv);
+        if( arg == "debug" )
+            DEBUG = true;
+        else if( arg == "test" )
+            TEST = true;
     }
 
-    std::cout << "Part 1: " << cnt1 << "\n"
-              << "Part 2: " << cnt2 << "\n";
+    if( TEST )
+    {
+        for( auto t : tests )
+            std::cout << t << " P1: " << valid(t,1) << " P2: " << valid(t,2) << "\n";
+    }
+    else
+    {
+        int cnt1 = 0;
+        int cnt2 = 0;
+        for( int t = 254032; t <= 789860; t++ )
+        {
+            cnt1 += valid( t, 1 );
+            cnt2 += valid( t, 2 );
+        }
+
+        std::cout << "Part 1: " << cnt1 << "\n"
+                  << "Part 2: " << cnt2 << "\n";
+    }
 }
