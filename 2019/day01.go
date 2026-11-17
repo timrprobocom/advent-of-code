@@ -2,51 +2,51 @@ package main
 
 import (
 	"Fmt"
-	"bufio"
-	"os"
-	"strconv"
+
+	"aoc/tools"
+	_ "embed"
 )
 
-func fuel1(mass int) int {
+var DEBUG bool = false
+var TEST bool = false
+
+var test = `
+0
+0
+0
+100756`[1:]
+
+//go:embed day01.txt
+var live string
+
+func fuel1(mass int, sum int) int {
 	return mass/3 - 2
 }
 
 func fuel2(mass int, sum int) int {
-	f := fuel1(mass)
+	f := fuel1(mass, 0)
 	if f <= 0 {
 		return sum
 	}
 	return fuel2(f, sum+f)
 }
 
-func fuel(which int, mass int) int {
-	if which == 1 {
-		return fuel1(mass)
-	} else {
-		return fuel2(mass, 0)
+func part1( data []int, fuel func(int, int) int ) int {
+	sum := 0
+	for _,val := range data {
+		if val > 0 {
+			sum += fuel(val, 0)
+		}
 	}
+	return sum
 }
 
 func main() {
-	which, err := strconv.Atoi(os.Args[1])
-	if err != nil {
-		fmt.Println("Pass part number, 1 or 2")
-		return
-	}
+	var input string
+	TEST, DEBUG, input = tools.Setup(test, live)
 
-	tests := [...]int{12, 14, 1969, 100756}
-	for _, test := range tests {
-		fmt.Println(fuel(which, test))
-	}
+    data := tools.GetRowNumbers[int](input)
 
-	file, _ := os.Open("day01.txt")
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	sum := 0
-	for scanner.Scan() {
-		in, _ := strconv.Atoi(scanner.Text())
-		sum += fuel(which, in)
-	}
-	fmt.Println(sum)
+	fmt.Println("Part 1:", part1(data, fuel1))
+	fmt.Println("Part 2:", part1(data, fuel2))
 }

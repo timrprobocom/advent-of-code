@@ -153,6 +153,39 @@ func GetPosNumbers[T Number](input string) [][]T {
 	return result
 }
 
+// Produce a list of ints from the input.  No grouping.
+
+func GetRowNumbers[T Number](input string) []T {
+	row := []T{}
+	var accum T
+	var sign T = 1
+	last := ' '
+	for _, c := range input+" " {
+		switch c {
+		case '+':
+			sign = 1
+		case '-':
+			sign = -1
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			accum = accum*10 + T(c) - '0'
+		default:
+			if last != ' ' {
+				row = append(row, sign*accum)
+				accum = 0
+				sign = 1
+			}
+			c = ' '
+		}
+		last = c
+	}
+	/*
+	if last != ' ' {
+		row = append(row, sign*accum)
+	}
+	*/
+	return row
+}
+
 // How does the language not already have this
 
 func Isdigit(s byte) bool {
