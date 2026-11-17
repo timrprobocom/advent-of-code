@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Fmt"
+	"fmt"
 
 	"aoc/tools"
 	_ "embed"
