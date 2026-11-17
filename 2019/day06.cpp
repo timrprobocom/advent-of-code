@@ -2,10 +2,14 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <fstream>
 #include <iostream>
 #include <algorithm>
 
 using namespace std;
+
+bool DEBUG = false;
+bool TEST = false;
 
 const char * test[] = {
 "COM)B",
@@ -61,7 +65,8 @@ int part1( nodetree_t & tree, string st, int depth )
     for(auto & i : e.child )
     {
         part1(tree, i, depth+1);
-//        cout << st << ": After " << i << " now " << depth << "\n";
+        if( DEBUG )
+            cout << st << ": After " << i << " now " << depth << "\n";
         xsum += depth + 1;
     }
     return xsum;
@@ -82,12 +87,16 @@ void getpath( string el, path_t & path )
 
 int main( int argc, char ** argv )
 {
-    // day06 test
-    // day06 < day06.txt
-    //
-    bool testdata = (argc > 1) && (string(argv[1]) == "test");
+    while( *++argv )
+    {
+        string arg(*argv);
+        if( arg == "debug" )
+            DEBUG = true;
+        else if( arg == "test" )
+            TEST = true;
+    }
 
-    if( testdata )
+    if( TEST )
     {
         // Test data.
 
@@ -98,8 +107,9 @@ int main( int argc, char ** argv )
     {
         // Real data.
 
+        ifstream fin("day06.txt");
         string ln;
-        while( getline( cin, ln ) )
+        while( getline( fin, ln ) )
             add_to_tree( tree, ln );
     }
 
@@ -107,7 +117,7 @@ int main( int argc, char ** argv )
 
     // Part 2.
 
-    if( testdata )
+    if( TEST )
     {
         add_to_tree( tree, "K)YOU" );
         add_to_tree( tree, "I)SAN" );
@@ -121,9 +131,11 @@ int main( int argc, char ** argv )
         if( find( santa.begin(), santa.end(), s ) != santa.end() )
             equal.push_back( s );
 
-    cout << "YOU: " << you.size() << "\n";
-    cout << "SANTA: " << santa.size() << "\n";
-    cout << "COMMON: " << equal.size() << "\n";
+    if( DEBUG ) {
+        cout << "YOU: " << you.size() << "\n";
+        cout << "SANTA: " << santa.size() << "\n";
+        cout << "COMMON: " << equal.size() << "\n";
+    }
 
 // How many steps on the two branches that are not in common:
 
