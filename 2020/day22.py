@@ -33,6 +33,10 @@ else:
 def parse(decks):
     return [[int(k) for k in deck.splitlines() if k[0] != 'P'] for deck in decks]
 
+def score(deck1,deck2):
+    d = deck1 + deck2
+    return sum( (len(d)-i) * v for i,v in enumerate(d) )
+
 def part1(data):
     deck1,deck2 = parse(data)
     while deck1 and deck2:
@@ -79,14 +83,9 @@ def roundx(deck1,deck2,depth=0):
 
 def part2(data):
     decks = parse(data)
-    while all(decks):
-        roundx( *decks )
+    roundx( *decks )
     return score( *decks )
 
-
-def score(deck1,deck2):
-    d = deck1 + deck2
-    return sum( (len(d)-i) * v for i,v in enumerate(d) )
 
 print( "Part 1:", part1(data) )
 print( "Part 2:", part2(data) )
