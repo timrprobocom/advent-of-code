@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Fmt"
+	"fmt"
 	"strings"
 
 	"aoc/tools"
