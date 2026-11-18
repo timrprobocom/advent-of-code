@@ -1,3 +1,6 @@
+import sys
+
+DEBUG = 'debug' in sys.argv
 
 def part1():
     min0 = 99999
@@ -11,9 +14,10 @@ def part1():
             best = i1*i2
             min0 = i0
 
-        print( i0, i1, i2, i1*i2, ccc )
+        if DEBUG:
+            print( i0, i1, i2, i1*i2, ccc )
 
-    print( "Part 1:", best )
+    return best
 
 def part2():
     s = ['2']*(25*6)
@@ -21,10 +25,10 @@ def part2():
         for i,c in enumerate(ln.strip()):
             if s[i] == '2':
                 s[i] = c
-    print( "Part 2:" )
     for i in range(0,150,25):
         print( ''.join(s[i:i+25]).replace('0',' ') )
 
-part1()
+print("Part 1:", part1())
+print("Part 2:")
 part2()
 
