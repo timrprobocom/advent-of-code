@@ -74,10 +74,18 @@ def part1():
 def neighbors(blacks,cell):
     return sum( 1 for m in moves.values() if cell+m in blacks )
 
+def extrema(grid):
+    minx = min(int(k.real) for k in blacks)
+    maxx = max(int(k.real) for k in blacks)
+    miny = min(int(k.imag) for k in blacks)
+    maxy = max(int(k.imag) for k in blacks)
+    return minx, maxx, miny, maxy
+
 def cycle(blacks):
+    minx,maxx,miny,maxy = extrema(blacks)
     nxt = set()
-    for x in range(-100,100):
-        for y in range(-100,100):
+    for x in range(minx-1,maxx+2):
+        for y in range(miny-1,maxy+2):
             cell = complex(x,y)
             blks = neighbors( blacks, cell )
             if cell in blacks and blks in (1,2):
@@ -87,10 +95,7 @@ def cycle(blacks):
     return nxt
 
 def printgrid(blacks):
-    minx = min(int(k.real) for k in blacks)
-    maxx = max(int(k.real) for k in blacks)
-    miny = min(int(k.imag) for k in blacks)
-    maxy = max(int(k.imag) for k in blacks)
+    minx,maxx,miny,maxy = extrema(blacks)
     print( '     ' + ' '.join((' -'[d<0] for d in range(minx,maxx))))
     print( '    ' + ''.join(('%2d'%abs(d) for d in range(minx,maxx))))
     for y in range(miny,maxy):
