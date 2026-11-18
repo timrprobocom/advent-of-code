@@ -30,7 +30,9 @@ func part1( program []int ) int {
         lastval := 0
         for _,ip := range inputset {
             lastval = tools.MakeProgram(program, []int{ip, lastval}).Run().Dump()[0]
-            fmt.Println( lastval )
+			if DEBUG {
+				fmt.Println( lastval )
+			}
 		}
         maxval = max(maxval,lastval)
 	}

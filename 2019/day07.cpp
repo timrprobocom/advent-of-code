@@ -2,6 +2,7 @@
 #include <algorithm>
 bool TRACE = false;
 bool TESTS = false;
+bool DEBUG = false;
 #include "intcode.h"
 
 #define __countof(x)    (sizeof(x)/sizeof(x[0])
@@ -20,9 +21,11 @@ int runsequence( std::vector<int> & code )
     std::vector<int> inputset { 0,1,2,3,4 };
     do
     {
-        for( auto ip : inputset )
-            std::cout << ip;
-        std::cout << "\n";
+		if( DEBUG ) {
+			for( auto ip : inputset )
+				std::cout << ip;
+			std::cout << "\n";
+		}
         int lastval = 0;
         for( auto ip : inputset )
         {
@@ -50,15 +53,17 @@ int main( int argc, char ** argv )
             TRACE = true;
         else if( s == "test" )
             TESTS = true;
+        else if( s == "debug" )
+            DEBUG = true;
     }
     if( TESTS )
     {
         int v = runsequence( t1 );
-        std::cout << "Answer: " << v << "\n";
+        std::cout << "Part 1: " << v << "\n";
         v = runsequence( t2 );
-        std::cout << "Answer: " << v << "\n";
+        std::cout << "Part 1: " << v << "\n";
         v = runsequence( t3 );
-        std::cout << "Answer: " << v << "\n";
+        std::cout << "Part 1: " << v << "\n";
     }
     else
     {
