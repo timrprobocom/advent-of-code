@@ -14,6 +14,7 @@ type Program struct {
 	id	int
 	pgm	[]int
 	pc  int
+	finish chan int
 	input  chan int
 	output chan int
 	rbase int
@@ -29,6 +30,7 @@ func MakeProgram( program []int, inputs []int) *Program {
 	pgm.id = count
 	count++
 	pgm.pgm = slices.Clone( program )
+	pgm.finish = make(chan int, 10)
 	pgm.input = make(chan int, 50)
 	pgm.output = make(chan int, 50)
 	for _,k := range inputs {
@@ -38,13 +40,12 @@ func MakeProgram( program []int, inputs []int) *Program {
 }
 
 func (self *Program) Close() {
-	close(self.input)
 	close(self.output)
 	self.die = true
 }
 
-func (self *Program) Connect(other *Program) {
-	other.input = self.output
+func Connect( producer *Program, consumer *Program ) {
+	consumer.input = producer.output
 }
 
 func (self *Program) Clone() *Program {
@@ -55,16 +56,16 @@ func (self *Program) Push( val int) {
 	self.input <- val
 }
 
+func (self *Program) Pop() int {
+	return <- self.output
+}
+
 func (self *Program) Read_input() int {
 	return <- self.input
 }
 
 func (self *Program) Send_output( p int ) {
 	self.output <- p
-}
-
-func (self *Program) Pop() int {
-	return <- self.output
 }
 
 func (self *Program) Dump() []int {
@@ -188,7 +189,11 @@ func (self *Program) Run() *Program {
 			break
 		}
 	}
-	self.output <- 0
-	self.Close()   // is this right?
+	self.finish <- 0
+	self.Close()
 	return self
+}
+
+func (self *Program) Wait() {
+	<-self.finish
 }

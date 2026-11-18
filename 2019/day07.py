@@ -52,7 +52,7 @@ def part2( pgm0 ):
 # Set the initial input for each amp.
 
         for amp,val in zip(amps,ip):
-            amp.input.put( val )
+            amp.push( val )
 
 # Set the first signal into amp 0.
 

@@ -39,12 +39,60 @@ func part1( program []int ) int {
     return maxval
 }
 
+func part2( program []int ) int {
+    maxval := 0
+	perms := make(chan []int)
+    go tools.Permutations(perms, []int{5,6,7,8,9})
+	empty := []int{}
+    for ip := range perms {
+        amps := []*tools.Program{
+            tools.MakeProgram(program,empty),
+            tools.MakeProgram(program,empty),
+            tools.MakeProgram(program,empty),
+            tools.MakeProgram(program,empty),
+            tools.MakeProgram(program,empty),
+        }
+
+		// The output from 0 sends to the input of 1.
+
+		tools.Connect( amps[0], amps[1] )
+		tools.Connect( amps[1], amps[2] )
+		tools.Connect( amps[2], amps[3] )
+		tools.Connect( amps[3], amps[4] )
+		tools.Connect( amps[4], amps[0] )
+
+		// Set the initial phase input for each amp.
+
+        for i := range 5 {
+			amps[i].Push( ip[i] )
+		}
+
+		// Set the first signal into amp 0.
+
+        amps[0].Push( 0 )
+
+		// Go.
+
+        for _,amp := range amps {
+			go amp.Run()
+		}
+
+		// Wait for the chain to exit.
+
+        amps[4].Wait()
+
+		// The answer is waiting in amp 4's output queue.
+
+        maxval = max( maxval, amps[4].Final )
+	}
+
+    return maxval
+}
+
 func main() {
 	var input []int
 	TEST, DEBUG, input = tools.Setup(test, live)
 
 	fmt.Println("Part 1:", part1(input))
-//	fmt.Println("Part 2:", part2(input))
+	fmt.Println("Part 2:", part2(input))
 }
-
-
