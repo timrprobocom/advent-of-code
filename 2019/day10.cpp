@@ -12,6 +12,9 @@
 #define M_PI 3.14159265358979
 #endif
 
+bool DEBUG = false;
+bool TEST = false;
+
 // 3,4 with 8
 
 const char * t1 = "\
@@ -223,7 +226,8 @@ bool visible( const spacemap_t & graph, Point p0, Point p1 )
 
 std::set<Point> check( const spacemap_t & graph, Point(target) )
 {
-//    std::cout << "Checking " << target.x << " " <<  target.y << "\n";
+    if( DEBUG )
+        std::cout << "Checking " << target.x << " " <<  target.y << "\n";
     int dim = graph.size();
     std::set<Point> found;
     for( int y1=0; y1 < dim; y1++ )
@@ -237,7 +241,6 @@ std::set<Point> check( const spacemap_t & graph, Point(target) )
                 continue;
             if( visible( graph, target, pt ) )
             {
-//                std::cout << "   " << pt.x << "," << pt.y << " visible\n";
                 found.insert( pt );
             }
         }
@@ -257,7 +260,6 @@ std::pair<int,Point> scan(const spacemap_t & graph)
         for( int x = 0; x < ln.size(); x++ )
         {
             char cell = ln[x];
-//            print( x, y, ln, cell )
             if( cell == '.' )
                 continue;
             int count = check( graph, Point(x, y) ).size();
@@ -268,7 +270,8 @@ std::pair<int,Point> scan(const spacemap_t & graph)
             }
         }
     }
-    std::cout << maxelem.x << "," << maxelem.y << " sees " << maxcount << "\n";
+    if( DEBUG )
+        std::cout << maxelem.x << "," << maxelem.y << " sees " << maxcount << "\n";
     return std::make_pair( maxcount, maxelem );
 }
 
@@ -307,45 +310,56 @@ int laser(spacemap_t graph, Point target)
         } 
     );
 
-    std::cout << "Number 200 is " 
-        << data[remains-1].x << ","
-        << data[remains-1].y << "\n";
+    if( DEBUG )
+        std::cout << "Number 200 is " 
+            << data[remains-1].x << ","
+            << data[remains-1].y << "\n";
 
     return data[remains-1].x * 100 + data[remains-1].y;
 }
 
 
-void part1()
+int part1( spacemap_t & graph )
 {
-    scan(read(t1));
-    scan(read(t2));
-    scan(read(t3));
-    scan(read(t4));
-    scan(read(t5));
-    std::cout 
-        << "\nPart 1: " 
-        << scan(read(std::ifstream("day10.txt"))).first << "\n";
+    if( TEST ) {
+        std::cout << "Test 1: " << scan(read(t1)).first << "\n";
+        std::cout << "Test 1: " << scan(read(t2)).first << "\n";
+        std::cout << "Test 1: " << scan(read(t3)).first << "\n";
+        std::cout << "Test 1: " << scan(read(t4)).first << "\n";
+        std::cout << "Test 1: " << scan(read(t5)).first << "\n";
+        return 0;
+    }
+    return scan(graph).first;
 }
 
 // Answer was 26, 29.
         
-void part2()
+int part2( spacemap_t & graph )
 {
     Point best = scan(read(t5)).second;
-    std::cout << laser( read(t5), best ) << "\n";
+    if( DEBUG )
+        std::cout << laser( read(t5), best ) << "\n";
 
     // Find the point with the most visible asteroids.
-    best = scan(read(std::ifstream("day10.txt"))).second;
+    best = scan(graph).second;
 
     // Find the 200th blasted asteroid.
-    std::cout 
-        << "\nPart 2: " 
-        << laser(read(std::ifstream("day10.txt")), best)  << "\n";
+    return laser(graph, best);
 }
 
-int main()
+
+int main( int argc, char ** argv )
 {
-    part1();
-    std::cout << std::endl;
-    part2();
+    while( *++argv )
+    {
+        std::string arg(*argv);
+        if( arg == "debug" )
+            DEBUG = true;
+        else if( arg == "test" )
+            TEST = true;
+    }
+    spacemap_t data = read(std::ifstream("day10.txt"));
+    std::cout << "Part 1: " << part1(data) << "\n";
+    if(!TEST)
+    std::cout << "Part 2: " << part2(data) << "\n";
 }
