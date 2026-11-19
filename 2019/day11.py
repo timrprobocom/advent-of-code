@@ -83,5 +83,6 @@ def part2():
     return '\n'.join( ''.join(row) for row in array )
 
 print( "Part 1:", part1() )
-print( "Part 2:\n", part2() )
+print( "Part 2:")
+print( part2() )
 
