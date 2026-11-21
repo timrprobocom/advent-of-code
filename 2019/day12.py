@@ -1,4 +1,3 @@
-
 import os
 import re
 import sys
@@ -6,7 +5,8 @@ import copy
 import time
 import itertools
 
-
+DEBUG = 'debug' in sys.argv
+TEST = 'test' in sys.argv
 
 # moon position (x,y,z)
 # First apply gravity to update velocity
@@ -46,11 +46,7 @@ test2 = """\
 <x=2, y=-7, z=3>
 <x=9, y=-8, z=-3>"""
 
-real = """\
-<x=-8, y=-18, z=6>
-<x=-11, y=-14, z=4>
-<x=8, y=-3, z=-10>
-<x=-2, y=-16, z=1>"""
+live = open("day12.txt").read()
 
 match=re.compile("<x=([0-9-]*), y=([0-9-]*), z=([0-9-]*)>")
 
@@ -83,17 +79,16 @@ def step(system):
     for m1 in system:
         m1.apply()
 
-def run(system, n):
-    for m1 in system:
-        print( m1 )
+def part1(system, n):
+    if DEBUG:
+        for m1 in system:
+            print( m1 )
     for i in range(n):
         step( system )
     return energy( system )
 
-def part1():
-#    run( makemoons(test), 10 )
-#    run( makemoons(test2), 100 )
-    print( "Part 1: ", run( makemoons(real), 1000 ))
+def time1():
+    print( "Part 1: ", run( makemoons(live), 1000 ))
 
 # Part 2.
 
@@ -123,19 +118,21 @@ def findrepeat( system ):
     while not all(found):
         for axis in range(3):
             if not found[axis] and getstate(system,axis) == zeros:
-                print("Found",axis,"at",nstep)
+                if DEBUG:
+                    print("Found",axis,"at",nstep)
                 found[axis] = nstep*2
         step(system)
         nstep += 1
     return found
 
-def run2(system):
-    cycles = findrepeat( makemoons(system) )
-    print( cycles, lcm3(*cycles) )
+def part2(data):
+    cycles = findrepeat( data )
+    if DEBUG:
+        print( cycles, lcm3(*cycles) )
     return lcm3(*cycles)
 
-def part2():
-    print( "Part 2:", run2( real ) )
+def time2():
+    print( "Part 2:", part2( live ) )
 
 def dotiming(fn):
     p1 = time.time()
@@ -143,6 +140,8 @@ def dotiming(fn):
     p2 = time.time()
     print( "Elapsed:", p2-p1)
 
-dotiming( part1 )
-dotiming( part2 )
+#dotiming( time1 )
+#dotiming( time2 )
 
+print( "Part 1:", part1( makemoons(live), 1000 ))
+print( "Part 2:", part2( makemoons(live) ) )
