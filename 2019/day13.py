@@ -42,7 +42,7 @@ def part1():
     queue = pgm.dump()
     print( len(queue) )
     twos = [1 for k in take(queue,3) if k[2] == 2]
-    print( "Part 1:", len(twos) ) # 228
+    return len(twos) ) # 228
 
 
 def display(grid):
@@ -140,8 +140,8 @@ def part2():
 
     display(grid)
 
-    print( "Part 2:", pgm.score )  # 10776
+    return pgm.score   # 10776
 
 tools.cls()
-part1()
-part2()
+print( "Part 1:", part1() )
+print( "Part 2:", part2() )
