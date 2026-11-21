@@ -39,6 +39,10 @@ func MakeProgram( program []int, inputs []int) *Program {
 	return &pgm
 }
 
+func MakeProgramNo( program []int ) *Program {
+	return MakeProgram(program, []int{})
+}
+
 func (self *Program) Close() {
 	close(self.output)
 	self.die = true
@@ -50,6 +54,10 @@ func Connect( producer *Program, consumer *Program ) {
 
 func (self *Program) Clone() *Program {
 	return MakeProgram(self.pgm, []int{})
+}
+
+func (self *Program) IsAlive() bool {
+	return ! self.die
 }
 
 func (self *Program) Push( val int) {
