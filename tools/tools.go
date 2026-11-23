@@ -2,6 +2,7 @@ package tools
 
 import (
 	"os"
+	"fmt"
 	"errors"
 	"strings"
 	"strconv"
@@ -550,4 +551,12 @@ func PermutationsArr(arr []int)[][]int{
 		res = append(res, <-out)
 	}
 	return res
+}
+
+func Gotoxy(x, y int) {
+	fmt.Printf( "\033[%d;%dH", x, y )
+}
+
+func Cls() {
+    print( "\033[2J\033[0;0H" )
 }

@@ -4,33 +4,11 @@ import itertools
 import tools
 from intcode import Program
 
+DEBUG = 'debug' in sys.argv
 TRACE = 'trace' in sys.argv
 SLOW = 'slow' in sys.argv
+IMAGE = 'image' in sys.argv
 
-
-def run( base, blacks, whites ):
-    pgm = Program(real)
-    loc = base
-    facing = 0
-    pgm.start()
-
-    while pgm.is_alive():
-        pgm.push( 1 if loc in whites else 0 )
-        color = pgm.pop()
-        newdir = pgm.pop()
-        if TRACE:
-            print( color, newdir )
-        if color:
-            whites.add( loc )
-            blacks.discard( loc )
-        else:
-            blacks.add( loc )
-            whites.discard( loc )
-        facing = (facing+[1,3][newdir]) % 4
-        loc += directions[facing]
-        if TRACE:
-            print( loc )
-    pgm.join()
 
 def take(data,n):
     return zip(*[iter(data)]*n)
@@ -40,16 +18,18 @@ def part1():
     pgm = Program(real)
     pgm.run()
     queue = pgm.dump()
-    print( len(queue) )
+    if DEBUG:
+        print( len(queue) )
     twos = [1 for k in take(queue,3) if k[2] == 2]
-    return len(twos) ) # 228
+    return len(twos)  # 228
 
 
 def display(grid):
-    tools.gotoxy( 0, 5 )
-    print( '\n'.join(''.join(row) for row in grid) )
-    if SLOW:
-        time.sleep( 0.05 )
+    if IMAGE:
+        tools.gotoxy( 0, 5 )
+        print( '\n'.join(''.join(row) for row in grid) )
+        if SLOW:
+            time.sleep( 0.05 )
 
 class Prog13( Program ):
     def __init__(self, program):
@@ -61,7 +41,8 @@ class Prog13( Program ):
     def updatecell( self, x, y, t ):
         if x == -1:
             self.score = t
-            print( "Score: ", t, "   " )
+            if DEBUG or IMAGE:
+                print( "Score: ", t, "   " )
         else:
             if t > 4:
                 print(x,y,t)
@@ -96,7 +77,7 @@ class Prog13( Program ):
 #            print( "Joy: 1" )
             self.xpaddle += 1
             return 1
-        print( "Joy: 0" )
+#        print( "Joy: 0" )
         return 0
 
 def part2():
@@ -109,7 +90,6 @@ def part2():
     queue = list(take(pgm.dump(),3))
     w =  max(k[0] for k in queue)+1
     h =  max(k[1] for k in queue)+1
-    print( w, h )
 
     # Create the printable grid.
 
@@ -142,6 +122,7 @@ def part2():
 
     return pgm.score   # 10776
 
-tools.cls()
+if IMAGE:
+    tools.cls()
 print( "Part 1:", part1() )
 print( "Part 2:", part2() )
