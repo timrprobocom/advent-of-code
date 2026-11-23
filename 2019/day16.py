@@ -1,6 +1,8 @@
-import itertools
 import sys
 import time
+
+TEST = 'test' in sys.argv
+TIMING = "timing" in sys.argv
 
 tests = (
 "80871224585914546619083218645595", # becomes 24176176.
@@ -14,10 +16,8 @@ test2 = (
 "03081770884921959731165446850517"  # becomes 53553731.
 )
 
-real = """\
-59791911701697178620772166487621926539855976237879300869872931303532122404711706813176657053802481833015214226705058704017099411284046473395211022546662450403964137283487707691563442026697656820695854453826690487611172860358286255850668069507687936410599520475680695180527327076479119764897119494161366645257480353063266653306023935874821274026377407051958316291995144593624792755553923648392169597897222058613725620920233283869036501950753970029182181770358827133737490530431859833065926816798051237510954742209939957376506364926219879150524606056996572743773912030397695613203835011524677640044237824961662635530619875905369208905866913334027160178"""
-
-#print( "My input length is ", len(real) )
+live = open('day16.txt').read().strip()
+#print( "My input length is ", len(live) )
 
 # This works for pass 1 but is way too slow for pass 2.
 
@@ -39,38 +39,46 @@ def onepass(digits,offset):
 def offsetpass(digits,offset):
     nextx = []
     sumx = sum(digits)
-    nextx.append( abs(sumx) % 10 )
+    nextx.append( sumx % 10 )
     for n in digits[:-1]:
-        sumx -= n
-        nextx.append( abs(sumx) % 10 )
+        sumx += 10 - n
+        nextx.append( sumx % 10 )
     return nextx
 
 def make(s):
     return list(int(k) for k in s)
 
 def do100(pat,process,rep=1,ofs=0):
-    base = (make(pat)*rep)[ofs:]
-    for i in range(100):
+    if rep == 1:
+        base = pat
+    else:
+        # Since we throw away almost all of the resulting string, don't 
+        # compute all of it.
+        # Example: 32 10000 303673
+        # So we keep 320000-303673 = 16327.
+        # So repeat (16327/32 + 1) times and skip 303673 % 32 = 25
+        need = (len(pat) * rep - ofs) // len(pat) + 1
+        base = (pat * need)[ofs % len(pat):]
+    base = make(base)
+    for _ in range(100):
         base = process(base,ofs)
     return ''.join(str(k) for k in base[:8])
-
-if "tests" in sys.argv:
-    for s in tests:
-        print( do100(s, onepass) )
-
-print( "Part 1:", do100(real, onepass) )
 
 def part2(seq):
     offset = int(seq[:7])
     assert( len(seq) < 2 * offset )
     return do100( seq, offsetpass, 10000, offset )
 
-if "tests" in sys.argv:
+if TEST:
+    for seq in tests:
+        print( "Test 1:", do100(seq, onepass) )
     for seq in test2:
         before = time.time()
-        print( part2(seq) )
+        print( "Test 2:", part2(seq) )
         print( "Elapsed", time.time() - before )
-
-before = time.time()
-print( "Part 2:", part2( real ) )
-print( "Elapsed", time.time() - before )
+else:
+    print( "Part 1:", do100(live, onepass) )
+    before = time.time()
+    print( "Part 2:", part2( live ) )
+    if TIMING:
+        print( "Elapsed", time.time() - before )

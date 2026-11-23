@@ -294,6 +294,14 @@ func Sum[T Number](set []T) T {
 	return sum
 }
 
+func SumByte (set []byte) int {
+	var sum int
+	for _, n := range set {
+		sum += int(n)
+	}
+	return sum
+}
+
 func Prod[T Number](set []T) T {
 	var sum T = 1
 	for _, n := range set {
