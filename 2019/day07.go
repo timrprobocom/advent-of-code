@@ -29,7 +29,10 @@ func part1( program []int ) int {
 		}
         lastval := 0
         for _,ip := range inputset {
-            lastval = tools.MakeProgram(program, []int{ip, lastval}).Run().Dump()[0]
+            pgm := tools.MakeProgram(program)
+			pgm.Push(ip)
+			pgm.Push(lastval)
+			lastval = pgm.Run().Dump()[0]
 			if DEBUG {
 				fmt.Println( lastval )
 			}
@@ -43,14 +46,13 @@ func part2( program []int ) int {
     maxval := 0
 	perms := make(chan []int)
     go tools.Permutations(perms, []int{5,6,7,8,9})
-	empty := []int{}
     for ip := range perms {
         amps := []*tools.Program{
-            tools.MakeProgram(program,empty),
-            tools.MakeProgram(program,empty),
-            tools.MakeProgram(program,empty),
-            tools.MakeProgram(program,empty),
-            tools.MakeProgram(program,empty),
+            tools.MakeProgram(program),
+            tools.MakeProgram(program),
+            tools.MakeProgram(program),
+            tools.MakeProgram(program),
+            tools.MakeProgram(program),
         }
 
 		// The output from 0 sends to the input of 1.

@@ -25,12 +25,18 @@ func main() {
 	TEST, DEBUG, input = tools.Setup("", live)
 	if TEST {
 		for _,p := range test {
-			fmt.Println( "Part 1:", tools.MakeProgram(p,[]int{}).Run().Dump())
+			fmt.Println( "Part 1:", tools.MakeProgram(p).Run().Dump())
 		}
 	} else {
 		data := tools.GetRowNumbers[int](input)
-		fmt.Println( "Part 1:", tools.MakeProgram(data, []int{1}).Run().Dump()[0] )
-		fmt.Println( "Part 2:", tools.MakeProgram(data, []int{2}).Run().Dump()[0] )
+
+		pgm := tools.MakeProgram(data)
+		pgm.Push(1)
+		fmt.Println( "Part 1:", pgm.Run().Dump()[0] )
+
+		pgm = tools.MakeProgram(data)
+		pgm.Push(2)
+		fmt.Println( "Part 2:", pgm.Run().Dump()[0] )
 	}
 }
 

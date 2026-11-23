@@ -75,13 +75,13 @@ func main() {
 
 	//For part 1, enter 1.  For part 2, enter 5.
 
-	pgm := tools.MakeProgram(input, []int{})
+	pgm := tools.MakeProgram(input)
 	pgm.Push(1)
 	go pgm.Run()
 	pgm.Pop()
 	fmt.Println("Part 1:", pgm.Final)
 
-	pgm = tools.MakeProgram(input, []int{})
+	pgm = tools.MakeProgram(input)
 	pgm.Push(5)
 	go pgm.Run()
 	pgm.Pop()

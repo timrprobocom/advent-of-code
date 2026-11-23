@@ -25,7 +25,7 @@ type Program struct {
 
 // How do we shut down the channels?
 
-func MakeProgram( program []int, inputs []int) *Program {
+func MakeProgram(program []int) *Program {
 	pgm := Program{}
 	pgm.id = count
 	count++
@@ -33,15 +33,9 @@ func MakeProgram( program []int, inputs []int) *Program {
 	pgm.finish = make(chan int, 10)
 	pgm.input = make(chan int, 50)
 	pgm.output = make(chan int, 50)
-	for _,k := range inputs {
-		pgm.input <- k
-	}
 	return &pgm
 }
 
-func MakeProgramNo( program []int ) *Program {
-	return MakeProgram(program, []int{})
-}
 
 func (self *Program) Close() {
 	close(self.output)
@@ -53,7 +47,7 @@ func Connect( producer *Program, consumer *Program ) {
 }
 
 func (self *Program) Clone() *Program {
-	return MakeProgram(self.pgm, []int{})
+	return MakeProgram(self.pgm)
 }
 
 func (self *Program) IsAlive() bool {

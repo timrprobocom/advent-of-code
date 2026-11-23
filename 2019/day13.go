@@ -22,7 +22,7 @@ var live string
 
 func run(program []int) []int {
 	out := []int{}
-    pgm := tools.MakeProgramNo(program)
+    pgm := tools.MakeProgram(program)
     go pgm.Run()
 	for pgm.IsAlive() {
 		out = append( out, pgm.Pop() )
@@ -45,7 +45,7 @@ func display( grid [][]byte ) {
 }
 
 func run2(grid [][]byte, program []int) int {
-	pgm := tools.MakeProgramNo(program)
+	pgm := tools.MakeProgram(program)
 	xball :=0
 	xpaddle := 0
 	score := 0

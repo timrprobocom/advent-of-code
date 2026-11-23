@@ -29,7 +29,7 @@ var directions = []Point{Point{0, -1}, Point{-1, 0}, Point{0, 1}, Point{1, 0}}
 type Grid = map[Point]bool
 
 func run(live []int, base Point, blacks Grid, whites Grid) {
-	pgm := tools.MakeProgramNo(live)
+	pgm := tools.MakeProgram(live)
 	loc := base
 	facing := 0
 	go pgm.Run()
