@@ -2,6 +2,7 @@ import sys
 from intcode import Program
 from tools import Point
 
+DEBUG = 'debug' in sys.argv
 
 class Maze(object):
     """ Absorbs the output from intcode and turns it into a stringable maze. """
@@ -18,16 +19,15 @@ class Maze(object):
         return self.maze[pt.y][pt.x]
 
 
-TRACE = 'trace' in sys.argv
-
 # Run the program once to get the path.
 
-real = list(eval(open('day17.txt').read()))
+live = list(eval(open('day17.txt').read()))
 
-pgm = Program(real)
+pgm = Program(live)
 pgm.run()
 maze = Maze( pgm.dump() )
-print(maze.string)
+if DEBUG:
+    print(maze.string)
 
 def part1():
     # Find the robot.
@@ -64,13 +64,13 @@ def part1():
                 crossings.add( robot )
             robot += facing
 
-        if TRACE:
+        if DEBUG:
             print( robot )
     # We return the set of crossings and the record of turns.
     return crossings, turns
 
 def part2():
-    pgm = Program(real)
+    pgm = Program(live)
     pgm.pgm[0] = 2
     instructions = (
         "A,B,A,C,C,A,B,C,B,B\n",
@@ -83,15 +83,16 @@ def part2():
         pgm.push(ord(c))
     pgm.run()
     d = pgm.dump()
-    if TRACE:
+    if DEBUG:
         print( Maze(d[:-1]).string )
     return d[-1]
 
 crossings, turns = part1()
 
 # Dump this to see the sequence of moves we took.
-print( ','.join( str(x) for x in turns) )
-print( )
+if DEBUG:
+    print( ','.join( str(x) for x in turns) )
+    print( )
 
 print( "Part 1:", sum( pt.x*pt.y for pt in crossings ) )
 print( "Part 2:", part2() )

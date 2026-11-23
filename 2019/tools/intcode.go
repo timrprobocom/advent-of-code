@@ -31,7 +31,7 @@ func MakeProgram(program []int) *Program {
 	count++
 	pgm.pgm = slices.Clone( program )
 	pgm.finish = make(chan int, 10)
-	pgm.input = make(chan int, 50)
+	pgm.input = make(chan int, 100)
 	pgm.output = make(chan int, 50)
 	return &pgm
 }
