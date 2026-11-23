@@ -156,7 +156,7 @@ if TEST:
     print( "Test 1: ", process(test1, 1) )
     print( "Test 2: ", process(test2, 1) )
     print( "Test 3: ", process(test3, 1) )
-print( "*** Part 1: ", process(real,1) )
+print( "Part 1:", process(real,1) )
 
 
 def part2( setup ):
@@ -193,4 +193,4 @@ if TEST:
     print( "Test 1: ", part2( test1 ) )
     print( "Test 2: ", part2( test2 ) )
     print( "Test 3: ", part2( test3 ) )
-print( "*** Part 2: ", part2( real ) )
+print( "Part 2:", part2( real ) )

@@ -106,7 +106,7 @@ public:
 };
 
 
-bool TRACE = false;
+bool DEBUG = false;
 bool TEST = false;
 
 struct Mix 
@@ -187,15 +187,15 @@ void processloop( map<string,Mix> & tree, map<string,int64_t> & amts, const stri
 {
     int64_t qty = amts[chem];
     amts[chem] = 0;
-    if( TRACE )
+    if( DEBUG )
         cout << qty << " of " << chem << " needs:\n";
     Mix & mix = tree[chem];
     qty = (qty+mix.m_Qty-1) / mix.m_Qty;
-    if( TRACE )
+    if( DEBUG )
         cout << "   " << qty << "  units\n";
     for( auto && need : mix.m_Needs )
     {
-        if( TRACE )
+        if( DEBUG )
             cout << "   " << (need.second * qty) << " of " << need.first << "\n";
         amts[need.first] += need.second*qty;
     }
@@ -203,7 +203,8 @@ void processloop( map<string,Mix> & tree, map<string,int64_t> & amts, const stri
 
 int64_t process( istream & s, int64_t target )
 {
-    cout << "process trying for " << target << "\n";
+    if( DEBUG )
+        cout << "process trying for " << target << "\n";
     map<string,Mix> tree;
     vector<string> order = parse( s, tree );
 
@@ -211,7 +212,7 @@ int64_t process( istream & s, int64_t target )
     amts["FUEL"] = target;
     amts["ORE"] = 0;
 
-    if( TRACE )
+    if( DEBUG )
     {
         for( auto && k : order )
             cout << "'" << k << "': " << amts[k] << ", ";
@@ -223,7 +224,7 @@ int64_t process( istream & s, int64_t target )
         if( i == "ORE" )
             break;
         processloop( tree, amts, i );
-        if( TRACE )
+        if( DEBUG )
         {
             cout << "Stores: ";
             for( auto && k : order )
@@ -251,7 +252,7 @@ int64_t part2( istream & setup )
     for( ;; )
     {
         int64_t got = process( setup, guess );
-        if( TRACE )
+        if( DEBUG )
             cout << guess << " got " << got << "\n";
         if( got > ore )
             break;
@@ -269,7 +270,7 @@ int64_t part2( istream & setup )
     {
         guess += incr;
         int64_t got = process( setup, guess );
-        if( TRACE )
+        if( DEBUG )
             cout << guess << " got " << got << "\n";
         if( got > ore )
         {
@@ -293,8 +294,8 @@ int main(int argc, char ** argv )
     while( *++argv )
     {
         std::string arg(*argv);
-        if( arg == "trace" )
-            TRACE = true;
+        if( arg == "debug" )
+            DEBUG = true;
         if( arg == "test" )
             TEST = true;
     }
@@ -305,7 +306,7 @@ int main(int argc, char ** argv )
         cout << "Test 2: " << process(test2, 1) << "\n";
         cout << "Test 3: " << process(test3, 1) << "\n";
     }
-    cout << "*** Part 1: " << process(real,1) << "\n";
+    cout << "Part 1: " << process(real,1) << "\n";
 
     if( TEST )
     {
@@ -313,5 +314,5 @@ int main(int argc, char ** argv )
         cout << "Test 2: " << part2(test2) << "\n";
         cout << "Test 3: " << part2(test3) << "\n";
     }
-    cout <<"*** Part 2: " << part2( real )  << "\n";
+    cout <<"Part 2: " << part2( real )  << "\n";
 }
