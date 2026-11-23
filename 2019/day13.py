@@ -21,7 +21,7 @@ def part1():
     if DEBUG:
         print( len(queue) )
     twos = [1 for k in take(queue,3) if k[2] == 2]
-    return len(twos)  # 228
+    return len(twos) # 228
 
 
 def display(grid):
