@@ -2,6 +2,7 @@
 #include <iostream>
 #include <thread>
 #include <deque>
+#include <memory>
 #include <vector>
 
 
@@ -16,8 +17,8 @@ class Program
     std::vector<T> m_Program;
     int pc;
     int m_Modes;
-    std::deque<T> m_Input;
-    std::deque<T> m_Output;
+    std::shared_ptr<std::deque<T> > m_Input;
+    std::shared_ptr<std::deque<T> > m_Output;
     T m_Final;
     int m_Rbase;
     
@@ -25,6 +26,8 @@ public:
     Program( std::vector<T> pgm )
         : id( count++ )
         , m_Program( pgm )
+        , m_Input( std::make_shared<std::deque<T>>() )
+        , m_Output( std::make_shared<std::deque<T>>() )
         , pc( 0 )
         , m_Rbase( 0 )
     {
@@ -32,23 +35,28 @@ public:
 
     void push( T val )
     {
-        m_Input.push_back( val );
+        m_Input->push_back( val );
     }
 
     T pop()
     {
-        T p = m_Output.front();
-        m_Output.pop_front();
+        T p = m_Output->front();
+        m_Output->pop_front();
         return p;
     }
 
     std::vector<T> dump()
     {
         std::vector<T> q;
-        q.insert( q.begin(), m_Output.begin(), m_Output.end() );
+        q.insert( q.begin(), m_Output->begin(), m_Output.end() );
         return q;
     }
 
+    static void connect( Program & producer, Program & consumer)
+    {
+        consumer.m_Input = producer.m_Output;
+    }
+ 
     int opcode()
     {
         int opc = m_Program[pc];
@@ -146,8 +154,8 @@ public:
                     store( fetch() * fetch() );
                     break;
                 case 3:
-                     ip = m_Input.front();
-                     m_Input.pop_front();
+                     ip = m_Input->front();
+                     m_Input->pop_front();
                      if( TRACE )
                          std::cout << id << ": input " << ip << "\n";
                      store( ip );
@@ -155,7 +163,7 @@ public:
                 case 4:
                     ip = fetch();
                     m_Final = ip;
-                    m_Output.push_back( ip );
+                    m_Output->push_back( ip );
                     if( TRACE )
                         std::cout << id << ": output " << ip << "\n";
                     break;
