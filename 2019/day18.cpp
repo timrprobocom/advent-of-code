@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstdint>
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -130,7 +131,7 @@ struct vector2d : public vector<T>
 struct Maze
 {
     vector<string> m_Maze;
-    vector<Point> m_Adit;
+    Point m_Adit;
 
     map<char,Point> m_Locations;
     map<char,map<char,int>> m_Steps;
@@ -144,15 +145,16 @@ struct Maze
         map<char,Point> doors;
         for( string ln; std::getline( iss, ln );  )
         {
+            int y = m_Maze.size();
             m_Maze.push_back( ln );
             for( int i = 0; i < ln.size(); i++ )
             {
                 if( ln[i] == '@' )
-                    m_Adit.emplace_back( i, m_Maze.size() - 1 );
+                    m_Adit = Point( i, y );
                 else if( 'A' <= ln[i] && ln[i] <= 'Z' )
-                    doors[ln[i]] = Point( i, m_Maze.size() - 1 );
+                    doors[ln[i]] = Point( i, y );
                 else if( 'a' <= ln[i] && ln[i] <= 'z' )
-                    keys[ln[i]] = Point( i, m_Maze.size() - 1 );
+                    keys[ln[i]] = Point( i, y );
             }
         }
 
@@ -185,7 +187,10 @@ struct Maze
             for( auto && m : upcoming )
             {
                 Point cur = m.first;
-                string  intheway = m.second;
+                if (at(cur) != '.' )
+                    cout << cur.x << "," << cur.y << " = " << at(cur) << "\n";
+                string intheway = m.second;
+                visited[cur] = 1;
 
                 char ch = at(cur);
                 if( islower(ch) && steps )
@@ -198,14 +203,13 @@ struct Maze
                 }
                 else if( isupper(ch) )
                     intheway += ch;
-                visited[cur] = 1;
+
                 for( auto & facing : movements )
                 {
                     Point next = cur + facing;
                     char ch = at(next);
-                    if( visited[next] || ch == '#' )
-                        continue;
-                    more[next] = intheway;
+                    if( !visited[next] && ch != '#' )
+                        more[next] = intheway;
                 }
             }
             upcoming = more;
@@ -218,7 +222,7 @@ struct Maze
         return m_Maze[pt.y][pt.x];
     }
 
-    virtual int search( string sitting, std::string found ) = 0;
+    virtual int search( char sitting, std::string found ) = 0;
 };
 
 
@@ -228,7 +232,7 @@ public:
     Maze_BFS( const string & str )
         : Maze( str )
         {}
-    int search( string sitting, string found );
+    int search( char sitting, string found );
 };
 
 
@@ -238,15 +242,9 @@ public:
     Maze_DFS( const string & str )
         : Maze( str )
         {}
-    int search( string sitting, string found );
+    int search( char sitting, string found );
 };
 
-
-string sub(std::string s, int i, char c)
-{
-    // Isn't this s.replace(i,1,c)?
-    return s.substr(0,i)+c+s.substr(i+1);
-}
 
 string ssort( std::string s )
 {
@@ -254,11 +252,11 @@ string ssort( std::string s )
     return s;
 }
 
-int Maze_BFS::search( string start, std::string found )
+int Maze_BFS::search( char start, std::string found )
 {
     map<std::string, int> unchecked;
     unchecked[start+found] = 0; 
-    int nrobots = start.size();
+    int nrobots = 1;
     int result = 0;
 
     // Keep going as long as there are paths we haven't tested.
@@ -277,41 +275,38 @@ int Maze_BFS::search( string start, std::string found )
 
         for( auto & item : unchecked )
         {
-            string sitting = item.first.substr(0,nrobots);
-            string found = item.first.substr(nrobots);
+            char sitting = item.first[0];
+            string found = item.first.substr(1);
             int steps = item.second;
             paths.push_back( steps );
 
-            // For each robot:
-            for( int si = 0; si < nrobots; si++ )
+            char s = sitting;
+
+            // For each key this robot can see:
+            for( auto pt : m_Steps[s] )
             {
-                char s = sitting[si];
+                char key = pt.first;
+                if( key < 'a' )
+                    continue;
+                if( found.find( key ) != found.npos )
+                    continue;
+                // If there's a door in the way without a key, ignore.
+                int dstep = m_Steps[s][key];
+                string doors = m_Doors[s][key];
+                if( any_of( 
+                    doors.begin(), doors.end(),
+                    [&found](char ch){ return found.find(tolower(ch)) == found.npos;})
+                )
+                    continue;
 
-                // For each key this robot can see:
-                for( auto pt : m_Steps[s] )
-                {
-                    char key = pt.first;
-                    if( key < 'a' )
-                        continue;
-                    if( found.find( key ) != found.npos )
-                        continue;
-                    // If there's a door in the way without a key, ignore.
-                    int dstep = m_Steps[s][key];
-                    string doors = m_Doors[s][key];
-                    if( any_of( 
-                        doors.begin(), doors.end(),
-                        [&found](char ch){ return found.find(tolower(ch)) == found.npos;})
-                    )
-                        continue;
+                // If this new path has alread been enumerated, and
+                // this path to the same state is shorter, keep it.
 
-                    // If this new path has alread been enumerated, and
-                    // this path to the same state is shorter, keep it.
-
-                    auto newsit = sub(sitting,si,key)+ssort(found+key);
-                    if( more.find(newsit) != more.end() && more[newsit] <= steps+dstep )
-                        continue;
-                    more[newsit] = steps+dstep;
-                }
+                string keys(1,key);
+                auto newsit = keys+ssort(found+keys);
+                if( more.find(newsit) != more.end() && more[newsit] <= steps+dstep )
+                    continue;
+                more[newsit] = steps+dstep;
             }
         }
         // When we have nothing new, we have our answer.
@@ -323,7 +318,7 @@ int Maze_BFS::search( string start, std::string found )
 }
 
 
-int Maze_DFS::search( string sitting, std::string found )
+int Maze_DFS::search( char sitting, std::string found )
 {
     if( DEBUG )
         cout << "New search " << sitting << " " << found << "\n";
@@ -337,30 +332,27 @@ int Maze_DFS::search( string sitting, std::string found )
     vector<int> paths;
 
     // For each robot:
-    for( int si = 0; si < sitting.size(); si++ )
-    {
-        char s = sitting[si];
-        // For each key the robot can see:
-        for( auto pt : m_Steps[s] )
-        {
-            char key = pt.first;
-            if( key < 'a' )
-                continue;
-            // If we've already picked it up, ignore.
-            if( found.find( key ) != found.npos )
-                continue;
 
-            // If there's a door in the way without a key, ignore.
-            int dstep = m_Steps[s][key];
-            string doors = m_Doors[s][key];
-            if( any_of( 
-                doors.begin(), doors.end(),
-                [&found](char ch){ return found.find(tolower(ch)) == found.npos;})
-            )
-                continue;
-            // Go explore this path.
-            paths.push_back( dstep + search(sub(sitting,si,key), ssort(found+key)) );
-        }
+    // For each key the robot can see:
+    for( auto pt : m_Steps[sitting] )
+    {
+        char key = pt.first;
+        if( key < 'a' )
+            continue;
+        // If we've already picked it up, ignore.
+        if( found.find( key ) != found.npos )
+            continue;
+
+        // If there's a door in the way without a key, ignore.
+        int dstep = m_Steps[sitting][key];
+        string doors = m_Doors[sitting][key];
+        if( any_of( 
+            doors.begin(), doors.end(),
+            [&found](char ch){ return found.find(tolower(ch)) == found.npos;})
+        )
+            continue;
+        // Go explore this path.
+        paths.push_back( dstep + search(key, ssort(found+key)) );
     }
 
     int ans = paths.empty() ? 0 : *min_element(paths.begin(),paths.end());
@@ -400,18 +392,12 @@ int solve( Maze * maze )
 {
     if( DEBUG ) {
         maze->print();
-        for( auto & pt : maze->m_Adit )
-        {
-            cout << "(" << pt.x << "," << pt.y << ")\n";
-        }
+        cout << "(" << maze->m_Adit.x << "," << maze->m_Adit.y << ")\n";
     }
 
     // Find all of the targets.
 
-    for( int i = 0; i < maze->m_Adit.size(); i++ )
-    {
-        maze->findall( '0'+i, maze->m_Adit[i] );
-    }
+    maze->findall( '0', maze->m_Adit );
 
     // Find the distance betweeen targets.
 
@@ -420,12 +406,17 @@ int solve( Maze * maze )
         maze->findall( v.first, v.second );
     }
 
+    for( auto & v : maze->m_Locations )
+    {
+        cout << v.first << " x " << v.second.x << "," << v.second.y << "\n";
+    }
+
     if( DEBUG )
         for( auto & v : maze->m_Steps )
             for( auto p : v.second )
                 cout << v.first << " to " << p.first << ": " << p.second << "\n";
 
-    return maze->search( "0", "@" );
+    return maze->search( '0', "@" );
 }
 
 int main( int argc, char ** argv )
