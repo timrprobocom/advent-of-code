@@ -311,6 +311,9 @@ func Prod[T Number](set []T) T {
 }
 
 func Min[T Number](chunk []T) T {
+	if len(chunk) == 0 {
+		return 0
+	}
 	var minx T = chunk[0]
 	for _, k := range chunk {
 		minx = min(minx, k)

@@ -78,51 +78,9 @@ func sub(s string, i int, c string) string {
 }
 
 func ssort(s string) string {
-	b := []byte(string)
+	b := []byte(s)
 	slices.Sort(b)
 	return string(b)
-}
-
-type Maze struct {
-	maze	[][]byte
-	adit	[]Point
-	size	int
-}
-
-func makeMaze(source []string) Maze {
-	maze := Maze{}
-	maze.maze = make([][]byte, len(source))
-	maze.size = len(maze.maze)
-	doors := make(map[byte]Point)
-	keys := make(map[byte]bool)
-	for y,ln := range source {
-		maze.maze[y] = []byte(ln)
-		for x := range len(ln) {
-			ch := ln[x]
-			if ch == '@' {
-				maze.adit = append( maze.adit, Point{x,y} )
-			} else if isupper(ch) {
-				doors[ch] = Point{x,y}
-			} else if islower(ch) {
-				keys[ch] = true
-			}
-		}
-	}
-	
-	// Eliminate any doors whose keys are not found in this maze.
-
-	for k,v := range doors {
-		if !keys[k+32] {
-			maze.maze[v.Y][v.X] = '.'
-		}
-	}
-	return maze
-}
-
-func (self Maze) print() {
-	for _,row := range self.maze {
-		fmt.Println(string(row))
-	}
 }
 
 type Track struct {
@@ -131,7 +89,62 @@ type Track struct {
 	intheway []byte
 }
 
-func (self Maze) findall( start Point ) map[byte]Track {
+type Maze struct {
+	maze	[][]byte
+	size	int
+	adit	Point
+	doors	map[byte]Point
+	seen	map[string]int
+	stats   map[byte]map[byte]Track
+}
+
+func makeMaze(source []string) *Maze {
+	maze := Maze{}
+	maze.maze = make([][]byte, len(source))
+	maze.size = len(maze.maze)
+	maze.doors = make(map[byte]Point)
+	keys := make(map[byte]bool)
+	for y,ln := range source {
+		maze.maze[y] = []byte(ln)
+		for x := range len(ln) {
+			ch := ln[x]
+			if ch == '@' {
+				maze.adit = Point{x,y}
+			} else if isupper(ch) {
+				maze.doors[ch] = Point{x,y}
+			} else if islower(ch) {
+				keys[ch] = true
+			}
+		}
+	}
+	
+	// Eliminate any doors whose keys are not found in this maze.
+
+	for k,v := range maze.doors {
+		if !keys[k+32] {
+			maze.maze[v.Y][v.X] = '.'
+		}
+	}
+	return &maze
+}
+
+func (self *Maze) print() {
+	for _,row := range self.maze {
+		fmt.Println(string(row))
+	}
+}
+
+func (self *Maze) showStats() {
+	fmt.Println("showState")
+	for k,v := range self.stats {
+		fmt.Println("  ",string(k))
+		for k1,v1 := range v {
+			fmt.Println("     ",string(k1), v1.pt, v1.steps, string(v1.intheway))
+		}
+	}
+}
+
+func (self *Maze) findall( start Point ) map[byte]Track {
 	upcoming := make(map[Point][]byte)
 	upcoming[start] = []byte{}
 	visited := make(map[Point]bool)
@@ -153,7 +166,7 @@ func (self Maze) findall( start Point ) map[byte]Track {
 				next := cur.Add(facing)
 				ch := self.getpt(next)
 				if !visited[next] && ch != '#' {
-					more[next] = intheway
+					more[next] = slices.Clone(intheway)
 				}
 			}
 		}
@@ -163,8 +176,42 @@ func (self Maze) findall( start Point ) map[byte]Track {
 	return found
 }
 
-func (maze Maze) getpt( pt Point ) byte {
+func (maze *Maze) getpt( pt Point ) byte {
 	return maze.maze[pt.Y][pt.X]
+}
+
+
+func parse( s []string ) *Maze {
+    maze := makeMaze(s)
+    if DEBUG {
+        maze.print()
+        fmt.Println( maze.adit )
+	}
+	maze.seen = make(map[string]int)
+
+// Find all of the targets.
+
+    maze.stats = make(map[byte]map[byte]Track)
+	maze.stats['0'] = maze.findall( maze.adit )
+
+    if DEBUG {
+        fmt.Println( len(maze.stats['0']) )
+	}
+
+// Find the distance betweeen targets.
+
+	for _,v := range maze.stats {
+        for key,trk := range v {
+            if key >= 'a' {
+                maze.stats[key] = maze.findall(trk.pt)
+			}
+		}
+	}
+
+    if DEBUG {
+        fmt.Println( "parse:", maze.stats )
+	}
+	return maze
 }
 
 
@@ -172,47 +219,51 @@ func (maze Maze) getpt( pt Point ) byte {
 //
 // We need to do a depth-first search to weed out duplicates.
 
-var seen map[string]int
-
-func search( sitting string, found string ) int {
+func search( maze *Maze, sitting byte, found string ) int {
     if DEBUG {
         fmt.Println( "New search", sitting, found )
 	}
     found = ssort(found)
 
     // If we've been in this situation before, we don't need to go again.
-	if seen[sitting+found] > 0 {
-        return seen[sitting+found]
+	if maze.seen[string(sitting)+found] > 0 {
+        return maze.seen[string(sitting)+found]
 	}
 
-    paths = []
+    paths := []int{}
 
-    // For each robot:
-	for si := range len(sitting) {
-		s := sitting[si]
-        // For each key the robot can see:
-        for k,v := range stats[s] {
-            // If we've already picked it up, ignore.
-            if found[k] {
-                continue
-			}
-            _, dstep, doors = v
-            // If there's a door in the way without a key, ignore.
-// LEFT OFF
-// need a found=galse for range doors if not lower in found
-            if any( d.lower() not in found for d in doors ):
-                continue
-            // Go explore this path.
-            paths.append( v.steps + search(sub(sitting,si,k), found+k) )
+	// For each key the robot can see:
+	for k,v := range maze.stats[sitting] {
+		// If we've already picked it up, ignore.
+		if strings.IndexByte(found,k) >= 0 || k < 'a' {
+			continue
 		}
+
+		// If there's a door in the way without a key, ignore.
+		
+		anybad := false
+		for _,d := range v.intheway {
+			anybad = anybad || (strings.IndexByte(found, d+32) == -1)
+			if anybad {
+				break
+			}
+		}
+		if anybad {
+			continue
+		}
+
+		// Go explore this path.
+
+		paths = append( paths, v.steps + search(maze, k, found+string(k)) )
 	}
-    ans = min(paths) if paths else 0
+	ans := tools.Min(paths)
     if DEBUG {
-        fmt.Println( sitting+found, ans )
+        fmt.Println( "search return", string(sitting)+found, ans )
 	}
-    seen[sitting+found] = ans
+    maze.seen[string(sitting)+found] = ans
     return ans
 }
+
 
 // Divide the maze into four quadreants.
 
@@ -232,16 +283,13 @@ func split(grid []string) [][]string {
 }
 
 
-// Part 1
-
-func part1(data string) int {
-	return 0
-}
-
-// Part 2.
-
-func part2(data string) int {
-	return 0
+func part1(data [][]string) int {
+    sum := 0
+	for _,grid := range data {
+		maze := parse(grid)
+		sum += search(maze, '0', "@")
+	}
+	return sum
 }
 
 // Splits a set of strings into a set of grids.
@@ -264,51 +312,10 @@ func main() {
 		data1 = subsplit(test1)
 		data2 = subsplit(test2)
 	} else {
-		data1 = [][]string{strings.Split(strings.TrimSpace(live1), "\n")}
+		data1 = [][]string{strings.Split(strings.TrimSpace(input), "\n")}
 		data2 = split(strings.Split(strings.TrimSpace(live2), "\n"))
 	}
 
-    sum := 0
-	for _,grid := range data1 {
-		maze := parse(grid)
-		sumx += search(maze, '0','@')
-	}
-
-    sum := 0
-	for _,grid = range data1 {
-		maze := parse(grid)
-		sumx += search(maze, '0','@')
-	}
-	fmt.Println("Part 2:", sum );
+	fmt.Println("Part 1:", part1(data1) );
+	fmt.Println("Part 2:", part1(data2) );
 }
-
-/*
-
-
-def parse(s):
-    global stats
-    search.seen = {}
-    maze = Maze(s)
-    if DEBUG:
-        maze.print()
-        print( maze.adit )
-
-# Find all of the targets.
-
-    stats = {}
-    for i,adit in enumerate(maze.adit):
-        stats[str(i)] = maze.findall( adit )
-
-    if DEBUG:
-        print( sum(len(v) for v in stats.values() ))
-
-# Find the distance betweeen targets.
-
-    for v in list(stats.values()):
-        for key,ptx in v.items():
-            if key >= 'a':
-                stats[key] = maze.findall(ptx[0])
-
-    if DEBUG:
-        pprint( stats )
-*/
