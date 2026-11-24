@@ -187,8 +187,6 @@ struct Maze
             for( auto && m : upcoming )
             {
                 Point cur = m.first;
-                if (at(cur) != '.' )
-                    cout << cur.x << "," << cur.y << " = " << at(cur) << "\n";
                 string intheway = m.second;
                 visited[cur] = 1;
 
@@ -404,11 +402,6 @@ int solve( Maze * maze )
     for( auto & v : maze->m_Locations )
     {
         maze->findall( v.first, v.second );
-    }
-
-    for( auto & v : maze->m_Locations )
-    {
-        cout << v.first << " x " << v.second.x << "," << v.second.y << "\n";
     }
 
     if( DEBUG )
