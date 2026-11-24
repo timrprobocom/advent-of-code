@@ -8,7 +8,10 @@
 #include <map>
 #include <set>
 
-bool TRACE = false;
+using namespace std;
+
+bool DEBUG = false;
+bool TEST = false;
 
 // Answer 8.
 const char * test[] =  {
@@ -40,9 +43,11 @@ const char * test[] =  {
 "###d#e#f################\n"
 "###A#B#C################\n"
 "###g#h#i################\n"
-"########################\n",
+"########################\n"
+};
 
 // Part 2, answer 72.
+const char * test2[] =  {
 "#############\n"
 "#g#f.D#..h#l#\n"
 "#F###e#E###.#\n"
@@ -98,12 +103,10 @@ struct Point {
 
 Point movements[4] = { Point(0,-1),Point(0,1),Point(-1,0),Point(1,0) };
 
-typedef std::map<char,std::tuple<Point,int,std::string> > lookupData_t;
-
 template<typename T>
-struct vector2d : public std::vector<T>
+struct vector2d : public vector<T>
 {
-    std::vector<T> m_vec;
+    vector<T> m_vec;
     int m_w;
     int m_h;
     vector2d(int w, int h)
@@ -126,23 +129,38 @@ struct vector2d : public std::vector<T>
 
 struct Maze
 {
-    std::vector<std::string> m_Maze;
-    std::vector<Point> m_Adit;
+    vector<string> m_Maze;
+    vector<Point> m_Adit;
 
-    std::map<char,Point> m_Locations;
-    std::map<char,std::map<char,int>> m_Steps;
-    std::map<char,std::map<char,std::string>> m_Doors;
-    std::map<std::string, int> m_Seen;
+    map<char,Point> m_Locations;
+    map<char,map<char,int>> m_Steps;
+    map<char,std::map<char,std::string>> m_Doors;
+    map<std::string, int> m_Seen;
 
-    Maze( std::istream && iss )
+    Maze( const string & str )
     {
-        for( std::string ln; std::getline( iss, ln );  )
+        istringstream iss( str );
+        map<char,Point> keys;
+        map<char,Point> doors;
+        for( string ln; std::getline( iss, ln );  )
         {
             m_Maze.push_back( ln );
             for( int i = 0; i < ln.size(); i++ )
             {
                 if( ln[i] == '@' )
                     m_Adit.emplace_back( i, m_Maze.size() - 1 );
+                else if( 'A' <= ln[i] && ln[i] <= 'Z' )
+                    doors[ln[i]] = Point( i, m_Maze.size() - 1 );
+                else if( 'a' <= ln[i] && ln[i] <= 'z' )
+                    keys[ln[i]] = Point( i, m_Maze.size() - 1 );
+            }
+        }
+
+        for( auto kv : doors )
+        {
+            if( keys.find(tolower(kv.first)) == keys.end() )
+            {
+                m_Maze[kv.second.y].replace( kv.second.x, 1, " " );
             }
         }
     }
@@ -150,12 +168,12 @@ struct Maze
     void print()
     {
         for( auto ln : m_Maze )
-            std::cout << ln << "\n";
+            cout << ln << "\n";
     }
 
     void findall( char cfrom, Point & start )
     {
-        std::map<Point, std::string> upcoming;
+        map<Point, string> upcoming;
         m_Locations[cfrom] = start;
         upcoming[start] = "";
         vector2d<uint8_t> visited( m_Maze[0].size(), m_Maze.size() );
@@ -163,11 +181,11 @@ struct Maze
 
         while( !upcoming.empty() )
         {
-            std::map<Point,std::string> more;
+            map<Point,string> more;
             for( auto && m : upcoming )
             {
                 Point cur = m.first;
-                std::string  intheway = m.second;
+                string  intheway = m.second;
 
                 char ch = at(cur);
                 if( islower(ch) && steps )
@@ -200,44 +218,45 @@ struct Maze
         return m_Maze[pt.y][pt.x];
     }
 
-    virtual int search( std::string sitting, std::string found ) = 0;
+    virtual int search( string sitting, std::string found ) = 0;
 };
 
 
 class Maze_BFS : public Maze
 {
 public:
-    Maze_BFS( std::istream && iss )
-        : Maze( std::move(iss) )
+    Maze_BFS( const string & str )
+        : Maze( str )
         {}
-    int search( std::string sitting, std::string found );
+    int search( string sitting, string found );
 };
 
 
 class Maze_DFS : public Maze
 {
 public:
-    Maze_DFS( std::istream && iss )
-        : Maze( std::move(iss) )
+    Maze_DFS( const string & str )
+        : Maze( str )
         {}
-    int search( std::string sitting, std::string found );
+    int search( string sitting, string found );
 };
 
 
-std::string sub(std::string s, int i, char c)
+string sub(std::string s, int i, char c)
 {
+    // Isn't this s.replace(i,1,c)?
     return s.substr(0,i)+c+s.substr(i+1);
 }
 
-std::string ssort( std::string s )
+string ssort( std::string s )
 {
-    std::sort( s.begin(), s.end() );
+    sort( s.begin(), s.end() );
     return s;
 }
 
-int Maze_BFS::search( std::string start, std::string found )
+int Maze_BFS::search( string start, std::string found )
 {
-    std::map<std::string, int> unchecked;
+    map<std::string, int> unchecked;
     unchecked[start+found] = 0; 
     int nrobots = start.size();
     int result = 0;
@@ -248,18 +267,18 @@ int Maze_BFS::search( std::string start, std::string found )
     // will be one step longer.
     while( !unchecked.empty() )
     {
-        if( TRACE )
-            std::cout << "Depth " << unchecked.begin()->second << "\n";
+        if( DEBUG )
+            cout << "Depth " << unchecked.begin()->second << "\n";
 
-        std::map<std::string, int> more;
-        std::vector<int> paths;
+        map<std::string, int> more;
+        vector<int> paths;
 
         // For each path that needs to be checked:
 
         for( auto & item : unchecked )
         {
-            std::string sitting = item.first.substr(0,nrobots);
-            std::string found = item.first.substr(nrobots);
+            string sitting = item.first.substr(0,nrobots);
+            string found = item.first.substr(nrobots);
             int steps = item.second;
             paths.push_back( steps );
 
@@ -278,8 +297,8 @@ int Maze_BFS::search( std::string start, std::string found )
                         continue;
                     // If there's a door in the way without a key, ignore.
                     int dstep = m_Steps[s][key];
-                    std::string doors = m_Doors[s][key];
-                    if( std::any_of( 
+                    string doors = m_Doors[s][key];
+                    if( any_of( 
                         doors.begin(), doors.end(),
                         [&found](char ch){ return found.find(tolower(ch)) == found.npos;})
                     )
@@ -297,17 +316,17 @@ int Maze_BFS::search( std::string start, std::string found )
         }
         // When we have nothing new, we have our answer.
         if( more.empty() )
-            return *std::min_element(paths.begin(), paths.end() );
+            return *min_element(paths.begin(), paths.end() );
         unchecked = more;
     }
     return 0;
 }
 
 
-int Maze_DFS::search( std::string sitting, std::string found )
+int Maze_DFS::search( string sitting, std::string found )
 {
-    if( TRACE )
-        std::cout << "New search " << sitting << " " << found << "\n";
+    if( DEBUG )
+        cout << "New search " << sitting << " " << found << "\n";
 
     // If we've been in this situation before, we don't need to go again.
     if( m_Seen.find( sitting+found ) != m_Seen.end() )
@@ -315,7 +334,7 @@ int Maze_DFS::search( std::string sitting, std::string found )
         return m_Seen[sitting+found];
     }
 
-    std::vector<int> paths;
+    vector<int> paths;
 
     // For each robot:
     for( int si = 0; si < sitting.size(); si++ )
@@ -333,8 +352,8 @@ int Maze_DFS::search( std::string sitting, std::string found )
 
             // If there's a door in the way without a key, ignore.
             int dstep = m_Steps[s][key];
-            std::string doors = m_Doors[s][key];
-            if( std::any_of( 
+            string doors = m_Doors[s][key];
+            if( any_of( 
                 doors.begin(), doors.end(),
                 [&found](char ch){ return found.find(tolower(ch)) == found.npos;})
             )
@@ -344,49 +363,47 @@ int Maze_DFS::search( std::string sitting, std::string found )
         }
     }
 
-    int ans = paths.empty() ? 0 : *std::min_element(paths.begin(),paths.end());
-    if( TRACE )
-        std::cout << (sitting+found) << ": " << ans << "\n";
+    int ans = paths.empty() ? 0 : *min_element(paths.begin(),paths.end());
+    if( DEBUG )
+        cout << (sitting+found) << ": " << ans << "\n";
     m_Seen[sitting+found] = ans;
     return ans;
 }
 
 
-int main( int argc, char ** argv )
+string readall( const char * filename  )
 {
-    bool do_bfs = false;
-    Maze * maze = nullptr;
-    int input = -1;
-    std::string filename;
+    ifstream file(filename);
+    ostringstream oss;
+    oss << file.rdbuf();
+    return oss.str();
+}
 
-    while( *++argv )
+void split( vector<string> & live, const string & sin )
+{
+    auto size = sin.find("\n") + 1;
+    int mid = (size-1) / 2 + 1;
+    live.resize(4);
+    for( int i = 0; i < mid*size; i += size )
     {
-        std::string arg(*argv);
-        if( arg == "trace" )
-            TRACE = true;
-        else if( arg == "bfs" )
-            do_bfs = !do_bfs;
-        else if( isdigit(arg[0]) )
-            input = arg[0]-'1';
-        else
-            filename = arg;
+        live[0] += sin.substr(i, mid)+"\n";
+        live[1] += sin.substr(i+mid-1, mid)+"\n";
     }
-
-    if( do_bfs )
-        if( filename.empty() )
-            maze = new Maze_BFS( std::istringstream(test[input]) );
-        else
-            maze = new Maze_BFS( std::ifstream( filename ) );
-    else
-        if( filename.empty() )
-            maze = new Maze_DFS( std::istringstream(test[input]) );
-        else
-            maze = new Maze_DFS( std::ifstream( filename ) );
-
-    maze->print();
-    for( auto & pt : maze->m_Adit )
+    for( int i = (mid-1)*size; i < sin.size(); i += size )
     {
-        std::cout << "(" << pt.x << "," << pt.y << ")\n";
+        live[2] += sin.substr(i, mid)+"\n";
+        live[3] += sin.substr(i+mid-1, mid)+"\n";
+    }
+}
+
+int solve( Maze * maze )
+{
+    if( DEBUG ) {
+        maze->print();
+        for( auto & pt : maze->m_Adit )
+        {
+            cout << "(" << pt.x << "," << pt.y << ")\n";
+        }
     }
 
     // Find all of the targets.
@@ -403,13 +420,66 @@ int main( int argc, char ** argv )
         maze->findall( v.first, v.second );
     }
 
-    if( TRACE )
+    if( DEBUG )
         for( auto & v : maze->m_Steps )
             for( auto p : v.second )
-                std::cout << v.first << " to " << p.first << ": " << p.second << "\n";
+                cout << v.first << " to " << p.first << ": " << p.second << "\n";
 
-    if( maze->m_Adit.size() == 1 )
-        std::cout << "Part 1: " << maze->search( "0", "@" ) << "\n";
-    else
-        std::cout << "Part 2: " << maze->search( "0123", "@" ) << "\n";
+    return maze->search( "0", "@" );
+}
+
+int main( int argc, char ** argv )
+{
+    bool do_bfs = false;
+    Maze * maze = nullptr;
+    int input = -1;
+    string filename;
+
+    while( *++argv )
+    {
+        string arg(*argv);
+        if( arg == "debug" )
+            DEBUG = true;
+        else if( arg == "test" )
+            TEST = true;
+        else if( arg == "bfs" )
+            do_bfs = !do_bfs;
+    }
+
+    vector<string> live1;
+    vector<string> live2;
+
+    if( TEST ) {
+        for( auto pc : test )
+            live1.push_back(pc);
+        for( auto pc : test2 )
+            live2.push_back(pc);
+    } else {
+        live1.push_back( readall("day18.txt") );
+        split( live2, readall("day18b.txt"));
+    }
+
+    int sum = 0;
+    for( auto && problem : live1 )
+    {
+        if( do_bfs )
+            maze = new Maze_BFS( problem );
+        else
+            maze = new Maze_DFS( problem );
+
+        sum += solve(maze);
+    }
+    cout << "Part 1: " << sum << "\n";
+
+    sum = 0;
+    for( auto && problem : live2 )
+    {
+        if( do_bfs )
+            maze = new Maze_BFS( problem );
+        else
+            maze = new Maze_DFS( problem );
+
+        sum += solve(maze);
+    }
+    cout << "Part 2: " << sum << "\n";
 }

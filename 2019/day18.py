@@ -6,7 +6,7 @@ import collections
 from pprint import pprint
 from tools import Point
 
-TRACE = False
+DEBUG = False
 
 # Answer 8.
 test = ("""\
@@ -60,17 +60,27 @@ movements = ( Point(0,-1),Point(0,1),Point(-1,0),Point(1,0) )
 
 class Maze(object):
     def __init__(self,source):
-        if not isinstance(source,str):
-            source = source.read()
         maze = []
         self.adit = []
-        for ln in source.splitlines():
+        for ln in source:
             maze.append( list(ln.strip()) )
             for i,ch in enumerate(ln):
                 if ch == '@':
                     self.adit.append( Point(i,len(maze)-1 ))
         self.maze = maze
         self.size = len(maze)
+        # Eliminate any doors whose keys are not found in this maze.
+        doors = {}
+        keys = {}
+        for y,row in enumerate(maze):
+            for x,col in enumerate(row):
+                if 'A' <= col <= 'Z':
+                    doors[col] = (x,y)
+                elif 'a' <= col <= 'z':
+                    keys[col] = (x,y)
+        for k,(x,y) in doors.items():
+            if k.lower() not in keys:
+                maze[y][x] = '.'
 
     def print(self):
         print( '\n'.join(''.join(ln) for ln in self.maze) )
@@ -124,7 +134,7 @@ def bfs( start, found ):
     # processed all of the paths of a single length.  The next pass
     # will be one step longer.
     while unchecked:
-        if TRACE:
+        if DEBUG:
             print('Depth',len(next(iter(unchecked.keys()))[1]))
         more = {}
         paths = []
@@ -145,7 +155,7 @@ def bfs( start, found ):
                         continue
                     # If this new path has alread been enumerated, and
                     # this path to the same state is shorter, keep it.
-                    newsit = (sub(sitting,si,k),ssort(found+K))
+                    newsit = (sub(sitting,si,k),ssort(found+k))
                     if newsit in more and more[newsit] <= steps+dstep:
                         continue
                     more[newsit] = steps+dstep
@@ -155,9 +165,8 @@ def bfs( start, found ):
         unchecked = more
     return None
 
-
 def search( sitting, found ):
-    if TRACE:
+    if DEBUG:
         print( "New search", sitting, found )
     found = ssort(found)
 
@@ -169,7 +178,7 @@ def search( sitting, found ):
 
     # For each robot:
     for si,s in enumerate(sitting):
-        # For each key the robot can see:
+    #    # For each key the robot can see:
         for k,v in stats[s].items():
             # If we've already picked it up, ignore.
             if k in found:
@@ -181,48 +190,76 @@ def search( sitting, found ):
             # Go explore this path.
             paths.append( dstep + search(sub(sitting,si,k), found+k) )
     ans = min(paths) if paths else 0
-    if TRACE:
+    if DEBUG:
         print( sitting+found, ans )
     search.seen[sitting+found] = ans
     return ans
 
-search.seen = {}
 
-for arg in sys.argv[1:]:
-    if arg == 'trace':
-        TRACE = True
-    elif arg == 'bfs':
-        search = bfs
-    elif arg.isdigit():
-        maze = Maze(test[int(arg)-1])
-    elif arg[-4:] == '.txt':
-        maze = Maze(open(arg))
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+BFS = 'bfs' in sys.argv
 
-maze.print()
-print( maze.adit )
+if BFS:
+    search = bfs
+
+def parse(s):
+    global stats
+    search.seen = {}
+    maze = Maze(s)
+    if DEBUG:
+        maze.print()
+        print( maze.adit )
 
 # Find all of the targets.
 
-stats = {}
-for i,adit in enumerate(maze.adit):
-    stats[str(i)] = maze.findall( adit )
+    stats = {}
+    for i,adit in enumerate(maze.adit):
+        stats[str(i)] = maze.findall( adit )
 
-print( sum(len(v) for v in stats.values() ))
+    if DEBUG:
+        print( sum(len(v) for v in stats.values() ))
 
 # Find the distance betweeen targets.
 
-for v in list(stats.values()):
-    for key,ptx in v.items():
-        if key >= 'a':
-            stats[key] = maze.findall(ptx[0])
+    for v in list(stats.values()):
+        for key,ptx in v.items():
+            if key >= 'a':
+                stats[key] = maze.findall(ptx[0])
 
-if TRACE:
-    pprint( stats )
+    if DEBUG:
+        pprint( stats )
 
-begin = time.time()
-if len(maze.adit) == 1:
-    print( "Part 1:", search( '0', '@' ) )
+def split(grid):
+    grids = [[],[],[],[]]
+    midh = len(grid)//2
+    midw = len(grid[0])//2
+    for y,row in enumerate(grid[:midh+1]):
+        grids[0].append(row[:midw+1])
+        grids[1].append(row[midw:])
+    for y,row in enumerate(grid[midh:]):
+        grids[2].append(row[:midw+1])
+        grids[3].append(row[midw:])
+    return grids
+
+
+if TEST:
+    data = test[3]
+    data2 = test[4]
 else:
-    print( "Part 2:", search( '0123', '@' ) )
-delta = time.time() - begin
-print( "Elapsed:", delta )
+    data = open("day18.txt").read()
+    data2 = open("day18b.txt").read()
+
+maze = parse(data.splitlines())
+print( "Part 1:", search( '0', '@' ) )
+
+# Try chopping this into 4 parts, solve separately.
+# Since time waiting for someone else to unlock a door
+# is free, we just remove those doors.
+
+sumx = 0
+for grid in split(data2.splitlines()):
+    maze = parse(grid)
+    sumx += search('0','@')
+
+print( "Part 2:", sumx )
