@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"aoc/tools"
 	_ "embed"
@@ -193,13 +192,8 @@ func (self Maze) bfs( part int, start Point) int {
 	seen := make(map[SeenItem]bool)
 	unchecked := tools.Stack[QueueItem]{}
 	unchecked.Push( QueueItem{start,0,0} )
-	sec := time.Now()
 	for !unchecked.IsEmpty() {
 		q,_ := unchecked.PopFront()
-		if DEBUG && time.Since(sec) > time.Second {
-			sec = time.Now()
-			fmt.Println( "Examine", q, unchecked.Size() )
-		}
 		if seen[SeenItem{q.pt,q.level}] {
 			continue
 		}

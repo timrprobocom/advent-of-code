@@ -1,10 +1,12 @@
 import os
 import sys
-import time
 import itertools
 import collections
 from tools import Point
 
+
+DEBUG = 'debug' in sys.argv
+TEST = 'test' in sys.argv
 
 test = """\
                    A               
@@ -117,7 +119,8 @@ class Maze(object):
                     ):
                         if check.isalpha():
                             pt = Point(x,y)
-                            print( check, pt )
+                            if DEBUG:
+                                print( check, pt )
                             if check in gates:
                                 paths[pt] = gates[check]
                                 gates[pt] = check
@@ -143,16 +146,13 @@ class Maze(object):
         unchecked = collections.deque()
         unchecked.append( (start,0,0) )
         lowerwalls = (self.start,self.goal)
-        sec = int(time.time())
         while unchecked:
             pt,dist,level = unchecked.popleft()
-            if TRACE and int(time.time()) != sec:
-                sec = int(time.time())
-                print( "Examine", pt, dist, level, len(unchecked) )
             if (pt,level) in seen:
                 continue
             if pt == self.goal and level == 0:
-                print( "GOAL" )
+                if DEBUG:
+                    print( "GOAL" )
                 return dist
             seen.add( (pt,level) )
             if pt in self.paths:
@@ -174,21 +174,20 @@ class Maze(object):
                 if self[newpt] == '.':
                     unchecked.append( (newpt,dist+1,level) )
 
-TRACE = 'trace' in sys.argv
-
 # Part 1.
 
-if 'test' in sys.argv:
+if TEST:
     maze = Maze(test)
 else:
     maze = Maze(open('day20.txt'))
 
-print( maze.start, maze.goal )
+if DEBUG:
+    print( maze.start, maze.goal )
 print( "Part 1:", maze.bfs(1, maze.start) )
 
 # Part 2.
 
-if 'test' in sys.argv:
+if TEST:
     maze = Maze(test2)
 
 print( "Part 2:", maze.bfs(2, maze.start) )
