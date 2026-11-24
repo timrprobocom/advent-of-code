@@ -3,8 +3,6 @@ import itertools
 from intcode import Program
 from tools import Point
 
-
-
 TRACE = 'trace' in sys.argv
 
 real = [ 
