@@ -3,7 +3,7 @@ from intcode import Program
 from tools import Point
 
 
-TRACE = 'trace' in sys.argv
+DEBUG = 'debug' in sys.argv
 
 # So, we have to probe to find the holes.
 
@@ -15,7 +15,8 @@ def run(instructions):
         pgm.push(ord(c))
     pgm.run()
     dump = pgm.dump()
-    print( ''.join(chr(i) for i in dump if i < 255) )
+    if DEBUG:
+        print( ''.join(chr(i) for i in dump if i < 255) )
     if dump[-1] > 255:
         return dump[-1]
     return -1
