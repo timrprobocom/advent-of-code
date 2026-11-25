@@ -48,7 +48,7 @@ public:
     std::vector<T> dump()
     {
         std::vector<T> q;
-        q.insert( q.begin(), m_Output->begin(), m_Output.end() );
+        q.insert( q.begin(), m_Output->begin(), m_Output->end() );
         return q;
     }
 

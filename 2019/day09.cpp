@@ -1,6 +1,6 @@
 #include <iostream>
 bool TRACE = false;
-bool TESTS = false;
+bool TEST = false;
 
 #include "intcode.h"
 
@@ -55,10 +55,10 @@ int main( int argc, char ** argv )
         if( s == "trace" )
             TRACE = true;
         else if( s == "test" )
-            TESTS = true;
+            TEST = true;
     }
 
-    if( TESTS )
+    if( TEST )
     {
         for( auto code : { t1, t2, t3 } )
         {
