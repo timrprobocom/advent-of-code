@@ -2,11 +2,14 @@ import sys
 import math
 import functools
 
-TRACE = 'trace' in sys.argv
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
+
+live = open("day22.txt").readlines()
 
 # Find the multiplicative inverse in a modulus field.
 
-# This is Euler's theorem.  This is slick, but it really only works if
+# This is Euler's theorem.  This is slick, but it lively only works if
 # mod is prime.  The first line computes the "totient" of the modulus,
 # which is mod-1 if mod is prime, but requires prime factoring otherwise.
 # The test case uses mod 10 which, of course, is not prime.  We hardcode 
@@ -73,7 +76,7 @@ class Deck(object):
 
     def run( self, src ):
         for ln in src:
-            if TRACE:
+            if DEBUG:
                 print( ln.strip() )
             words = ln.strip().split()
             if words[0] == 'cut':
@@ -82,43 +85,46 @@ class Deck(object):
                 self.increment( int(words[3]) )
             if words[1] == 'into':
                 self.reverse()
-            if TRACE:
+            if DEBUG:
                 print( self.state )
 
 # Do a part 1 test.  Should be 9 2 5 8 1 4 7 0 3 6, or 9+3x.
 
-COUNT = 10
-deck = Deck(COUNT)
-deck.run( test1.splitlines() )
-print( deck.state )
-b,m = deck.state
-for x in range(COUNT):
-    print( (m*x+b) % COUNT, end='' )
-print( '' )
+def part1test(data):
+    COUNT = 10
+    deck = Deck(COUNT)
+    deck.run( data.splitlines() )
+    print( deck.state )
+    b,m = deck.state
+    for x in range(COUNT):
+        print( (m*x+b) % COUNT, end='' )
+    print( '' )
 
 # Do part 1.  Should be 4775.
 
-COUNT = 10007
-real = open("day22.txt").readlines()
+def part1(data):
+    COUNT = 10007
 
-deck = Deck(COUNT)
-deck.run( real )
-print( deck.state )
-b,m = deck.state
+    deck = Deck(COUNT)
+    deck.run( data )
+    if DEBUG:
+        print( deck.state )
+    b,m = deck.state
 
-for x in range(COUNT):
-    if (m*x+b) % COUNT == 2019:
-        print( "Part 1:", x );
-        break
+    for x in range(COUNT):
+        if (m*x+b) % COUNT == 2019:
+            return x
 
 # Do part 2.  Shouild be 37889219674304.
 
-COUNT = 119315717514047
+def part2(data):
+    COUNT = 119315717514047
 
-deck = Deck(COUNT)
-deck.run( real )
-print( deck.state )
-b,m = deck.state
+    deck = Deck(COUNT)
+    deck.run( data )
+    if DEBUG:
+        print( deck.state )
+    b,m = deck.state
 
 # So, each cycle through will do
 # bn = mn * b
@@ -127,11 +133,18 @@ b,m = deck.state
 # The formula comes from Wikipedia.  There's magic to do
 # exponentiation and inversion in a modulus field.
 
-cycles = 101741582076661
-finalm = pow( m, cycles, COUNT )
-finalb = (b * (1 - finalm) * invert(1 - m, COUNT)  ) % COUNT
-print(finalm,finalb)
+    cycles = 101741582076661
+    finalm = pow( m, cycles, COUNT )
+    finalb = (b * (1 - finalm) * invert(1 - m, COUNT)  ) % COUNT
+    if DEBUG:
+        print(finalm,finalb)
 
-tgt = 2020
-print( "Part 2:", (finalm * tgt + finalb) % COUNT )
+    tgt = 2020
+    return (finalm * tgt + finalb) % COUNT
 
+
+if TEST:
+    part1test(test1)
+else:
+    print("Part 1:", part1(live))
+    print("Part 2:", part2(live))
