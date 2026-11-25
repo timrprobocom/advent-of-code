@@ -19,7 +19,6 @@ var live string
 type Point = tools.Point
 
 
-
 // So, we have to probe to find the holes.
 
 func run(program []int, instructions []string) int {

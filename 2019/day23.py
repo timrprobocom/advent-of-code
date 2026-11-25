@@ -59,9 +59,9 @@ while 1:
     time.sleep( 0.1 )
     if nat and all(p.idle for p in progs):
         if not lastnat:
-            print( "Part 1:", nat )
+            print( "Part 1:", nat[1] )
         if nat == lastnat:
-            print( "Part 2:", nat )
+            print( "Part 2:", nat[1] )
             break
         if TRACE:
             print( "Delivering", nat )

@@ -31,7 +31,7 @@ func fetch(cmd string, args ...string) (string, time.Duration) {
 func prep(file string, ext string) {
 	if ext == ".cpp" {
 		os.Remove(file)
-		sub := exec.Command("g++", "--std=c++17", "-O3", "-o", file, file+ext, "-llapack")
+		sub := exec.Command("g++", "--std=c++17", "-O3", "-o", file, file+ext, "-llapack", "-lgmpxx", "-lgmp")
 		sub.Stdout = os.Stdout
 		sub.Stderr = os.Stderr
 		sub.Run()

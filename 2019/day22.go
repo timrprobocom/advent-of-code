@@ -105,7 +105,7 @@ func MakeDeck(k int) *Deck {
 }
 
 func (self *Deck) cut( n int ) {
-	off := (self.state0 + self.state1 * n) % self.count
+	off := tools.Mod( self.state0 + self.state1 * n, self.count )
 	self.state0 = off
 }
 
@@ -115,9 +115,21 @@ func (self *Deck) reverse() {
 	self.state1 = inc
 }
 
+// The intermediate value here exceed 64 bits after the multiply, and so we 
+// are left with this abomination.
 func (self *Deck) increment(n int) {
-	inc := tools.Mod(self.state1 * invert(n, self.count), self.count)
-	self.state1 = inc
+	p1 := big.NewInt(int64(self.count))
+	p2 := big.NewInt(int64(invert(n, self.count)))
+	p3 := big.NewInt(int64(self.state1))
+	p2.Mul(p2,p3)
+	p2.Mod(p2,p1)
+	self.state1 = int(p2.Int64())
+	if self.state1 < 0 {
+		self.state1 += self.count
+	}
+
+	//inc := tools.Mod(self.state1 * invert(n, self.count), self.count)
+	//self.state1 = inc
 }
 
 func (self *Deck) run( src []string ) {
@@ -202,13 +214,21 @@ func part2(data []string) int {
 
     cycles := 101741582076661
     finalm := pow( m, cycles, COUNT )
-    finalb := tools.Mod((b * (1 - finalm) * invert(1 - m, COUNT)),  COUNT)
+    //finalb := tools.Mod(b * (1 - finalm) * invert(1 - m, COUNT),  COUNT)
+	// This sucks.  Really bad.  Blame Go.
+
+	p1 := big.NewInt(int64(b))
+	p1 = p1.Mul( p1, big.NewInt(int64(1 - finalm)) )
+	p1 = p1.Mul( p1, big.NewInt(int64(invert(1-m, COUNT))) )
+	p1 = p1.Mod( p1, big.NewInt(int64(COUNT)) )
+	finalb := int(p1.Int64())
+
     if DEBUG {
         fmt.Println(finalm,finalb)
 	}
 
     tgt := 2020
-    return (finalm * tgt + finalb) % COUNT
+    return tools.Mod(finalm * tgt + finalb, COUNT)
 }
 
 func main() {

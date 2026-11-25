@@ -21,6 +21,7 @@ type Program struct {
 	die   bool
 	modes int
 	Final int
+	Waiting bool
 }
 
 // How do we shut down the channels?
@@ -46,6 +47,19 @@ func Connect( producer *Program, consumer *Program ) {
 	consumer.input = producer.output
 }
 
+func (self *Program) Reroute( output chan int ) {
+	close(self.output)
+	self.output = output
+}
+
+func (self *Program) InSize() int {
+	return len(self.input)
+}
+
+func (self *Program) OutSize() int {
+	return len(self.output)
+}
+
 func (self *Program) Clone() *Program {
 	return MakeProgram(self.pgm)
 }
@@ -63,7 +77,10 @@ func (self *Program) Pop() int {
 }
 
 func (self *Program) Read_input() int {
-	return <- self.input
+	self.Waiting = true
+	i := <- self.input
+	self.Waiting = false
+	return i
 }
 
 func (self *Program) Send_output( p int ) {

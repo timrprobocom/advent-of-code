@@ -54,7 +54,6 @@ deal with increment 3
 cut -1"""
 # Result: 9 2 5 8 1 4 7 0 3 6
 
-
 # A deck can be encoded as ax+b mod n.
 
 class Deck(object):

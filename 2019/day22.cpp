@@ -5,7 +5,8 @@
 
 #include "gmpxx.h"
 
-bool TRACE = false;
+bool DEBUG = false;
+bool TEST = false;
 
 typedef mpz_class int999_t;
 
@@ -118,7 +119,7 @@ public:
     {
         for( std::string ln; getline( iss, ln ); )
         {
-            if( TRACE )
+            if( DEBUG )
                 std::cout << ln << "\n";
             if( startswith( ln, "cut" ) )
                 cut( lastfield(ln) );
@@ -126,7 +127,7 @@ public:
                 increment( lastfield(ln) );
             if( startswith( ln, "deal into") )
                 reverse();
-            if( TRACE )
+            if( DEBUG )
                 std::cout << "(" << base << "," << incr << ")\n";
         }
     }
@@ -149,35 +150,38 @@ void part1test()
 
 // Do part 1.  Should be 4775.
 
-void part1()
+int part1()
 {
     int COUNT = 10007;
     Deck<int> deck(COUNT);
     deck.run( std::ifstream("day22.txt") );
-    std::cout << "(" << deck.base << "," << deck.incr << ")\n";
+    if( DEBUG )
+        std::cout << "(" << deck.base << "," << deck.incr << ")\n";
     int b = deck.base;
     int m = deck.incr;
+    int x = 0;
 
-    for( int x=0; x < COUNT; x++ )
+    for( x=0; x < COUNT; x++ )
     {
         if( (m*x+b) % COUNT == 2019 )
         {
-            std::cout << "Part 1: " << x << "\n";
             break;
         }
     }
+    return x;
 }
 
 // Do part 2.  Shouild be 37889219674304.
 //
 // This requires 128-bit arithmetic.
 
-void part2()
+int999_t part2()
 {
     int999_t COUNT = 119315717514047;
     Deck<int999_t> deck(COUNT);
     deck.run( std::ifstream("day22.txt") );
-    std::cout << "(" << deck.base << "," << deck.incr << ")\n";
+    if( DEBUG )
+        std::cout << "(" << deck.base << "," << deck.incr << ")\n";
     int999_t b = deck.base;
     int999_t m = deck.incr;
 
@@ -191,15 +195,28 @@ void part2()
     int999_t cycles = 101741582076661;
     int999_t finalm = pow( m, cycles, COUNT );
     int999_t finalb = (b * (1 - finalm) * invert(int999_t(1 - m), COUNT)  ) % COUNT;
-    std::cout << "(" << finalm << "," << finalb << ")\n";
+    if( DEBUG )
+        std::cout << "(" << finalm << "," << finalb << ")\n";
 
     int tgt = 2020;
-    std::cout << "Part 2: " << ((finalm * tgt + finalb) % COUNT) << "\n";
+    return ((finalm * tgt + finalb) % COUNT);
 }
 
-int main()
+int main( int argc, char ** argv )
 {
-    part1test();
-    part1();
-    part2();
+    while( *++argv )
+    {
+        std::string arg(*argv);
+        if( arg == "debug" )
+            DEBUG = true;
+        else if( arg == "test" )
+            TEST = true;
+    }
+    if( TEST )
+        part1test();
+    else
+    {
+        std::cout << "Part 1: " << part1() << "\n";
+        std::cout << "Part 2: " << part2() << "\n";
+    }
 }
