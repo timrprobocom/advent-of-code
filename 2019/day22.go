@@ -27,7 +27,6 @@ cut -1`[1:]
 
 // Result: 9 2 5 8 1 4 7 0 3 6
 
-
 //go:embed day22.txt
 var live string
 

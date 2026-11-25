@@ -19,7 +19,7 @@ const char * test =
     "..#.."
     "#....";
 
-bool TRACE = false;
+bool DEBUG = false;
 bool TEST = false;
 
 class Grid
@@ -96,27 +96,33 @@ int main( int argc, char ** argv )
     while( *++argv )
     {
         std::string arg(*argv);
-        if( arg == "trace" )
-            TRACE = true;
+        if( arg == "debug" )
+            DEBUG = true;
         else if( arg == "test" )
             TEST = true;
     }
 
     Grid grid( TEST ? test : input );
-    grid.print();
     int r = grid.rating();
-    std::cout << grid.rating() << "\n";
+    if( DEBUG ) 
+    {
+        grid.print();
+        std::cout << grid.rating() << "\n";
+    }
     std::map<int, int> track;
     track[r] = 0;
     for( int i = 1; ; i++ )
     {
         grid.cycle();
-        grid.print();
         r = grid.rating();
-        std::cout << i << " " << r << "\n";
+        if( DEBUG )
+        {
+            grid.print();
+            std::cout << i << " " << r << "\n";
+        }
         if( track.find(r) != track.end() )
         {
-            std::cout << "Part 1: " << i << " " << r << "\n";
+            std::cout << "Part 1: " << " " << r << "\n";
             break;
         }
         track[r] = i;
