@@ -1,6 +1,8 @@
+import sys
+
+DEBUG = 'debug' in sys.argv
 
 nums = open('day01.txt').readlines()
-print len(nums)
 
 def part1(nums):
     sum = 0
@@ -13,15 +15,13 @@ def part2(nums):
     sum = 0
     found = -1
     while found < 0:
-        print '*',
         for ln in nums:
             sum += int(ln)
             if sum in cnts:
                 found = sum
                 break
             cnts.add(  sum  )
-    print
     return found
 
-print( part1(nums) )
-print( part2(nums) )
+print( "Part 1:", part1(nums) )
+print( "Part 2:", part2(nums) )
