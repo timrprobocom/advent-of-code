@@ -162,8 +162,8 @@ public:
                     store( fetch() * fetch() );
                     break;
                 case 3:
-					while( m_Input->empty() )
-						this_thread::sleep_for(chrono::milliseconds(1));
+                    while( m_Input->empty() )
+                        this_thread::sleep_for(chrono::microseconds(500));
                      ip = m_Input->front();
                      m_Input->pop_front();
                      if( TRACE )
