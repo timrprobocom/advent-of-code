@@ -4,7 +4,9 @@
 #include <deque>
 #include <memory>
 #include <vector>
+#include <chrono>
 
+using namespace std;
 
 // The IntCode computer.
 
@@ -14,20 +16,21 @@ template<typename T>
 class Program
 {
     int id;
-    std::vector<T> m_Program;
+    vector<T> m_Program;
     int pc;
     int m_Modes;
-    std::shared_ptr<std::deque<T> > m_Input;
-    std::shared_ptr<std::deque<T> > m_Output;
+    shared_ptr<deque<T> > m_Input;
+    shared_ptr<deque<T> > m_Output;
     T m_Final;
     int m_Rbase;
+	thread m_MyThread;
     
 public:
-    Program( std::vector<T> pgm )
-        : id( count++ )
+    Program( vector<T> pgm )
+        : id( ::count++ )
         , m_Program( pgm )
-        , m_Input( std::make_shared<std::deque<T>>() )
-        , m_Output( std::make_shared<std::deque<T>>() )
+        , m_Input( make_shared<deque<T>>() )
+        , m_Output( make_shared<deque<T>>() )
         , pc( 0 )
         , m_Rbase( 0 )
     {
@@ -45,9 +48,14 @@ public:
         return p;
     }
 
-    std::vector<T> dump()
+    T Final() const 
+	{
+		return m_Final;
+	}
+
+    vector<T> dump()
     {
-        std::vector<T> q;
+        vector<T> q;
         q.insert( q.begin(), m_Output->begin(), m_Output->end() );
         return q;
     }
@@ -62,7 +70,7 @@ public:
         int opc = m_Program[pc];
         m_Modes = opc/100;
         if( TRACE )
-            std::cout << id << ": At " << pc << ": " << opc << "\n";
+            cout << id << ": At " << pc << ": " << opc << "\n";
         pc++;
         return opc % 100;
     }
@@ -80,7 +88,7 @@ public:
         {
             m_Program.resize( loc+1 );
             if( TRACE )
-                std::cout << "Extending memory to " << loc << "\n";
+                cout << "Extending memory to " << loc << "\n";
         }
     }
 
@@ -104,7 +112,7 @@ public:
                 break;
         }
         if( TRACE )
-            std::cout << id  << ": fetch[" << mode << "] " << operand << " = " << val << "\n";
+            cout << id  << ": fetch[" << mode << "] " << operand << " = " << val << "\n";
         return val;
     }
 
@@ -113,7 +121,7 @@ public:
         int mode = nextmode();
         T operand = m_Program[pc++];
         if( TRACE )
-            std::cout << id << ": store[" << mode << "] " << n << " at " << operand << "\n";
+            cout << id << ": store[" << mode << "] " << n << " at " << operand << "\n";
         switch( mode )
         {
             case 0:
@@ -121,7 +129,7 @@ public:
                 m_Program[operand] = n;
                 break;
             case 1:
-                std::cout << "EXPLODE\n";
+                cout << "EXPLODE\n";
                 return;
             case 2:
                 verify(operand+m_Rbase);
@@ -154,10 +162,12 @@ public:
                     store( fetch() * fetch() );
                     break;
                 case 3:
+					while( m_Input->empty() )
+						this_thread::sleep_for(chrono::milliseconds(1));
                      ip = m_Input->front();
                      m_Input->pop_front();
                      if( TRACE )
-                         std::cout << id << ": input " << ip << "\n";
+                         cout << id << ": input " << ip << "\n";
                      store( ip );
                      break;
                 case 4:
@@ -165,7 +175,7 @@ public:
                     m_Final = ip;
                     m_Output->push_back( ip );
                     if( TRACE )
-                        std::cout << id << ": output " << ip << "\n";
+                        cout << id << ": output " << ip << "\n";
                     break;
                 case 5: // JT
                     if( fetch() )
@@ -191,10 +201,18 @@ public:
                 case 99: // halt
                     return *this;
                 default:
-                    std::cout << "Explode, pc=" << pc << ", pgm=" << "\n";
+                    cout << "Explode, pc=" << pc << ", pgm=" << "\n";
                     return *this;
             }
         }
     }
+
+	void start() {
+		m_MyThread = thread( &Program::run, this );
+	}
+	
+	void wait() {
+		m_MyThread.join();
+	}
 };
 
