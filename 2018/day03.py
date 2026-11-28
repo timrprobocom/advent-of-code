@@ -1,4 +1,8 @@
+import re
+import sys
 
+TEST = 'test' in sys.argv
+DEBUG = 'debug' in sys.argv
 
 # Pass 1, determine the size;
 
@@ -11,7 +15,8 @@ test = (
 
 live = list( k.strip() for k in open('day03.txt').readlines())
 
-import re
+data = test if TEST else live
+
 match = r'#(\d*) @ (\d*),(\d*): (\d*)x(\d*)'
 
 def makematrix( x, y ):
@@ -27,7 +32,8 @@ def maxi(lns):
     for ln in lns:
         parse = re.match(match,ln)
         data = list(int(x) for x in parse.groups())
-        print data
+        if DEBUG:
+            print( data )
         mx = data[1] + data[3]
         my = data[2] + data[4]
         if mx > maxx: maxx = mx
@@ -43,7 +49,7 @@ def fill(mat, lns):
                 mat[y+dy][x+dx] += 1
     return mat
 
-def countm(mat):
+def part1(mat):
     tot = 0
     for row in mat:
         for col in row:
@@ -51,7 +57,7 @@ def countm(mat):
                 tot += 1
     return tot
 
-def check( mat, lns ):
+def part2( mat, lns ):
     for ln in lns:
         parse = re.match(match,ln)
         n,x,y,w,h = (int(x) for x in parse.groups())
@@ -64,13 +70,11 @@ def check( mat, lns ):
             if not winner:
                 break
         if winner:
-            print n
-
-data = live
+            return n
+    return -1
 
 w,h = maxi( data )
 mat = makematrix( w, h )
 fill( mat, data )
-print countm(mat)
-
-check( mat, data )
+print( "Part 1:", part1(mat) )
+print( "Part 2:", part2(mat, data) )
